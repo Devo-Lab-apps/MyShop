@@ -18,9 +18,7 @@ import com.labs.devo.apps.myshop.view.adapter.intro.IntroViewPageAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -37,13 +35,6 @@ class IntroActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //if already shown then finish
-        if (isIntroShown()) {
-            val mainActivity = Intent(this@IntroActivity, MainActivity::class.java)
-            startActivity(mainActivity)
-            finish()
-            return
-        }
         init()
         fillData()
         setupTabs()
@@ -148,16 +139,6 @@ class IntroActivity : AppCompatActivity() {
                 R.drawable.intro_img3
             )
         )
-    }
-
-
-    private fun isIntroShown(): Boolean {
-        //TODO find a way out and use this wisely.
-        val isIntoShown: Boolean
-        runBlocking {
-            isIntoShown = preferences.introActivityShown.first()
-        }
-        return isIntoShown
     }
 
     private suspend fun setIsIntroShown() {
