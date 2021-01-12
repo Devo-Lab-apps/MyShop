@@ -24,5 +24,9 @@
     <color name="intro_title_color">#000000</color>
     <color name="intro_description_color">#656565</color>
 
+<!--    buttons-->
+
+    <color name="lightGray">#F2F2F2</color>
+    <color name="disabledBtnBg">#999999</color>
 
 </resources>
