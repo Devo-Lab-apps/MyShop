@@ -13,6 +13,7 @@ import com.labs.devo.apps.myshop.R
 import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.databinding.ActivitySplashBinding
 import com.labs.devo.apps.myshop.helper.PreferencesManager
+import com.labs.devo.apps.myshop.view.activity.auth.AuthenticationActivity
 import com.labs.devo.apps.myshop.view.activity.intro.IntroActivity
 import com.labs.devo.apps.myshop.view.activity.main.MainActivity
 import dagger.hilt.android.AndroidEntryPoint
@@ -48,7 +49,7 @@ class SplashActivity : AppCompatActivity() {
         binding.splashTxt.animation = anim
         Handler(Looper.getMainLooper()).postDelayed({
             if (isIntroShown()) {
-                startActivity(Intent(this@SplashActivity, MainActivity::class.java))
+                startActivity(Intent(this@SplashActivity, AuthenticationActivity::class.java))
                 finish()
             } else {
                 startActivity(Intent(this@SplashActivity, IntroActivity::class.java))

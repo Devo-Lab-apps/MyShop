@@ -13,6 +13,7 @@ import com.google.android.material.tabs.TabLayout
 import com.labs.devo.apps.myshop.R
 import com.labs.devo.apps.myshop.databinding.ActivityIntroBinding
 import com.labs.devo.apps.myshop.helper.PreferencesManager
+import com.labs.devo.apps.myshop.view.activity.auth.AuthenticationActivity
 import com.labs.devo.apps.myshop.view.activity.main.MainActivity
 import com.labs.devo.apps.myshop.view.adapter.intro.IntroViewPageAdapter
 import dagger.hilt.android.AndroidEntryPoint
@@ -104,7 +105,7 @@ class IntroActivity : AppCompatActivity() {
             }
 
             //open main activity
-            val mainActivity = Intent(this@IntroActivity, MainActivity::class.java)
+            val mainActivity = Intent(this@IntroActivity, AuthenticationActivity::class.java)
             startActivity(mainActivity)
             finish()
         }

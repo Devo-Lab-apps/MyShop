@@ -4,9 +4,9 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 
-class BaseViewModel<ChannelState>: ViewModel() {
+open class BaseViewModel<ChannelState>: ViewModel() {
 
-    private val channel: Channel<ChannelState> = Channel()
+    protected val channel: Channel<ChannelState> = Channel()
 
     var channelFlow = channel.receiveAsFlow()
 
