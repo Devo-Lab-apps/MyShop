@@ -6,7 +6,9 @@ import android.widget.Toast
 import com.labs.devo.apps.myshop.R
 import com.labs.devo.apps.myshop.view.util.DataState
 import com.labs.devo.apps.myshop.view.util.DataStateListener
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class AuthenticationActivity : AppCompatActivity(), DataStateListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
