@@ -18,17 +18,54 @@ import javax.inject.Inject
 class FirebaseUserAuth @Inject constructor(val auth: FirebaseAuth, val db: FirebaseFirestore) :
     UserAuth {
 
+    enum class AuthMethod {
+        LOGIN,
+        SIGNUP
+    }
+
     private val TAG = AppConstants.APP_PREFIX + javaClass.simpleName
 
     override suspend fun loginUser(credentials: LoginUserCredentials): DataState<AuthenticationResult> {
-        TODO("Not yet implemented")
+        return try {
+            val authResult =
+                auth.signInWithEmailAndPassword(credentials.email, credentials.password).await()
+            getUserFromDb(credentials.email, authResult)
+        } catch (e: Exception) {
+            DataState.message(e.message ?: "An error occurred. Please try again later")
+        }
+    }
+
+    private suspend fun getUserFromDb(
+        email: String,
+        authResult: AuthResult?
+    ): DataState<AuthenticationResult> {
+        var user: User? = null
+        try {
+            val doc = FirebaseUtil.getUsersDocReference(email).get().await()
+            user = doc.toObject(User::class.java)
+            return DataState.data(
+                data = AuthenticationResult(user!!),
+                message = "Logged in"
+            )
+        } catch (ex: java.lang.Exception) {
+            if (user == null) {
+                printLogD(TAG, "Can't find user in db. So deleting user.")
+
+                //create user and ask.
+                return createUserInDb(email, authResult, AuthMethod.LOGIN)
+            }
+            return DataState.data(
+                data = AuthenticationResult(user),
+                message = "Logged in"
+            )
+        }
     }
 
     override suspend fun signUpUser(credentials: SignUpUserCredentials): DataState<AuthenticationResult> {
         return try {
             val authResult =
                 auth.createUserWithEmailAndPassword(credentials.email, credentials.password).await()
-            createUserInDb(credentials.email, authResult)
+            createUserInDb(credentials.email, authResult, AuthMethod.SIGNUP)
         } catch (e: Exception) {
             DataState.message(e.message ?: "An error occurred. Please try again later")
         }
@@ -36,7 +73,8 @@ class FirebaseUserAuth @Inject constructor(val auth: FirebaseAuth, val db: Fireb
 
     private suspend fun createUserInDb(
         email: String,
-        authResult: AuthResult?
+        authResult: AuthResult?,
+        authMethod: AuthMethod
     ): DataState<AuthenticationResult> {
         var user: User? = null
         try {
@@ -49,8 +87,7 @@ class FirebaseUserAuth @Inject constructor(val auth: FirebaseAuth, val db: Fireb
                         email,
                         System.currentTimeMillis()
                     )
-                    val docRef = FirebaseUtil.getUsersCollection().add(user!!).await()
-                    printLogD(javaClass.name, docRef.path)
+                    FirebaseUtil.getUsersDocReference(email).set(user!!).await()
                 }
             }
             return DataState.data(
@@ -61,13 +98,13 @@ class FirebaseUserAuth @Inject constructor(val auth: FirebaseAuth, val db: Fireb
             user = null
             throw ex
         } finally {
-            if (user == null) {
+            if (user == null && authMethod == AuthMethod.SIGNUP) {
                 printLogD(TAG, "Can't store data in db. So deleting user")
                 auth.currentUser?.delete()?.await()
 
                 //sign out after creating the user to re-login.
                 auth.signOut()
-                return DataState.message("An error occurred. Please try again later")
+                return DataState.message("An error occurred. Please try again later.")
             }
             //sign out after creating the user to re-login.
             auth.signOut()
