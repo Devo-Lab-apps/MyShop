@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "197632838538",
+    "project_id": "myshop-devo",
+    "storage_bucket": "myshop-devo.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:197632838538:android:ff31144595aff0540ed673",
+        "android_client_info": {
+          "package_name": "com.labs.devo.apps.myshop"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "197632838538-p6fib8lfgijk7hld5mg19ikuo2r3t3uo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCpMzM20bW9dq5lPeEZufpgdmILhuUEoc0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "197632838538-p6fib8lfgijk7hld5mg19ikuo2r3t3uo.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

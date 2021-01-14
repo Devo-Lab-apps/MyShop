@@ -4,6 +4,7 @@ plugins {
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
     id 'androidx.navigation.safeargs.kotlin'
+    id 'com.google.gms.google-services'
 }
 
 android {
@@ -66,6 +67,7 @@ dependencies {
 
     // Room
     implementation "androidx.room:room-runtime:$roomVersion"
+
     kapt "androidx.room:room-compiler:$roomVersion"
     implementation "androidx.room:room-ktx:$roomVersion"
 
@@ -81,6 +83,11 @@ dependencies {
 
     // DataStore
     implementation "androidx.datastore:datastore-preferences:$dataStoreVersion"
+
+    //firebase
+    implementation "com.google.firebase:firebase-auth:$firebaseAuth"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$playServicesCoroutines"
+    implementation "com.google.firebase:firebase-firestore:$firebaseFirestore"
 
     //other
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
