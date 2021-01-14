@@ -40,7 +40,7 @@ class SignUpViewModel
             val authResult = res.getContentIfNotHandled()
             channel.send(
                 SignUpEvent.UserSignedUp(
-                    data.message?.getContentIfNotHandled() ?: "Successfully authenticated"
+                    data.message?.getContentIfNotHandled() ?: "Successfully signed up"
                 )
             )
             initUser(authResult?.user!!)
