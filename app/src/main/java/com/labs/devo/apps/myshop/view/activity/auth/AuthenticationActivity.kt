@@ -2,8 +2,11 @@ package com.labs.devo.apps.myshop.view.activity.auth
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
+import androidx.databinding.DataBindingUtil
 import com.labs.devo.apps.myshop.R
+import com.labs.devo.apps.myshop.databinding.ActivityAuthenticationBinding
 import com.labs.devo.apps.myshop.view.util.DataState
 import com.labs.devo.apps.myshop.view.util.DataStateListener
 import dagger.hilt.android.AndroidEntryPoint
@@ -11,10 +14,10 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class AuthenticationActivity : AppCompatActivity(), DataStateListener {
 
+    private lateinit var binding: ActivityAuthenticationBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_authentication)
-
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_authentication)
         supportActionBar?.hide()
     }
 
@@ -37,7 +40,7 @@ class AuthenticationActivity : AppCompatActivity(), DataStateListener {
     }
 
     private fun showProgressBar(isVisible: Boolean){
-
+        binding.authProgressBar.visibility = if (isVisible) View.VISIBLE else View.GONE
     }
 
     companion object {

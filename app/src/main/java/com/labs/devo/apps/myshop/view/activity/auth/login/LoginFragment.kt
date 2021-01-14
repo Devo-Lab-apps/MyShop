@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.labs.devo.apps.myshop.R
 import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.databinding.FragmentLoginBinding
@@ -23,6 +24,12 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentLoginBinding.bind(view)
 
+
+        binding.apply {
+            openSignupActivityBtn.setOnClickListener {
+                findNavController().navigate(R.id.action_loginFragment_to_signUpFragment)
+            }
+        }
 
     }
 

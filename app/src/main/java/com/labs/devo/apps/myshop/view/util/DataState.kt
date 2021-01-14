@@ -13,7 +13,7 @@ data class DataState<T>(
 ) {
     companion object {
 
-        fun <T> error(
+        fun <T> message(
             message: String
         ): DataState<T> {
             return DataState(
