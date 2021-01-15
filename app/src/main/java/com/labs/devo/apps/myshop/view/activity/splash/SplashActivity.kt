@@ -15,7 +15,6 @@ import com.labs.devo.apps.myshop.databinding.ActivitySplashBinding
 import com.labs.devo.apps.myshop.helper.PreferencesManager
 import com.labs.devo.apps.myshop.view.activity.auth.AuthenticationActivity
 import com.labs.devo.apps.myshop.view.activity.intro.IntroActivity
-import com.labs.devo.apps.myshop.view.activity.main.MainActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking

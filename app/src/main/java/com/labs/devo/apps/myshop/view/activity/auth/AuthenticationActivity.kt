@@ -1,23 +1,34 @@
 package com.labs.devo.apps.myshop.view.activity.auth
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
+import com.google.firebase.auth.FirebaseAuth
 import com.labs.devo.apps.myshop.R
 import com.labs.devo.apps.myshop.databinding.ActivityAuthenticationBinding
+import com.labs.devo.apps.myshop.view.activity.home.HomeActivity
 import com.labs.devo.apps.myshop.view.util.DataState
 import com.labs.devo.apps.myshop.view.util.DataStateListener
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class AuthenticationActivity : AppCompatActivity(), DataStateListener {
+
+    @Inject
+    lateinit var auth: FirebaseAuth
 
     private lateinit var binding: ActivityAuthenticationBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_authentication)
+        if (auth.currentUser != null) {
+            startActivity(Intent(this, HomeActivity::class.java))
+            finish()
+        }
         supportActionBar?.hide()
     }
 

@@ -14,7 +14,6 @@ import com.labs.devo.apps.myshop.R
 import com.labs.devo.apps.myshop.databinding.ActivityIntroBinding
 import com.labs.devo.apps.myshop.helper.PreferencesManager
 import com.labs.devo.apps.myshop.view.activity.auth.AuthenticationActivity
-import com.labs.devo.apps.myshop.view.activity.main.MainActivity
 import com.labs.devo.apps.myshop.view.adapter.intro.IntroViewPageAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
