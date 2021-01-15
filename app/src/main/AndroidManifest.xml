@@ -20,7 +20,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".view.activity.intro.IntroActivity"/>
-        <activity android:name=".view.activity.main.MainActivity" />
+        <activity android:name=".view.activity.home.HomeActivity"
+            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"
+            />
     </application>
 
 </manifest>

@@ -29,7 +29,12 @@ class FirebaseUserAuth @Inject constructor(val auth: FirebaseAuth, val db: Fireb
         return try {
             val authResult =
                 auth.signInWithEmailAndPassword(credentials.email, credentials.password).await()
-            getUserFromDb(credentials.email, authResult)
+            val isEmailVerified = auth.currentUser?.isEmailVerified
+            return if (isEmailVerified == true) getUserFromDb(credentials.email, authResult)
+            else {
+                auth.signOut()
+                throw java.lang.Exception("Please verify your email before login.")
+            }
         } catch (e: Exception) {
             DataState.message(e.message ?: "An error occurred. Please try again later")
         }
@@ -88,11 +93,14 @@ class FirebaseUserAuth @Inject constructor(val auth: FirebaseAuth, val db: Fireb
                         System.currentTimeMillis()
                     )
                     FirebaseUtil.getUsersDocReference(email).set(user!!).await()
+                    if (authMethod == AuthMethod.SIGNUP) {
+                        u.sendEmailVerification()
+                    }
                 }
             }
             return DataState.data(
                 data = AuthenticationResult(user!!),
-                message = "Successfully created"
+                message = "Successfully created. Please verify your email before login."
             )
         } catch (ex: java.lang.Exception) {
             user = null
@@ -104,7 +112,6 @@ class FirebaseUserAuth @Inject constructor(val auth: FirebaseAuth, val db: Fireb
 
                 //sign out after creating the user to re-login.
                 auth.signOut()
-                return DataState.message("An error occurred. Please try again later.")
             }
             //sign out after creating the user to re-login.
             auth.signOut()

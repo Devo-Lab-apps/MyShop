@@ -12,7 +12,7 @@ import com.labs.devo.apps.myshop.R
 import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.data.models.auth.LoginUserCredentials
 import com.labs.devo.apps.myshop.databinding.FragmentLoginBinding
-import com.labs.devo.apps.myshop.view.activity.main.MainActivity
+import com.labs.devo.apps.myshop.view.activity.home.HomeActivity
 import com.labs.devo.apps.myshop.view.util.DataState
 import com.labs.devo.apps.myshop.view.util.DataStateListener
 import dagger.hilt.android.AndroidEntryPoint
@@ -61,7 +61,7 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                         dataStateHandler.onDataStateChange(
                             DataState.message<String>(event.msg)
                         )
-                        startActivity(Intent(requireContext(), MainActivity::class.java))
+                        startActivity(Intent(requireContext(), HomeActivity::class.java))
                         requireActivity().finish()
                     }
                 }
