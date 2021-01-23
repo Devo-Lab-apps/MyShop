@@ -60,14 +60,12 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
      * Start accounts activity
      */
     private fun openAccountsActivity() {
-//        startActivity(Intent(this, AccountActivity::class.java))
     }
 
     /**
      * Method to logout the user.
      */
     private fun logoutUser() {
-//        binding.homeDrawerLayout.closeDrawers()
         binding.homeProgressBar.visibility = View.VISIBLE
 
         auth.signOut()

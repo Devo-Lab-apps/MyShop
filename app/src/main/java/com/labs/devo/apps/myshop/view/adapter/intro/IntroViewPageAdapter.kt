@@ -10,7 +10,9 @@ import androidx.viewpager.widget.PagerAdapter
 import com.labs.devo.apps.myshop.R
 import com.labs.devo.apps.myshop.view.activity.intro.IntroScreenItem
 
-
+/**
+ * Adapter for the intro activity.
+ */
 class IntroViewPageAdapter(var mContext: Context?, var mListScreen: List<IntroScreenItem>) :
     PagerAdapter() {
 

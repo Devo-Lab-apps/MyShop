@@ -2,7 +2,7 @@ package com.labs.devo.apps.myshop.view.util
 
 
 /**
- * Interace to communicate between activity and fragments.
+ * Interface to communicate between activity and fragments.
  */
 interface DataStateListener {
 

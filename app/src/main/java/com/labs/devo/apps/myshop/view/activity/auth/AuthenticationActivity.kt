@@ -32,6 +32,9 @@ class AuthenticationActivity : AppCompatActivity(), DataStateListener {
         supportActionBar?.hide()
     }
 
+    /**
+     * Handle fragment events.
+     */
     override fun onDataStateChange(dataState: DataState<*>?){
         dataState?.let{
             // Handle loading
