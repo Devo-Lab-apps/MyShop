@@ -1,14 +1,14 @@
-package com.labs.devo.apps.myshop.data.util
+package com.labs.devo.apps.myshop.business.helper
 
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 
 val users = "users"
 
 
-object FirebaseUtil {
+object FirebaseHelper {
+    //initialize db
     val db = FirebaseFirestore.getInstance()
 
     fun getUsersCollection(): CollectionReference {

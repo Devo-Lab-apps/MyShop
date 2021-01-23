@@ -41,22 +41,32 @@ class SignUpFragment : Fragment(R.layout.fragment_signup) {
             }
 
         }
+        observeEvents()
+    }
 
+    /**
+     * Listen view model events.
+     */
+    private fun observeEvents() {
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             viewModel.channelFlow.collect { event ->
                 when (event) {
                     is SignUpViewModel.SignUpEvent.UserSignedUp -> {
-                        dataStateHandler.onDataStateChange(
-                            DataState.message<String>(event.msg)
-                        )
+                        if (event.msg != null) {
+                            dataStateHandler.onDataStateChange(
+                                DataState.message<String>(event.msg)
+                            )
+                        }
                         findNavController().popBackStack()
                     }
                     is SignUpViewModel.SignUpEvent.ShowInvalidInputMessage -> {
                         binding.signupEmailAddress.clearFocus()
                         binding.signupPassword.clearFocus()
-                        dataStateHandler.onDataStateChange(
-                            DataState.message<String>(event.msg)
-                        )
+                        if (event.msg != null) {
+                            dataStateHandler.onDataStateChange(
+                                DataState.message<String>(event.msg)
+                            )
+                        }
                     }
                 }
                 binding.signupBtn.isEnabled = true

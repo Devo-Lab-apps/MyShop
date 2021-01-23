@@ -1,8 +1,8 @@
 package com.labs.devo.apps.myshop.util
 
 import android.util.Log
-import com.labs.devo.apps.myshop.util.Constants.DEBUG
-import com.labs.devo.apps.myshop.util.Constants.TAG
+import com.labs.devo.apps.myshop.const.AppConstants.DEBUG
+import com.labs.devo.apps.myshop.const.AppConstants.TAG
 
 
 var isUnitTest = false

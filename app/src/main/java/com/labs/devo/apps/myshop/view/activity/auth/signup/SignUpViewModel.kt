@@ -3,9 +3,9 @@ package com.labs.devo.apps.myshop.view.activity.auth.signup
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.viewModelScope
 import com.labs.devo.apps.myshop.business.auth.abstraction.UserAuth
-import com.labs.devo.apps.myshop.data.manager.UserManager
+import com.labs.devo.apps.myshop.business.helper.UserManager
 import com.labs.devo.apps.myshop.data.models.auth.SignUpUserCredentials
-import com.labs.devo.apps.myshop.data.models.auth.User
+import com.labs.devo.apps.myshop.data.models.account.User
 import com.labs.devo.apps.myshop.helper.extensions.isValidEmail
 import com.labs.devo.apps.myshop.helper.extensions.isValidPassword
 import com.labs.devo.apps.myshop.view.util.BaseViewModel
@@ -40,23 +40,23 @@ class SignUpViewModel
             val authResult = res.getContentIfNotHandled()
             channel.send(
                 SignUpEvent.UserSignedUp(
-                    data.message?.getContentIfNotHandled() ?: "Successfully signed up"
+                    data.message?.getContentIfNotHandled()
                 )
             )
-            initUser(authResult?.user!!)
-        } ?: showInvalidInputMessage(data.message?.getContentIfNotHandled()!!)
+            initUser(authResult?.user)
+        } ?: showInvalidInputMessage(data.message?.getContentIfNotHandled())
     }
 
-    private fun showInvalidInputMessage(text: String) = viewModelScope.launch {
+    private fun showInvalidInputMessage(text: String?) = viewModelScope.launch {
         channel.send(SignUpEvent.ShowInvalidInputMessage(text))
     }
 
-    private fun initUser(user: User) {
+    private fun initUser(user: User?) {
         UserManager.initUser(user)
     }
 
     sealed class SignUpEvent {
-        data class ShowInvalidInputMessage(val msg: String) : SignUpEvent()
-        data class UserSignedUp(val msg: String) : SignUpEvent()
+        data class ShowInvalidInputMessage(val msg: String?) : SignUpEvent()
+        data class UserSignedUp(val msg: String?) : SignUpEvent()
     }
 }

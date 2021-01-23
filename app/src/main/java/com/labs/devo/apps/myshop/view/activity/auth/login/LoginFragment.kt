@@ -47,20 +47,32 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
             }
         }
 
+        observeEvents()
+
+    }
+
+    /**
+     * Listen view model events.
+     */
+    private fun observeEvents() {
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             viewModel.channelFlow.collect { event ->
                 when (event) {
                     is LoginViewModel.LoginEvent.ShowInvalidInputMessage -> {
                         binding.loginEmailAddress.clearFocus()
                         binding.loginPassword.clearFocus()
-                        dataStateHandler.onDataStateChange(
-                            DataState.message<String>(event.msg)
-                        )
+                        if (event.msg != null) {
+                            dataStateHandler.onDataStateChange(
+                                DataState.message<String>(event.msg)
+                            )
+                        }
                     }
                     is LoginViewModel.LoginEvent.UserLoggedIn -> {
-                        dataStateHandler.onDataStateChange(
-                            DataState.message<String>(event.msg)
-                        )
+                        if (event.msg != null) {
+                            dataStateHandler.onDataStateChange(
+                                DataState.message<String>(event.msg)
+                            )
+                        }
                         startActivity(Intent(requireContext(), HomeActivity::class.java))
                         requireActivity().finish()
                     }
@@ -68,7 +80,6 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                 binding.loginBtn.isEnabled = true
             }
         }
-
     }
 
 

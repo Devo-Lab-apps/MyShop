@@ -117,6 +117,9 @@ class IntroActivity : AppCompatActivity() {
     }
 
 
+    /**
+     * Initial data.
+     */
     private fun fillData() {
         screenItems.add(
             IntroScreenItem(

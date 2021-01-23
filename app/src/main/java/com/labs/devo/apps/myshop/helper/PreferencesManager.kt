@@ -20,7 +20,7 @@ class PreferencesManager @Inject constructor(@ApplicationContext context: Contex
 
 
     suspend fun updateIntoActivityShown(shown: Boolean) {
-        dataStore.edit { prefs->
+        dataStore.edit { prefs ->
             prefs[PreferenceKeys.introActivityShown] = shown
         }
     }

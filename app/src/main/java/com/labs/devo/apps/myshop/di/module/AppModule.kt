@@ -11,14 +11,16 @@ import dagger.hilt.android.components.ApplicationComponent
 import javax.inject.Singleton
 
 
+/**
+ * App level module to provide singleton dependencies.
+ */
 @Module
 @InstallIn(ApplicationComponent::class)
 class AppModule {
 
     @Provides
     @Singleton
-    fun providesUserAuth(auth: FirebaseAuth, db: FirebaseFirestore): UserAuth =
-        FirebaseUserAuth(auth, db)
+    fun providesUserAuth(auth: FirebaseAuth): UserAuth = FirebaseUserAuth(auth)
 
     @Provides
     @Singleton
