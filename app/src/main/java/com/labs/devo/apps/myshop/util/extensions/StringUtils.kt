@@ -1,4 +1,4 @@
-package com.labs.devo.apps.myshop.helper.extensions
+package com.labs.devo.apps.myshop.util.extensions
 
 
 /**

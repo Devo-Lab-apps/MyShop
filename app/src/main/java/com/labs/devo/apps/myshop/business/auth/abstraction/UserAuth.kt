@@ -19,4 +19,10 @@ interface UserAuth {
      * Method to create new user.
      */
     suspend fun signUpUser(credentials: SignUpUserCredentials): DataState<AuthenticationResult>
+
+
+    /**
+     * Logout out of all devices.
+     */
+    suspend fun logoutOfAllDevices(credentials: LoginUserCredentials): DataState<AuthenticationResult>
 }
