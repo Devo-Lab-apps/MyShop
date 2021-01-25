@@ -1,4 +1,4 @@
-package com.labs.devo.apps.myshop.helper
+package com.labs.devo.apps.myshop.util
 
 import android.content.Context
 import androidx.datastore.preferences.createDataStore

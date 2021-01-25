@@ -6,8 +6,9 @@ import com.labs.devo.apps.myshop.business.auth.abstraction.UserAuth
 import com.labs.devo.apps.myshop.business.helper.UserManager
 import com.labs.devo.apps.myshop.data.models.auth.SignUpUserCredentials
 import com.labs.devo.apps.myshop.data.models.account.User
-import com.labs.devo.apps.myshop.helper.extensions.isValidEmail
-import com.labs.devo.apps.myshop.helper.extensions.isValidPassword
+import com.labs.devo.apps.myshop.data.models.auth.AuthenticationResult
+import com.labs.devo.apps.myshop.util.extensions.isValidEmail
+import com.labs.devo.apps.myshop.util.extensions.isValidPassword
 import com.labs.devo.apps.myshop.view.util.BaseViewModel
 import kotlinx.coroutines.launch
 
@@ -43,7 +44,9 @@ class SignUpViewModel
                     data.message?.getContentIfNotHandled()
                 )
             )
-            initUser(authResult?.user)
+            if (authResult is AuthenticationResult.SignedUp) {
+                initUser(authResult.user)
+            }
         } ?: showInvalidInputMessage(data.message?.getContentIfNotHandled())
     }
 

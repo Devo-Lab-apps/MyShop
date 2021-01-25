@@ -6,10 +6,12 @@ import com.google.firebase.firestore.FirebaseFirestoreException
 import com.labs.devo.apps.myshop.business.auth.abstraction.UserAuth
 import com.labs.devo.apps.myshop.business.helper.FirebaseHelper
 import com.labs.devo.apps.myshop.const.AppConstants
+import com.labs.devo.apps.myshop.data.models.account.Account
+import com.labs.devo.apps.myshop.data.models.account.User
 import com.labs.devo.apps.myshop.data.models.auth.AuthenticationResult
 import com.labs.devo.apps.myshop.data.models.auth.LoginUserCredentials
 import com.labs.devo.apps.myshop.data.models.auth.SignUpUserCredentials
-import com.labs.devo.apps.myshop.data.models.account.User
+import com.labs.devo.apps.myshop.util.AppData
 import com.labs.devo.apps.myshop.util.printLogD
 import com.labs.devo.apps.myshop.view.util.DataState
 import kotlinx.coroutines.tasks.await
@@ -34,15 +36,15 @@ class FirebaseUserAuth @Inject constructor(val auth: FirebaseAuth) :
 
     override suspend fun loginUser(credentials: LoginUserCredentials): DataState<AuthenticationResult> {
         return try {
-            val authResult =
-                auth.signInWithEmailAndPassword(credentials.email, credentials.password).await()
+            auth.signInWithEmailAndPassword(credentials.email, credentials.password).await()
             val isEmailVerified = auth.currentUser?.isEmailVerified
-            return if (isEmailVerified == true) getUserFromDb(credentials.email, authResult)
-            else {
-                auth.signOut()
+            return if (isEmailVerified == true) {
+                getUserFromDb(credentials.email)
+            } else {
                 throw java.lang.Exception("Please verify your email before login.")
             }
         } catch (e: Exception) {
+            auth.signOut()
             DataState.message(e.message ?: "An error occurred. Please try again later")
         }
     }
@@ -52,106 +54,156 @@ class FirebaseUserAuth @Inject constructor(val auth: FirebaseAuth) :
         return try {
             val authResult =
                 auth.createUserWithEmailAndPassword(credentials.email, credentials.password).await()
-            createUserInDb(credentials.email, authResult, AuthEvent.SIGNUP)
+            val res = createAccountAndUserInDb(credentials.email, authResult)
+            //sign out and return result
+            auth.signOut()
+            res
         } catch (e: Exception) {
+            auth.signOut()
             DataState.message(e.message ?: "An error occurred. Please try again later")
         }
     }
+
+    override suspend fun logoutOfAllDevices(credentials: LoginUserCredentials): DataState<AuthenticationResult> {
+        return try {
+            auth.signInWithEmailAndPassword(credentials.email, credentials.password).await()
+            val doc = FirebaseHelper.getUsersDocReference(credentials.email).get().await()
+            val user = doc.toObject(User::class.java)!!
+            clearLoginDevice(user)
+            //for re-login
+            auth.signOut()
+            DataState.data(
+                data = AuthenticationResult.LoggedOutOfDevices,
+                message = "Logged out of all devices. Please login again."
+            )
+        } catch (ex: java.lang.Exception) {
+            auth.signOut()
+            if (ex is FirebaseFirestoreException || ex is NullPointerException) {
+                throw Exception(
+                    "An error occurred while creating user. Please try again later.",
+                    ex
+                )
+            }
+            throw ex
+        }
+    }
+
 
     /**
      * Method to fetch user from DB that is logged in.
      */
     private suspend fun getUserFromDb(
-        email: String,
-        authResult: AuthResult?
+        email: String
     ): DataState<AuthenticationResult> {
-        var user: User? = null
+        val user: User?
         try {
             val doc = FirebaseHelper.getUsersDocReference(email).get().await()
-            user = doc.toObject(User::class.java)
+            user = doc.toObject(User::class.java)!!
+            //if first time login, same device login or logged out of all devices.
+            if (user.loggedInDevice == "" || user.loggedInDevice == AppData.deviceId) {
+                updateLoginTimeAndLoginDevice(user)
+                //if logging in from another device
+            } else if (AppData.deviceId != user.loggedInDevice) {
+                auth.signOut()
+                return DataState.data(
+                    data = AuthenticationResult.LogoutOfDevicesError,
+                    message = "Please logout of all devices before login."
+                )
+            }
             return DataState.data(
-                data = AuthenticationResult(user!!),
+                data = AuthenticationResult.LoggedIn(user),
                 message = "Login Successful"
             )
         } catch (ex: Exception) {
-            if (user == null) {
-                printLogD(TAG, "Can't find user in db. So creating user.")
-
-                //if user don't get created on sign up anyhow or deleted and it is a valid authenticated user then create user and return that.
-                return createUserInDb(email, authResult, AuthEvent.LOGIN)
-            }
-            return DataState.data(
-                data = AuthenticationResult(user),
-                message = "Logged in"
-            )
+            //TODO decide whether to create account and user in db.
+            //TODO create a customer care
+            throw java.lang.Exception("Can't find user record. Please contact with our customer care.")
         }
     }
 
 
     /**
-     * Method to created user in DB under "users" collection.
+     * Method to created user in DB under "user" and "account" collection.
      */
-    private suspend fun createUserInDb(
+    private suspend fun createAccountAndUserInDb(
         email: String,
-        authResult: AuthResult?,
-        authEvent: AuthEvent
+        authResult: AuthResult?
     ): DataState<AuthenticationResult> {
         var user: User? = null
-        try {
+        return try {
             authResult?.let { res ->
                 res.user?.let { u ->
-                    user = User(
-                        u.uid,
-                        "", //not set on sign up
-                        email,
-                        System.currentTimeMillis()
-                    )
-                    FirebaseHelper.getUsersDocReference(email).set(user!!).await()
-                    if (authEvent == AuthEvent.SIGNUP) {
-                        u.sendEmailVerification()
-                    }
+                    val account = createAccountInDb(email)
+                    user = createUserInDb(email, account.accountId, u.uid)
+                    u.sendEmailVerification()
                 }
             }
-            return if (authEvent == AuthEvent.LOGIN) {
-                //very rare case
-                DataState.data(
-                    data = AuthenticationResult(user!!),
-                    message = "Login Successful. Your profile data is reset. You have to fill it again. Sorry for inconvenience." //user should know to reset the profile.
-                )
-            } else {
-                DataState.data(
-                    data = AuthenticationResult(user!!),
-                    message = "Successfully created. Please verify your email before login."
-                )
-            }
+            DataState.data(
+                data = AuthenticationResult.SignedUp(user!!),
+                message = "Successfully created. Please verify your email before login."
+            )
         } catch (ex: Exception) {
             user = null //to delete the user in finally make it null here.
-            if (ex is FirebaseFirestoreException) {
-                if (authEvent == AuthEvent.LOGIN) {
-                    throw Exception(
-                        "There's an error on our side. Please try again later. Sorry for inconvenience.",
-                        ex
-                    )
-                } else {
-                    throw Exception(
-                        "An error occurred while creating user. Please try again later.",
-                        ex
-                    )
-                }
+            printLogD(TAG, "Can't store data in db. So deleting user")
+            auth.currentUser?.delete()?.await()
+            if (ex is FirebaseFirestoreException || ex is NullPointerException) {
+                throw Exception(
+                    "An error occurred while creating user. Please try again later.",
+                    ex
+                )
             }
             throw ex
-        } finally {
-            //if signing up and an error occurred
-            if (user == null && authEvent == AuthEvent.SIGNUP) {
-                printLogD(TAG, "Can't store data in db. So deleting user")
-                auth.currentUser?.delete()?.await()
-
-                //sign out after creating the user to re-login.
-                auth.signOut()
-            }
-            //sign out after anyway.
-            auth.signOut()
         }
+    }
+
+    /**
+     * Save user in db under user collection.
+     */
+    private suspend fun createUserInDb(email: String, accountId: String, uid: String): User {
+        val user = User(
+            uid,
+            "", //not set on sign up
+            email,
+            accountId,
+            signedUpInAt = System.currentTimeMillis(),
+        )
+
+        FirebaseHelper.getUsersDocReference(email).set(user).await()
+        return user
+    }
+
+    /**
+     * Save account in db for new account.
+     */
+    private suspend fun createAccountInDb(email: String): Account {
+        val accountId = FirebaseHelper.getAccountDocumentReference().id
+
+        val account = Account(
+            accountId,
+            listOf(email) //add user in list of users
+        )
+
+        FirebaseHelper.getAccountDocumentReference(accountId)
+            .set(account).await()
+        return account
+    }
+
+    /**
+     * Set logged in time and device for the user.
+     */
+    private suspend fun updateLoginTimeAndLoginDevice(user: User) {
+        val loggedInDeviceId = AppData.deviceId
+        user.loggedInAt = System.currentTimeMillis()
+        user.loggedInDevice = loggedInDeviceId
+        FirebaseHelper.getUsersDocReference(user.email).set(user).await()
+    }
+
+    /**
+     * Clean login device for the user.
+     */
+    private suspend fun clearLoginDevice(user: User) {
+        user.loggedInDevice = ""
+        FirebaseHelper.getUsersDocReference(user.email).set(user).await()
     }
 
 }

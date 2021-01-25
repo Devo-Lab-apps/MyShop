@@ -7,6 +7,10 @@ data class User(
     val uid: String = "",
     val username: String = "",
     val email: String = "",
-    val loggedInAt: Long = 0
+    val accountId: String = "",
+    var loggedInDevice: String = "",
+    val profileImageUrl: String = "",
+    var loggedInAt: Long = 0,
+    val signedUpInAt: Long = 0,
     //TODO add other profile attributes
 )

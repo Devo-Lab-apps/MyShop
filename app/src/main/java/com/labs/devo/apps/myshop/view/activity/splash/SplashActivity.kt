@@ -12,7 +12,7 @@ import androidx.databinding.DataBindingUtil
 import com.labs.devo.apps.myshop.R
 import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.databinding.ActivitySplashBinding
-import com.labs.devo.apps.myshop.helper.PreferencesManager
+import com.labs.devo.apps.myshop.util.PreferencesManager
 import com.labs.devo.apps.myshop.view.activity.auth.AuthenticationActivity
 import com.labs.devo.apps.myshop.view.activity.intro.IntroActivity
 import dagger.hilt.android.AndroidEntryPoint
