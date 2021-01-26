@@ -100,10 +100,10 @@ class FirebaseUserAuth @Inject constructor(val auth: FirebaseAuth) :
             val doc = FirebaseHelper.getUsersDocReference(email).get().await()
             user = doc.toObject(User::class.java)!!
             //if first time login, same device login or logged out of all devices.
-            if (user.loggedInDevice == "" || user.loggedInDevice == AppData.deviceId) {
+            if (user.loggedInDeviceId == "" || user.loggedInDeviceId == AppData.deviceId) {
                 updateLoginTimeAndLoginDevice(user)
                 //if logging in from another device
-            } else if (AppData.deviceId != user.loggedInDevice) {
+            } else if (AppData.deviceId != user.loggedInDeviceId) {
                 auth.signOut()
                 return DataState.data(
                     data = AuthenticationResult.LogoutOfDevicesError,
@@ -194,7 +194,7 @@ class FirebaseUserAuth @Inject constructor(val auth: FirebaseAuth) :
     private suspend fun updateLoginTimeAndLoginDevice(user: User) {
         val loggedInDeviceId = AppData.deviceId
         user.loggedInAt = System.currentTimeMillis()
-        user.loggedInDevice = loggedInDeviceId
+        user.loggedInDeviceId = loggedInDeviceId
         FirebaseHelper.getUsersDocReference(user.email).set(user).await()
     }
 
@@ -202,7 +202,7 @@ class FirebaseUserAuth @Inject constructor(val auth: FirebaseAuth) :
      * Clean login device for the user.
      */
     private suspend fun clearLoginDevice(user: User) {
-        user.loggedInDevice = ""
+        user.loggedInDeviceId = ""
         FirebaseHelper.getUsersDocReference(user.email).set(user).await()
     }
 

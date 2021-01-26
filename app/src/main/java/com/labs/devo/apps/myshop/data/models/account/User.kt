@@ -8,7 +8,7 @@ data class User(
     val username: String = "",
     val email: String = "",
     val accountId: String = "",
-    var loggedInDevice: String = "",
+    var loggedInDeviceId: String = "",
     val profileImageUrl: String = "",
     var loggedInAt: Long = 0,
     val signedUpInAt: Long = 0,
