@@ -4,7 +4,6 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
-
     <application
         android:name=".MyShopApplication"
         android:allowBackup="true"
@@ -13,8 +12,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MyShop">
-        <activity android:name=".view.activity.auth.AuthenticationActivity"
-            />
+        <activity android:name=".view.activity.notebook.NotebookActivity"></activity>
+        <activity android:name=".view.activity.auth.AuthenticationActivity" />
         <activity android:name=".view.activity.splash.SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -22,10 +21,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".view.activity.intro.IntroActivity"/>
-        <activity android:name=".view.activity.home.HomeActivity"
-            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"
-            />
+        <activity android:name=".view.activity.intro.IntroActivity" />
+        <activity
+            android:name=".view.activity.home.HomeActivity"
+            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar" />
     </application>
 
 </manifest>
