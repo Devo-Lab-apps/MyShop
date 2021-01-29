@@ -9,7 +9,8 @@ object UserManager {
     /**
      * Store user in memory.
      */
-    private var user: User? = null
+    var user: User? = null
+        private set
 
     /**
      * Initialize user.

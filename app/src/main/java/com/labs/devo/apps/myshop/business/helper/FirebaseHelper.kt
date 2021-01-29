@@ -6,6 +6,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 val user = "user"
 val account = "account"
+val notebook = "notebook"
 
 
 object FirebaseHelper {
@@ -30,6 +31,21 @@ object FirebaseHelper {
 
     fun getAccountDocumentReference(): DocumentReference {
         return getAccountCollection().document()
+    }
+
+    fun getNotebookCollection(email: String): CollectionReference {
+        return getAccountDocumentReference(email)
+            .collection(notebook)
+    }
+
+    fun getNotebookReference(email: String, notebookId: String): DocumentReference {
+        return getAccountDocumentReference(email)
+            .collection(notebook).document(notebookId)
+    }
+
+    fun getNotebookReference(email: String): DocumentReference {
+        return getAccountDocumentReference(email)
+            .collection(notebook).document()
     }
 }
 

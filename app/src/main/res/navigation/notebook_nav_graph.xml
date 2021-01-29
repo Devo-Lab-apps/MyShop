@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/notebook_nav_graph"
+    app:startDestination="@id/pageFragment">
+
+    <fragment
+        android:id="@+id/notebookFragment"
+        android:name="com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment"
+        android:label="NotebookFragment"
+        tools:layout="@layout/fragment_notebook"
+        />
+    <fragment
+        android:id="@+id/pageFragment"
+        android:name="com.labs.devo.apps.myshop.view.activity.notebook.page.PageFragment"
+        android:label="PageFragment"
+        tools:layout="@layout/fragment_page"/>
+    <action android:id="@+id/action_global_notebookFragment2" app:destination="@id/notebookFragment"/>
+</navigation>
