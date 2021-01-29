@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
@@ -59,12 +60,21 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             viewModel.channelFlow.collect { event ->
                 when (event) {
                     HomeViewModel.HomeViewModelEvent.LogoutUser -> {
-                        printLogD(TAG, "logging out")
+                        printLogD(TAG, "Logging out dut to some reason")
+                        auth.signOut()
+                        Toast.makeText(this@HomeActivity, "You've been logged out of all devices.", Toast.LENGTH_LONG).show()
+                        val intent = Intent(this@HomeActivity, AuthenticationActivity::class.java)
+                        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+                        startActivity(intent)
+                        finish()
+                    }
+                    HomeViewModel.HomeViewModelEvent.UserNotFound -> {
+                        printLogD("User not found. Logging out.")
+                        Toast.makeText(this@HomeActivity, "Someone deleted the user. Please retry later.", Toast.LENGTH_LONG).show()
                         auth.signOut()
                         val intent = Intent(this@HomeActivity, AuthenticationActivity::class.java)
                         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
                         startActivity(intent)
-                        printLogD(TAG, "activity finishing")
                         finish()
                     }
                 }
@@ -118,7 +128,6 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onDestroy() {
         super.onDestroy()
-        printLogD(TAG, "On destroy")
         job.cancel()
     }
 }

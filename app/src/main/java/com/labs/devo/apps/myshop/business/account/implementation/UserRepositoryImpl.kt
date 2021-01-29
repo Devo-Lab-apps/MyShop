@@ -7,5 +7,5 @@ import kotlinx.coroutines.flow.Flow
 
 class UserRepositoryImpl constructor(val userService: UserService) : UserRepository {
 
-    override suspend fun getUser(email: String): Flow<User> = userService.getUser(email)
+    override suspend fun getUser(email: String): Flow<User?> = userService.getUser(email)
 }

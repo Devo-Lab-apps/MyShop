@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface UserService {
 
-    suspend fun getUser(email: String): Flow<User>
+    suspend fun getUser(email: String): Flow<User?>
 
 
 }

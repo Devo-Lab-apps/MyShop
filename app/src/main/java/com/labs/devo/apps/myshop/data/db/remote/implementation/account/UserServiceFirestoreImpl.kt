@@ -14,7 +14,7 @@ class UserServiceFirestoreImpl : UserService {
 
     private val TAG = AppConstants.APP_PREFIX + javaClass.simpleName
 
-    override suspend fun getUser(email: String): Flow<User> {
+    override suspend fun getUser(email: String): Flow<User?> {
         return channelFlow {
             val listener =
                 FirebaseHelper.getUsersDocReference(email).addSnapshotListener { ds, ex ->
@@ -23,14 +23,13 @@ class UserServiceFirestoreImpl : UserService {
                         return@addSnapshotListener
                     }
                     if (ds != null && ds.exists()) {
-                        val user = ds.toObject(User::class.java)!!
+                        val user = ds.toObject(User::class.java)
                         offer(user)
                     } else {
                         cancel(message = "Error fetching data for user with email: $email")
                     }
                 }
             awaitClose {
-                printLogD(TAG, "Closing connection for user listener")
                 listener.remove()
             }
         }
