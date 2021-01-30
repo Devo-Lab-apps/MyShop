@@ -4,9 +4,11 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.labs.devo.apps.myshop.R
 import com.labs.devo.apps.myshop.const.AppConstants
@@ -17,7 +19,6 @@ import com.labs.devo.apps.myshop.view.adapter.notebook.NotebookListAdapter
 import com.labs.devo.apps.myshop.view.util.DataState
 import com.labs.devo.apps.myshop.view.util.DataStateListener
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 
 @AndroidEntryPoint
@@ -33,15 +34,13 @@ class NotebookFragment : DialogFragment(R.layout.fragment_notebook) {
 
     private lateinit var dataStateHandler: DataStateListener
 
-    private lateinit var job: Job
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         binding = FragmentNotebookBinding.bind(view)
         initView()
-        job = viewModel.getNotebooks()
+        viewModel.getNotebooks()
         observeEvents()
     }
 
@@ -51,7 +50,8 @@ class NotebookFragment : DialogFragment(R.layout.fragment_notebook) {
     private fun initView() {
         notebookAdapter = NotebookListAdapter(object : NotebookListAdapter.OnNotebookClick {
             override fun onClick(notebook: Notebook) {
-                Toast.makeText(requireContext(), notebook.notebookId, Toast.LENGTH_LONG).show()
+                val args = bundleOf("notebook" to notebook)
+                findNavController().navigate(R.id.notebookSettings, args)
             }
         })
 
@@ -63,6 +63,7 @@ class NotebookFragment : DialogFragment(R.layout.fragment_notebook) {
                 layoutManager = LinearLayoutManager(requireContext())
                 setHasFixedSize(true)
             }
+
         }
     }
 
@@ -84,17 +85,15 @@ class NotebookFragment : DialogFragment(R.layout.fragment_notebook) {
                         notebookAdapter.submitList(notebooks.toMutableList())
                     }
                     is NotebookViewModel.NotebookEvent.ShowInvalidInputMessage -> {
-                        dataStateHandler.onDataStateChange(DataState.message<Nothing>(event.msg))
+                        if (event.msg != null) {
+                            dataStateHandler.onDataStateChange(DataState.message<Nothing>(event.msg))
+                        }
                     }
                 }
             }
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        job.cancel()
-    }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)

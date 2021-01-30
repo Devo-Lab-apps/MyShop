@@ -9,12 +9,22 @@
         android:id="@+id/notebookFragment"
         android:name="com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment"
         android:label="NotebookFragment"
-        tools:layout="@layout/fragment_notebook"
-        />
+        tools:layout="@layout/fragment_notebook">
+        <action
+            android:id="@+id/action_notebookFragment_to_notebookSettings"
+            app:destination="@id/notebookSettings" />
+    </fragment>
     <fragment
         android:id="@+id/pageFragment"
         android:name="com.labs.devo.apps.myshop.view.activity.notebook.page.PageFragment"
         android:label="PageFragment"
-        tools:layout="@layout/fragment_page"/>
-    <action android:id="@+id/action_global_notebookFragment2" app:destination="@id/notebookFragment"/>
+        tools:layout="@layout/fragment_page" />
+    <action
+        android:id="@+id/action_global_notebookFragment2"
+        app:destination="@id/notebookFragment" />
+    <fragment
+        android:id="@+id/notebookSettings"
+        android:name="com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookSettingsFragment"
+        android:label="NotebookSettings"
+        tools:layout="@layout/notebook_settings_fragment"/>
 </navigation>

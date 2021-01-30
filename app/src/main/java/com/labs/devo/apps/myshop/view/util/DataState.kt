@@ -34,8 +34,8 @@ data class DataState<T>(
         }
 
         fun <T> data(
-            message: String? = null,
-            data: T? = null
+            data: T? = null,
+            message: String? = null
         ): DataState<T> {
             return DataState(
                 message = Event.messageEvent(message),
