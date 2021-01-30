@@ -50,6 +50,10 @@ class NotebookFragment : DialogFragment(R.layout.fragment_notebook) {
     private fun initView() {
         notebookAdapter = NotebookListAdapter(object : NotebookListAdapter.OnNotebookClick {
             override fun onClick(notebook: Notebook) {
+                if (notebook.notebookId == "foreign" || notebook.notebookName == "Foreign") {
+                    dataStateHandler.onDataStateChange(DataState.message<Nothing>("You can't edit foreign transactions."))
+                    return
+                }
                 val args = bundleOf("notebook" to notebook)
                 findNavController().navigate(R.id.notebookSettings, args)
             }
