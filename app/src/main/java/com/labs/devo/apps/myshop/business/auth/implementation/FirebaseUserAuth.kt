@@ -11,6 +11,7 @@ import com.labs.devo.apps.myshop.data.models.account.User
 import com.labs.devo.apps.myshop.data.models.auth.AuthenticationResult
 import com.labs.devo.apps.myshop.data.models.auth.LoginUserCredentials
 import com.labs.devo.apps.myshop.data.models.auth.SignUpUserCredentials
+import com.labs.devo.apps.myshop.data.models.notebook.Notebook
 import com.labs.devo.apps.myshop.util.AppData
 import com.labs.devo.apps.myshop.util.printLogD
 import com.labs.devo.apps.myshop.view.util.DataState
@@ -135,6 +136,7 @@ class FirebaseUserAuth @Inject constructor(val auth: FirebaseAuth) :
                 res.user?.let { u ->
                     val account = createAccountInDb(email)
                     user = createUserInDb(email, account.accountId, u.uid)
+                    createForeignNotebook(account.accountId)
                     u.sendEmailVerification()
                 }
             }
@@ -154,6 +156,15 @@ class FirebaseUserAuth @Inject constructor(val auth: FirebaseAuth) :
             }
             throw ex
         }
+    }
+
+    private suspend fun createForeignNotebook(accountId: String) {
+        val notebook = Notebook(
+            "foreign",
+            "Foreign"
+        )
+        FirebaseHelper.getNotebookCollection(accountId)
+            .document("foreign").set(notebook).await()
     }
 
     /**
