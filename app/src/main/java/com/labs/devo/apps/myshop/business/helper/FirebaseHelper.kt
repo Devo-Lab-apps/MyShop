@@ -3,6 +3,7 @@ package com.labs.devo.apps.myshop.business.helper
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
 
 val user = "user"
 val account = "account"
@@ -43,9 +44,21 @@ object FirebaseHelper {
             .collection(notebook).document(notebookId)
     }
 
-    fun getNotebookReference(email: String): DocumentReference {
-        return getAccountDocumentReference(email)
+    fun getNotebookReference(accountId: String): DocumentReference {
+        return getAccountDocumentReference(accountId)
             .collection(notebook).document()
+    }
+
+    suspend fun runWriteBatch(f: () -> Unit) {
+        db.runBatch {
+            f.invoke()
+        }.await()
+    }
+
+    suspend fun runUpdateBatch(f: () -> Unit) {
+        db.runTransaction {
+            f.invoke()
+        }.await()
     }
 }
 
