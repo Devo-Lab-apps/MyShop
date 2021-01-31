@@ -22,7 +22,7 @@ class NotebookListAdapter(val onNotebookClick: OnNotebookClick) :
                 notebookName.text = notebook.notebookName
                 val pos = adapterPosition
                 if (pos != NO_POSITION) {
-                    binding.root.setOnClickListener {
+                    binding.notebookSettings.setOnClickListener {
                         onNotebookClick.onClick(getItem(pos))
                     }
                 }

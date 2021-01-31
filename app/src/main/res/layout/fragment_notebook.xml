@@ -33,31 +33,18 @@
                 android:layout_margin="16dp"
                 />
 
-
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/notebooks_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/notebooks_status"
-            tools:itemCount="4"
-            android:layout_marginTop="140dp"
             app:layout_constraintBottom_toTopOf="@id/add_notebook_btn"
-            tools:listitem="@layout/notebook_item_view" />
-
-        <TextView
-            android:id="@+id/notebooks_status"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Fetching..."
-            android:textAlignment="center"
-            android:textColor="@android:color/black"
-            android:textSize="18sp"
-            android:layout_marginTop="24dp"
             app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="72dp"
+            android:layout_marginBottom="48dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/add_notebook_tv" />
+            app:layout_constraintTop_toBottomOf="@+id/add_notebook_tv"
+            tools:itemCount="4"
+            tools:listitem="@layout/notebook_item_view" />
 
         <Button
             android:id="@+id/add_notebook_btn"
