@@ -53,12 +53,11 @@ class PageFragment : Fragment(R.layout.fragment_page) {
     }
 
     private fun showNotebookFragment() {
-        val action = NotebookFragmentDirections.actionGlobalNotebookFragment2()
         val options = NavOptions.Builder()
         options.setEnterAnim(R.anim.open_notebook_fragment)
         options.setExitAnim(R.anim.exit_notebook_fragment)
         options.setPopEnterAnim(R.anim.pop_enter_notebook_fragment)
         options.setPopExitAnim(R.anim.pop_exit_notebook_fragment)
-        findNavController().navigate(action, options.build())
+        findNavController().navigate(R.id.notebookFragment, null, options.build())
     }
 }

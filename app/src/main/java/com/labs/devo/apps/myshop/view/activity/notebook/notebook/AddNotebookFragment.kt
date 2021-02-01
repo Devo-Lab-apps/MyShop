@@ -9,57 +9,43 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.labs.devo.apps.myshop.R
 import com.labs.devo.apps.myshop.data.models.notebook.Notebook
-import com.labs.devo.apps.myshop.databinding.NotebookSettingsFragmentBinding
+import com.labs.devo.apps.myshop.databinding.AddNotebookFragmentBinding
 import com.labs.devo.apps.myshop.view.util.DataState
 import com.labs.devo.apps.myshop.view.util.DataStateListener
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 
 @AndroidEntryPoint
-class NotebookSettingsFragment : Fragment(R.layout.notebook_settings_fragment) {
+class AddNotebookFragment : Fragment(R.layout.add_notebook_fragment) {
 
-    private lateinit var binding: NotebookSettingsFragmentBinding
+    private lateinit var binding: AddNotebookFragmentBinding
 
-    private val viewModel: NotebookSettingsViewModel by viewModels()
-
-    private lateinit var notebook: Notebook
+    private val viewModel: AddNotebookViewModel by viewModels()
 
     private lateinit var dataStateHandler: DataStateListener
 
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding = NotebookSettingsFragmentBinding.bind(view)
-        init()
+        binding = AddNotebookFragmentBinding.bind(view)
+
+        initView()
 
         observeEvents()
     }
 
-    private fun init() {
 
-        arguments?.apply {
-            notebook = getParcelable("notebook")!!
-        }
-
+    private fun initView() {
         binding.apply {
-            notebookName.setText(notebook.notebookName)
-
-            updateNotebookBtn.setOnClickListener {
-                dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
+            addNotebookBtn.setOnClickListener {
                 val notebookName = notebookName.text.toString()
-                val newNotebook = notebook.copy(
-                    notebookName = notebookName,
-                    modifiedAt = System.currentTimeMillis()
+                val notebook = Notebook(
+                    notebookName = notebookName
                 )
-                viewModel.updateNotebook(notebook, newNotebook)
-            }
-
-            deleteNotebookBtn.setOnClickListener {
                 dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
-                viewModel.deleteNotebook(notebook.notebookId)
+                viewModel.addNotebook(notebook)
             }
         }
-
-
     }
 
 
@@ -67,20 +53,16 @@ class NotebookSettingsFragment : Fragment(R.layout.notebook_settings_fragment) {
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             viewModel.channelFlow.collect { event ->
                 when (event) {
-                    is NotebookSettingsViewModel.NotebookSettingsEvent.ShowInvalidInputMessage -> {
+                    is AddNotebookViewModel.AddNotebookEvent.NotebookInserted -> {
+                        dataStateHandler.onDataStateChange(DataState.message<Nothing>(event.msg))
+                        findNavController().navigateUp()
+                    }
+                    is AddNotebookViewModel.AddNotebookEvent.ShowInvalidInputMessage -> {
                         if (event.msg != null) {
-                            dataStateHandler.onDataStateChange(DataState.message<String>(event.msg))
+                            dataStateHandler.onDataStateChange(DataState.message<Nothing>(event.msg))
                         } else {
                             dataStateHandler.onDataStateChange(DataState.loading<Nothing>(false))
                         }
-                    }
-                    is NotebookSettingsViewModel.NotebookSettingsEvent.NotebookUpdated -> {
-                        dataStateHandler.onDataStateChange(DataState.message<String>(event.msg))
-                        findNavController().navigateUp()
-                    }
-                    is NotebookSettingsViewModel.NotebookSettingsEvent.NotebookDeleted -> {
-                        dataStateHandler.onDataStateChange(DataState.message<String>(event.msg))
-                        findNavController().navigateUp()
                     }
                 }
             }
@@ -97,6 +79,4 @@ class NotebookSettingsFragment : Fragment(R.layout.notebook_settings_fragment) {
         }
 
     }
-
-
 }

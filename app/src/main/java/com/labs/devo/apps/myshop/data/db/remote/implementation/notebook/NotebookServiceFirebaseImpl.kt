@@ -12,6 +12,7 @@ import com.labs.devo.apps.myshop.util.exceptions.UserNotInitializedException
 import com.labs.devo.apps.myshop.view.util.DataState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -37,17 +38,17 @@ class NotebookServiceFirebaseImpl @Inject constructor(
     override suspend fun insertNotebooks(notebooks: List<Notebook>): DataState<List<Notebook>> {
         val existingNotebooks = getNotebooks().asLiveData().value
 
-        if (existingNotebooks?.size == 2) {
-            return DataState.message("You can't have more than 2 notebooks per account.")
+        if (existingNotebooks?.size == 3) {
+            return DataState.message("You can't have more than 3 notebooks per account.")
         }
-        val updatedNotebooks = mutableListOf<Notebook>()
+        val insertedNotebooks = mutableListOf<Notebook>()
         return try {
             FirebaseHelper.runWriteBatch {
                 notebooks.forEach { notebook ->
-                    updatedNotebooks.add(insertInDb(notebook))
+                    insertedNotebooks.add(insertInDb(notebook))
                 }
             }
-            DataState.data(data = updatedNotebooks)
+            DataState.data(data = insertedNotebooks)
         } catch (ex: java.lang.Exception) {
             DataState.message(
                 ex.message ?: "An unknown error occurred. Please try again later"
@@ -56,10 +57,10 @@ class NotebookServiceFirebaseImpl @Inject constructor(
     }
 
     override suspend fun insertNotebook(notebook: Notebook): DataState<Notebook> {
-        val existingNotebooks = getNotebooks().asLiveData().value
+        val existingNotebooks = getNotebooks().first()
 
-        if (existingNotebooks?.size == 2) {
-            return DataState.message("You can't have more than 2 notebooks per account.")
+        if (existingNotebooks.size >= 3) {
+            return DataState.message("You can't have more than 3 notebooks per account.")
         }
         var updatedNotebook: Notebook? = null
         return try {
@@ -172,14 +173,12 @@ class NotebookServiceFirebaseImpl @Inject constructor(
         checkIfForeign(notebook)
         val user = UserManager.user ?: throw UserNotInitializedException("User not initialized")
         val notebookId = FirebaseHelper.getNotebookReference(user.accountId).id
-        val data = notebook.copy(
-            notebookId = notebookId,
-            createdAt = System.currentTimeMillis(),
-            modifiedAt = System.currentTimeMillis()
-        )
-        FirebaseHelper.getNotebookCollection(user.accountId)
-            .add(notebook)
-        return data
+        val data = mapper.mapToEntity(notebook.copy(
+            notebookId = notebookId
+        ))
+        FirebaseHelper.getNotebookReference(user.accountId, notebookId)
+            .set(data)
+        return mapper.mapFromEntity(data)
     }
 
 

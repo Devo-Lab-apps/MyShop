@@ -17,7 +17,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="24dp"
             android:layout_marginBottom="24dp"
-            android:text="Notebook"
+            android:text="Notebook Name"
             android:textColor="@color/black"
             android:textSize="20sp"
             android:textStyle="bold"
@@ -26,16 +26,23 @@
 
 
         <EditText
-            android:id="@+id/notebooks_name"
-            android:layout_width="match_parent"
+            android:id="@+id/notebook_name"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_margin="12dp"
-            android:textColor="@android:color/black"
-            android:textSize="18sp"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/text_input_bg"
+            android:ems="10"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            app:layout_goneMarginTop="20dp"
+            android:fontFamily="@font/open_sans_semibold"
+            android:hint="Notebook Name"
+            android:inputType="textEmailAddress"
+            android:padding="16dp"
+            android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tv1"
-            android:inputType="text" />
+            app:layout_constraintTop_toBottomOf="@+id/tv1" />
 
         <Button
             android:id="@+id/update_notebook_btn"

@@ -3,7 +3,6 @@ package com.labs.devo.apps.myshop.view.activity.notebook.notebook
 import android.content.Context
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
@@ -14,7 +13,6 @@ import com.labs.devo.apps.myshop.R
 import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.data.models.notebook.Notebook
 import com.labs.devo.apps.myshop.databinding.FragmentNotebookBinding
-import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.Companion.NO_NOTEBOOK_MSG
 import com.labs.devo.apps.myshop.view.adapter.notebook.NotebookListAdapter
 import com.labs.devo.apps.myshop.view.util.DataState
 import com.labs.devo.apps.myshop.view.util.DataStateListener
@@ -68,7 +66,13 @@ class NotebookFragment : DialogFragment(R.layout.fragment_notebook) {
                 setHasFixedSize(true)
             }
 
+            addNotebookBtn.setOnClickListener {
+                findNavController().navigate(R.id.addNotebookFragment)
+            }
+
         }
+
+
     }
 
     /**
@@ -81,10 +85,9 @@ class NotebookFragment : DialogFragment(R.layout.fragment_notebook) {
                     is NotebookViewModel.NotebookEvent.GetNotebooks -> {
                         val notebooks = event.notebooks
                         if (notebooks.isEmpty()) {
-                            binding.notebooksStatus.text = NO_NOTEBOOK_MSG
-                            binding.notebooksStatus.visibility = View.VISIBLE
+                            dataStateHandler.onDataStateChange(DataState.message<Nothing>("No notebooks present. Create one"))
                         } else {
-                            binding.notebooksStatus.visibility = View.GONE
+                            dataStateHandler.onDataStateChange(DataState.loading<Nothing>(false))
                         }
                         notebookAdapter.submitList(notebooks.toMutableList())
                     }
