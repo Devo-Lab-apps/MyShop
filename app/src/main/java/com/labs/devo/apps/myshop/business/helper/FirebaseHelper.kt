@@ -8,6 +8,7 @@ import kotlinx.coroutines.tasks.await
 val user = "user"
 val account = "account"
 val notebook = "notebook"
+val page = "page"
 
 
 object FirebaseHelper {
@@ -47,6 +48,19 @@ object FirebaseHelper {
     fun getNotebookReference(accountId: String): DocumentReference {
         return getAccountDocumentReference(accountId)
             .collection(notebook).document()
+    }
+
+
+    fun getPageCollection(): CollectionReference {
+        return db.collection(page)
+    }
+
+    fun getPageReference(pageId: String): DocumentReference {
+        return db.collection(page).document(pageId)
+    }
+
+    fun getPageReference(): DocumentReference {
+        return db.collection(page).document()
     }
 
     suspend fun runWriteBatch(f: () -> Unit) {

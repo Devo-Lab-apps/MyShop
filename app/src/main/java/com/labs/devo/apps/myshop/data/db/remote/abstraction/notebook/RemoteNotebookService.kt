@@ -4,7 +4,7 @@ import com.labs.devo.apps.myshop.data.models.notebook.Notebook
 import com.labs.devo.apps.myshop.view.util.DataState
 import kotlinx.coroutines.flow.Flow
 
-interface NotebookService {
+interface RemoteNotebookService {
 
     suspend fun getNotebooks(): Flow<List<Notebook>>
 

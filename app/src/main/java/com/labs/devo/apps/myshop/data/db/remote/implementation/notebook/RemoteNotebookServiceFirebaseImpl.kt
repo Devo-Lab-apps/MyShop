@@ -4,7 +4,7 @@ import androidx.lifecycle.asLiveData
 import com.labs.devo.apps.myshop.business.helper.FirebaseHelper
 import com.labs.devo.apps.myshop.business.helper.UserManager
 import com.labs.devo.apps.myshop.const.AppConstants
-import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.NotebookService
+import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemoteNotebookService
 import com.labs.devo.apps.myshop.data.db.remote.mapper.notebook.NotebookMapper
 import com.labs.devo.apps.myshop.data.db.remote.models.notebook.EntityNotebook
 import com.labs.devo.apps.myshop.data.models.notebook.Notebook
@@ -16,9 +16,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
-class NotebookServiceFirebaseImpl @Inject constructor(
+class RemoteNotebookServiceFirebaseImpl @Inject constructor(
     private val mapper: NotebookMapper
-) : NotebookService {
+) : RemoteNotebookService {
 
     private val TAG = AppConstants.APP_PREFIX + javaClass.simpleName
 
