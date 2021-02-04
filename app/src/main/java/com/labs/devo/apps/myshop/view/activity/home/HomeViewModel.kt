@@ -8,6 +8,7 @@ import com.labs.devo.apps.myshop.business.helper.UserManager
 import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.data.models.account.User
 import com.labs.devo.apps.myshop.util.AppData
+import com.labs.devo.apps.myshop.util.printLogD
 import com.labs.devo.apps.myshop.view.util.BaseViewModel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -28,7 +29,6 @@ class HomeViewModel @ViewModelInject constructor(
                 channel.send(HomeViewModelEvent.UserNotFound)
                 return@collect
             }
-
             UserManager.initUser(user)
             if (user.loggedInDeviceId != AppData.deviceId) {
                 channel.send(HomeViewModelEvent.LogoutUser)

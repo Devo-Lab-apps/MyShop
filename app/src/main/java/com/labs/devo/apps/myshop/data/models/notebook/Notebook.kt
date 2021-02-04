@@ -12,5 +12,7 @@ data class Notebook(
 
     val createdAt: Long = System.currentTimeMillis(),
 
-    val modifiedAt: Long = System.currentTimeMillis()
+    val modifiedAt: Long = System.currentTimeMillis(),
+
+    val pages: List<String> = listOf()
 ): Parcelable

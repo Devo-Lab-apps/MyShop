@@ -26,7 +26,7 @@ class UserServiceFirestoreImpl : UserService {
                         val user = ds.toObject(User::class.java)
                         offer(user)
                     } else {
-                        cancel(message = "Error fetching data for user with email: $email")
+                        offer(null)
                     }
                 }
             awaitClose {

@@ -27,7 +27,8 @@ class NotebookMapper: EntityMapper<EntityNotebook, Notebook> {
             entity.notebookId,
             entity.notebookName,
             entity.createdAt,
-            entity.modifiedAt
+            entity.modifiedAt,
+            entity.pages
         )
     }
 
@@ -36,7 +37,8 @@ class NotebookMapper: EntityMapper<EntityNotebook, Notebook> {
             model.notebookId,
             model.notebookName,
             model.createdAt,
-            model.modifiedAt
+            model.modifiedAt,
+            model.pages
         )
     }
 

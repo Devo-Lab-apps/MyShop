@@ -62,24 +62,32 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     HomeViewModel.HomeViewModelEvent.LogoutUser -> {
                         printLogD(TAG, "Logging out dut to some reason")
                         auth.signOut()
-                        Toast.makeText(this@HomeActivity, "You've been logged out of all devices.", Toast.LENGTH_LONG).show()
+                        showToast(
+                            "You've been logged out of all devices."
+                        )
                         val intent = Intent(this@HomeActivity, AuthenticationActivity::class.java)
-                        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+                        intent.flags =
+                            Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
                         startActivity(intent)
                         finish()
                     }
                     HomeViewModel.HomeViewModelEvent.UserNotFound -> {
-                        printLogD("User not found. Logging out.")
-                        Toast.makeText(this@HomeActivity, "Someone deleted the user. Please retry later.", Toast.LENGTH_LONG).show()
+                        printLogD(TAG, "User not found. Logging out.")
+                        showToast("Someone deleted the user. Please retry later.")
                         auth.signOut()
                         val intent = Intent(this@HomeActivity, AuthenticationActivity::class.java)
-                        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+                        intent.flags =
+                            Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
                         startActivity(intent)
                         finish()
                     }
                 }
             }
         }
+    }
+
+    private fun showToast(s: String) {
+        Toast.makeText(this, s, Toast.LENGTH_LONG).show()
     }
 
     /**
@@ -102,7 +110,7 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.accounts_nav -> openNotebookActivity()
+            R.id.notebooks_nav -> openNotebookActivity()
             R.id.logout_user -> logoutUser()
         }
         return true

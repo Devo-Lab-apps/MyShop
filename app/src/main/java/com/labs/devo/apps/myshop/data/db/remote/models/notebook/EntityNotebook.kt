@@ -7,5 +7,7 @@ data class EntityNotebook(
 
     val createdAt: Long = System.currentTimeMillis(),
 
-    val modifiedAt: Long = System.currentTimeMillis()
+    val modifiedAt: Long = System.currentTimeMillis(),
+
+    val pages: List<String> = listOf()
 )
