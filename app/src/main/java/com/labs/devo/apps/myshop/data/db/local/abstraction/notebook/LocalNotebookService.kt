@@ -1,12 +1,12 @@
-package com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook
+package com.labs.devo.apps.myshop.data.db.local.abstraction.notebook
 
 import com.labs.devo.apps.myshop.data.models.notebook.Notebook
-import com.labs.devo.apps.myshop.view.util.DataState
-import kotlinx.coroutines.flow.Flow
 
-interface RemoteNotebookService {
+interface LocalNotebookService {
 
-    suspend fun getNotebooks(): List<Notebook>
+    suspend fun getNotebooks(): List<Notebook>?
+
+    suspend fun getNotebook(notebookId: String): Notebook?
 
     suspend fun insertNotebooks(notebooks: List<Notebook>): List<Notebook>
 

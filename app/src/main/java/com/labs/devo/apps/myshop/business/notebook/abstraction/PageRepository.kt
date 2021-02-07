@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface PageRepository {
 
-    suspend fun getPages(notebookId: String): Flow<List<Page>?>
+    suspend fun getPages(notebookId: String): Flow<DataState<List<Page>>>
 
     suspend fun insertPages(pages: List<Page>): DataState<List<Page>>
 
@@ -16,8 +16,8 @@ interface PageRepository {
 
     suspend fun updatePage(page: Page): DataState<Page>
 
-    suspend fun deletePage(pageId: String): DataState<String>
+    suspend fun deletePage(page: Page): DataState<Page>
 
-    suspend fun deletePages(pageIds: List<String>): DataState<String>
+    suspend fun deletePages(pages: List<Page>): DataState<List<Page>>
 
 }

@@ -18,12 +18,16 @@ class PageViewModel @ViewModelInject constructor(
     }
 
     fun getPages(notebookId: String) = viewModelScope.launch {
-        pageRepository.getPages(notebookId).collect { pages ->
-            if (pages == null) {
-                channel.send(PageEvent.GetPagesEvent(listOf()))
-                return@collect
+        pageRepository.getPages(notebookId).collect { dataState ->
+            dataState.data?.let {
+                channel.send(
+                    PageEvent.GetPagesEvent(
+                        it.getContentIfNotHandled() ?: listOf()
+                    )
+                )
             }
-            channel.send(PageEvent.GetPagesEvent(pages))
+                ?: channel.send(PageEvent.ShowInvalidInputMessage(dataState.message?.getContentIfNotHandled()))
+
         }
     }
 
@@ -32,5 +36,7 @@ class PageViewModel @ViewModelInject constructor(
         object NavigateToNotebookFragment : PageEvent()
 
         data class GetPagesEvent(val pages: List<Page>) : PageEvent()
+
+        data class ShowInvalidInputMessage(val msg: String?) : PageEvent()
     }
 }

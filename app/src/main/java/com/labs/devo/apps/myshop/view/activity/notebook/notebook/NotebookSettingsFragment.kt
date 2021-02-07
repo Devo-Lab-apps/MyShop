@@ -55,7 +55,7 @@ class NotebookSettingsFragment : Fragment(R.layout.notebook_settings_fragment) {
 
             deleteNotebookBtn.setOnClickListener {
                 dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
-                viewModel.deleteNotebook(notebook.notebookId)
+                viewModel.deleteNotebook(notebook)
             }
         }
 

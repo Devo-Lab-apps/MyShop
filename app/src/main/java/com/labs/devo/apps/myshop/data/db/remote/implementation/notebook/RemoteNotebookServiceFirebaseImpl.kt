@@ -1,163 +1,130 @@
 package com.labs.devo.apps.myshop.data.db.remote.implementation.notebook
 
-import androidx.lifecycle.asLiveData
+import com.labs.devo.apps.myshop.business.helper.FirebaseConstants
 import com.labs.devo.apps.myshop.business.helper.FirebaseHelper
 import com.labs.devo.apps.myshop.business.helper.UserManager
 import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemoteNotebookService
-import com.labs.devo.apps.myshop.data.db.remote.mapper.notebook.NotebookMapper
-import com.labs.devo.apps.myshop.data.db.remote.models.notebook.EntityNotebook
+import com.labs.devo.apps.myshop.data.db.remote.mapper.notebook.RemoteNotebookMapper
+import com.labs.devo.apps.myshop.data.db.remote.models.notebook.RemoteEntityNotebook
 import com.labs.devo.apps.myshop.data.models.notebook.Notebook
+import com.labs.devo.apps.myshop.util.exceptions.NotebookLimitExceededException
+import com.labs.devo.apps.myshop.util.exceptions.NotebookNotFoundException
 import com.labs.devo.apps.myshop.util.exceptions.UserNotInitializedException
-import com.labs.devo.apps.myshop.view.util.DataState
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class RemoteNotebookServiceFirebaseImpl @Inject constructor(
-    private val mapper: NotebookMapper
+    private val mapperRemote: RemoteNotebookMapper
 ) : RemoteNotebookService {
 
     private val TAG = AppConstants.APP_PREFIX + javaClass.simpleName
 
-    override suspend fun getNotebooks(): Flow<List<Notebook>> {
-        return channelFlow {
-            val user = UserManager.user ?: throw UserNotInitializedException("User not initialized")
+    override suspend fun getNotebooks(): List<Notebook> {
+        val user = UserManager.user ?: throw UserNotInitializedException("User not initialized")
 
-            val querySnapshot = FirebaseHelper.getNotebookCollection(user.accountId)
-                .get().await()
+        val querySnapshot = FirebaseHelper.getNotebookCollection(user.accountId)
+            .get().await()
 
-            offer(querySnapshot.documents.map { doc ->
-                mapper.mapFromEntity(doc.toObject(EntityNotebook::class.java)!!)
-            })
-        }
+        return (querySnapshot.documents.map { doc ->
+            mapperRemote.mapFromEntity(doc.toObject(RemoteEntityNotebook::class.java)!!)
+        })
     }
 
-    override suspend fun insertNotebooks(notebooks: List<Notebook>): DataState<List<Notebook>> {
-        val existingNotebooks = getNotebooks().asLiveData().value
+    override suspend fun insertNotebooks(notebooks: List<Notebook>): List<Notebook> {
+        val existingNotebooks = getNotebooks()
 
-        if (existingNotebooks?.size == 3) {
-            return DataState.message("You can't have more than 3 notebooks per account.")
+        if (existingNotebooks.size == 3) {
+            throw NotebookLimitExceededException("You can't have more than 3 notebooks per account.")
         }
         val insertedNotebooks = mutableListOf<Notebook>()
-        return try {
-            FirebaseHelper.runWriteBatch {
-                notebooks.forEach { notebook ->
-                    insertedNotebooks.add(insertInDb(notebook))
-                }
+        FirebaseHelper.runWriteBatch {
+            notebooks.forEach { notebook ->
+                insertedNotebooks.add(insertInDb(notebook))
             }
-            DataState.data(data = insertedNotebooks)
-        } catch (ex: java.lang.Exception) {
-            DataState.message(
-                ex.message ?: "An unknown error occurred. Please try again later"
-            )
         }
+        return insertedNotebooks
     }
 
-    override suspend fun insertNotebook(notebook: Notebook): DataState<Notebook> {
-        val existingNotebooks = getNotebooks().first()
+    override suspend fun insertNotebook(notebook: Notebook): Notebook {
+        val existingNotebooks = getNotebooks()
 
         if (existingNotebooks.size >= 3) {
-            return DataState.message("You can't have more than 3 notebooks per account.")
+            throw NotebookLimitExceededException("You can't have more than 3 notebooks per account.")
         }
-        var updatedNotebook: Notebook? = null
-        return try {
-            FirebaseHelper.runWriteBatch {
-                updatedNotebook = insertInDb(notebook)
-            }
-            DataState.data(data = updatedNotebook)
-        } catch (ex: java.lang.Exception) {
-            DataState.message(
-                ex.message ?: "An unknown error occurred. Please try again later"
-            )
+        var insertedNotebook = notebook.copy()
+        FirebaseHelper.runWriteBatch {
+            insertedNotebook = insertInDb(notebook)
         }
+        return insertedNotebook
     }
 
-    override suspend fun updateNotebooks(updatedNotebooks: List<Notebook>): DataState<List<Notebook>> {
-        val updatedData = mutableListOf<Notebook>()
+    override suspend fun updateNotebooks(notebooks: List<Notebook>): List<Notebook> {
+        val updatedNotebooks = mutableListOf<Notebook>()
         val user = UserManager.user ?: throw UserNotInitializedException("User not initialized")
-        updatedNotebooks.forEach { notebook ->
+
+        FirebaseHelper.runUpdateBatch {
+            updatedNotebooks.forEach { notebook ->
+                val existing =
+                    FirebaseHelper.getNotebookReference(user.accountId, notebook.notebookId)
+                        .get().result
+                if (existing?.exists() == false) {
+                    throw NotebookNotFoundException("The notebook is not present and maybe deleted by another user.")
+                }
+            }
+            updatedNotebooks.forEach { notebook ->
+                updatedNotebooks.add(updateInDb(notebook))
+            }
+        }
+        return updatedNotebooks
+    }
+
+    override suspend fun updateNotebook(notebook: Notebook): Notebook {
+        val user = UserManager.user ?: throw UserNotInitializedException("User not initialized")
+        var updatedNotebook = notebook.copy()
+        FirebaseHelper.runUpdateBatch {
             val existing =
                 FirebaseHelper.getNotebookReference(user.accountId, notebook.notebookId)
-                    .get().await()
-            if (!existing?.exists()!!) {
-                return DataState.message("The notebook is not present and is deleted by another user.")
+                    .get().result
+            if (existing?.exists() == false) {
+                throw NotebookNotFoundException("The notebook is not present and maybe deleted by another user.")
             }
+            updatedNotebook = updateInDb(notebook)
         }
-        return try {
-            FirebaseHelper.runUpdateBatch {
-                updatedNotebooks.forEach { notebook ->
-                    updatedData.add(updateInDb(notebook))
-                }
-            }
-            DataState.data(updatedData)
-        } catch (ex: java.lang.Exception) {
-            DataState.message(
-                ex.message ?: "An unknown error occurred. Please try again later"
-            )
-        }
+        return updatedNotebook
     }
 
-    override suspend fun updateNotebook(notebook: Notebook): DataState<Notebook> {
-        return try {
-            val user = UserManager.user ?: throw UserNotInitializedException("User not initialized")
+    override suspend fun deleteNotebook(notebook: Notebook) {
+        val notebookId = notebook.notebookId
+        val user = UserManager.user ?: throw UserNotInitializedException("User not initialized")
+        FirebaseHelper.runUpdateBatch {
             val existing =
-                FirebaseHelper.getNotebookReference(user.accountId, notebook.notebookId).get()
-                    .await()
-            if (!existing.exists()) {
-                return DataState.message("The notebook is not present and maybe deleted by another user.")
-            }
-            DataState.data(updateInDb(notebook))
-        } catch (ex: java.lang.Exception) {
-            DataState.message(
-                ex.message ?: "An unknown error occurred. Please try again later"
-            )
-        }
-    }
-
-    override suspend fun deleteNotebook(notebookId: String): DataState<String> {
-        return try {
-            val user = UserManager.user ?: throw UserNotInitializedException("User not initialized")
-            val existing =
-                FirebaseHelper.getNotebookReference(user.accountId, notebookId).get().await()
-            if (!existing.exists()) {
-                return DataState.data("The notebook is already deleted by another user.")
+                FirebaseHelper.getNotebookReference(user.accountId, notebookId).get().result
+            if (existing?.exists() == false) {
+                throw NotebookNotFoundException("The notebook is not present and maybe deleted by another user.")
             }
             deleteFromDb(notebookId)
-            DataState.data("Notebook deleted.")
-        } catch (ex: java.lang.Exception) {
-            DataState.message(
-                ex.message ?: "An unknown error occurred. Please try again later"
-            )
         }
     }
 
-    override suspend fun deleteNotebooks(notebookIds: List<String>): DataState<String> {
-        try {
-            val user = UserManager.user ?: throw UserNotInitializedException("User not initialized")
+    override suspend fun deleteNotebooks(notebooks: List<Notebook>) {
+        val user = UserManager.user ?: throw UserNotInitializedException("User not initialized")
+        val notebookIds = notebooks.map { it.notebookId }
+        FirebaseHelper.runWriteBatch {
             notebookIds.forEach { notebookId ->
                 val existing =
-                    FirebaseHelper.getNotebookReference(user.accountId, notebookId).get().await()
-                if (!existing.exists()) {
-                    return DataState.data("The notebook is already deleted by another user.")
+                    FirebaseHelper.getNotebookReference(user.accountId, notebookId).get().result
+                if (false == existing?.exists()) {
+                    throw NotebookNotFoundException("The notebook is not present and maybe deleted by another user.")
                 }
             }
-            FirebaseHelper.runWriteBatch {
-                notebookIds.forEach { notebookId -> deleteFromDb(notebookId) }
-            }
-            return DataState.message("Notebooks deleted.")
-        } catch (ex: java.lang.Exception) {
-            return DataState.message(
-                ex.message ?: "An unknown error occurred. Please try again later"
-            )
+            notebookIds.forEach { notebookId -> deleteFromDb(notebookId) }
         }
 
     }
 
     private fun checkIfForeign(notebook: Notebook) {
-        if (notebook.notebookName == "Foreign" || notebook.notebookId == "foreign") {
+        if (notebook.notebookName == FirebaseConstants.foreignNotebookName || notebook.notebookId == FirebaseConstants.foreignNotebookKey) {
             throw java.lang.Exception("You can't perform any operation on foreign notebook")
         }
     }
@@ -173,12 +140,14 @@ class RemoteNotebookServiceFirebaseImpl @Inject constructor(
         checkIfForeign(notebook)
         val user = UserManager.user ?: throw UserNotInitializedException("User not initialized")
         val notebookId = FirebaseHelper.getNotebookReference(user.accountId).id
-        val data = mapper.mapToEntity(notebook.copy(
-            notebookId = notebookId
-        ))
+        val data = mapperRemote.mapToEntity(
+            notebook.copy(
+                notebookId = notebookId
+            )
+        )
         FirebaseHelper.getNotebookReference(user.accountId, notebookId)
             .set(data)
-        return mapper.mapFromEntity(data)
+        return mapperRemote.mapFromEntity(data)
     }
 
 
@@ -188,14 +157,14 @@ class RemoteNotebookServiceFirebaseImpl @Inject constructor(
         if (notebook.notebookId.isBlank()) {
             throw java.lang.Exception("Invalid notebook id passed.")
         }
-        val data = mapper.mapToEntity(
+        val data = mapperRemote.mapToEntity(
             notebook.copy(
                 modifiedAt = System.currentTimeMillis()
             )
         )
         FirebaseHelper.getNotebookReference(user.accountId, data.notebookId)
             .set(data)
-        return mapper.mapFromEntity(data)
+        return mapperRemote.mapFromEntity(data)
     }
 
     private fun deleteFromDb(notebookId: String) {
