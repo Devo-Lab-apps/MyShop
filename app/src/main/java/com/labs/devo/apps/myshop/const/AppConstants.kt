@@ -4,6 +4,9 @@ package com.labs.devo.apps.myshop.const
  * App level constants.
  */
 object AppConstants {
+
+    const val DATE_FORMAT: String = "dd-mm-yyyy"
+
     //splash time on app opening
     const val SPLASH_TIME: Int = 3000
 

@@ -16,6 +16,7 @@ class NotebookRepositoryImpl @Inject constructor(
 
 
     override suspend fun getNotebooks(): Flow<DataState<List<Notebook>>> = flow {
+        emit(DataState.loading<List<Notebook>>(true))
         try {
             var localNotebooks = localNotebookService.getNotebooks()
             if (localNotebooks.isNullOrEmpty()) {

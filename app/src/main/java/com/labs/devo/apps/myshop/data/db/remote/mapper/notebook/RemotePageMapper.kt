@@ -24,6 +24,10 @@ class RemotePageMapper : EntityMapper<RemoteEntityPage, Page> {
 
     override fun mapFromEntity(remoteEntity: RemoteEntityPage): Page {
         return Page(
+            creatorAccountId = remoteEntity.creatorAccountId,
+            consumerAccountId = remoteEntity.consumerAccountId,
+            creatorNotebookId = remoteEntity.creatorNotebookId,
+            consumerNotebookId = remoteEntity.consumerNotebookId,
             pageId = remoteEntity.pageId,
             pageName = remoteEntity.pageName,
             createdAt = remoteEntity.createdAt,
@@ -33,6 +37,10 @@ class RemotePageMapper : EntityMapper<RemoteEntityPage, Page> {
 
     override fun mapToEntity(model: Page): RemoteEntityPage {
         return RemoteEntityPage(
+            creatorAccountId = model.creatorAccountId,
+            consumerAccountId = model.consumerAccountId,
+            creatorNotebookId = model.creatorNotebookId,
+            consumerNotebookId = model.consumerNotebookId,
             pageId = model.pageId,
             pageName = model.pageName,
             createdAt = model.createdAt,

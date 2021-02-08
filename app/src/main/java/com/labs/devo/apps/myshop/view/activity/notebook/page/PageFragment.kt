@@ -13,9 +13,7 @@ import com.labs.devo.apps.myshop.R
 import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.data.models.notebook.Page
 import com.labs.devo.apps.myshop.databinding.FragmentPageBinding
-import com.labs.devo.apps.myshop.util.printLogD
 import com.labs.devo.apps.myshop.view.adapter.Page.PageListAdapter
-import com.labs.devo.apps.myshop.view.util.DataState
 import com.labs.devo.apps.myshop.view.util.DataStateListener
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
@@ -50,7 +48,6 @@ class PageFragment : Fragment(R.layout.fragment_page) {
 
         pageListAdapter = PageListAdapter(object : PageListAdapter.OnPageClick {
             override fun onClick(page: Page) {
-                printLogD(TAG, page)
             }
         })
 
@@ -78,12 +75,9 @@ class PageFragment : Fragment(R.layout.fragment_page) {
                         showNotebookFragment()
                     }
                     is PageViewModel.PageEvent.GetPagesEvent -> {
+                        dataStateHandler.onDataStateChange(event.dataState)
                         val pages = event.pages
-                        if (pages.isEmpty()) {
-                            dataStateHandler.onDataStateChange(DataState.message<Nothing>("No notebook for the selected notebook"))
-                        }
-                        printLogD(TAG, pages)
-                        pageListAdapter.submitList(event.pages)
+                        pageListAdapter.submitList(pages)
                     }
                 }
             }

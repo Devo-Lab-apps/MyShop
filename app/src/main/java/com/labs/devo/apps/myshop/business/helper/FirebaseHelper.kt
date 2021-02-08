@@ -3,6 +3,7 @@ package com.labs.devo.apps.myshop.business.helper
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Transaction
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.account
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.notebook
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.page
@@ -78,9 +79,9 @@ object FirebaseHelper {
         }.await()
     }
 
-    suspend fun runUpdateBatch(f: () -> Unit) {
+    suspend fun runTransaction(f: (transaction: Transaction) -> Unit) {
         db.runTransaction {
-            f.invoke()
+            f.invoke(it)
         }.await()
     }
 

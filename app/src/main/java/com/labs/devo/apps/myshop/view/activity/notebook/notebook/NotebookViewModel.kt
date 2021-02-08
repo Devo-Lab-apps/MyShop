@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.labs.devo.apps.myshop.business.notebook.abstraction.NotebookRepository
 import com.labs.devo.apps.myshop.data.models.notebook.Notebook
 import com.labs.devo.apps.myshop.view.util.BaseViewModel
+import com.labs.devo.apps.myshop.view.util.DataState
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -18,7 +19,8 @@ class NotebookViewModel @ViewModelInject constructor(val notebookRepository: Not
                 dataState.data?.let {
                     channel.send(
                         NotebookEvent.GetNotebooks(
-                            it.getContentIfNotHandled() ?: listOf()
+                            it.getContentIfNotHandled() ?: listOf(),
+                            dataState
                         )
                     )
                 }
@@ -46,7 +48,10 @@ class NotebookViewModel @ViewModelInject constructor(val notebookRepository: Not
 
         data class ShowInvalidInputMessage(val msg: String?) : NotebookEvent()
 
-        data class GetNotebooks(val notebooks: List<Notebook>) : NotebookEvent()
+        data class GetNotebooks(
+            val notebooks: List<Notebook>,
+            val dataState: DataState<List<Notebook>>
+        ) : NotebookEvent()
 
         object NotebookInserted : NotebookEvent()
 
