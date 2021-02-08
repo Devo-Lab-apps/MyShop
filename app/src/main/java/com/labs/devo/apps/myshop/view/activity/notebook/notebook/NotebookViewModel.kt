@@ -36,13 +36,6 @@ class NotebookViewModel @ViewModelInject constructor(val notebookRepository: Not
         }
     }
 
-    fun insertNotebook(notebook: Notebook) = viewModelScope.launch {
-        val data = notebookRepository.insertNotebook(notebook)
-        data.data?.let {
-            channel.send(NotebookEvent.NotebookInserted)
-        }
-            ?: channel.send(NotebookEvent.ShowInvalidInputMessage(data.message?.getContentIfNotHandled()))
-    }
 
     sealed class NotebookEvent {
 
@@ -55,8 +48,5 @@ class NotebookViewModel @ViewModelInject constructor(val notebookRepository: Not
 
         object NotebookInserted : NotebookEvent()
 
-        object NotebookUpdated : NotebookEvent()
-
-        object NotebookDeleted : NotebookEvent()
     }
 }

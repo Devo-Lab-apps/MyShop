@@ -7,7 +7,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="24dp"
-        tools:context=".view.activity.notebook.notebook.AddNotebookFragment">
+        tools:context=".view.activity.notebook.notebook.AddEditNotebookFragment">
 
 
         <TextView
@@ -38,7 +38,7 @@
             app:layout_constraintTop_toBottomOf="@+id/add_notebook_tv" />
 
         <Button
-            android:id="@+id/add_notebook_btn"
+            android:id="@+id/add_edit_notebook_btn"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
