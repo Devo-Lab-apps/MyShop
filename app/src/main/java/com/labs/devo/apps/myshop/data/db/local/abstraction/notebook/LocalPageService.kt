@@ -1,8 +1,9 @@
-package com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook
+package com.labs.devo.apps.myshop.data.db.local.abstraction.notebook
 
 import com.labs.devo.apps.myshop.data.models.notebook.Page
 
-interface RemotePageService {
+interface LocalPageService {
+
 
     suspend fun getPages(notebookId: String): List<Page>?
 
@@ -17,4 +18,5 @@ interface RemotePageService {
     suspend fun deletePage(page: Page)
 
     suspend fun deletePages(pages: List<Page>)
+
 }

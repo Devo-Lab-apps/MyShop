@@ -1,6 +1,6 @@
 package com.labs.devo.apps.myshop.data.db.remote.models.notebook
 
-data class EntityNotebook(
+data class RemoteEntityNotebook(
     val notebookId: String = "",
 
     val notebookName: String = "",

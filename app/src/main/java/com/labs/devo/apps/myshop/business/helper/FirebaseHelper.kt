@@ -3,12 +3,21 @@ package com.labs.devo.apps.myshop.business.helper
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
+import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.account
+import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.notebook
+import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.page
+import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.user
 import kotlinx.coroutines.tasks.await
 
-val user = "user"
-val account = "account"
-val notebook = "notebook"
-val page = "page"
+
+object FirebaseConstants {
+    const val user = "user"
+    const val account = "account"
+    const val notebook = "notebook"
+    const val page = "page"
+    const val foreignNotebookName = "Foreign"
+    const val foreignNotebookKey = "foreign"
+}
 
 
 object FirebaseHelper {
@@ -74,6 +83,7 @@ object FirebaseHelper {
             f.invoke()
         }.await()
     }
+
 }
 
 

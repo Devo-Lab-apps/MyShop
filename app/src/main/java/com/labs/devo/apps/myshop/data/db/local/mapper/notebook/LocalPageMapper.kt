@@ -1,12 +1,12 @@
-package com.labs.devo.apps.myshop.data.db.remote.mapper.notebook
+package com.labs.devo.apps.myshop.data.db.local.mapper.notebook
 
 import com.labs.devo.apps.myshop.business.helper.EntityMapper
-import com.labs.devo.apps.myshop.data.db.remote.models.notebook.EntityPage
+import com.labs.devo.apps.myshop.data.db.local.models.notebook.LocalEntityPage
 import com.labs.devo.apps.myshop.data.models.notebook.Page
 
-class PageMapper : EntityMapper<EntityPage, Page> {
+class LocalPageMapper : EntityMapper<LocalEntityPage, Page> {
 
-    fun entityListToPageList(entities: List<EntityPage>): List<Page> {
+    fun entityListToPageList(entities: List<LocalEntityPage>): List<Page> {
         val list: ArrayList<Page> = ArrayList()
         for (entity in entities) {
             list.add(mapFromEntity(entity))
@@ -14,15 +14,15 @@ class PageMapper : EntityMapper<EntityPage, Page> {
         return list
     }
 
-    fun pageListToEntityList(pages: List<Page>): List<EntityPage> {
-        val entities: ArrayList<EntityPage> = ArrayList()
+    fun pageListToEntityList(pages: List<Page>): List<LocalEntityPage> {
+        val entities: ArrayList<LocalEntityPage> = ArrayList()
         for (page in pages) {
             entities.add(mapToEntity(page))
         }
         return entities
     }
 
-    override fun mapFromEntity(entity: EntityPage): Page {
+    override fun mapFromEntity(entity: LocalEntityPage): Page {
         return Page(
             pageId = entity.pageId,
             pageName = entity.pageName,
@@ -31,13 +31,12 @@ class PageMapper : EntityMapper<EntityPage, Page> {
         )
     }
 
-    override fun mapToEntity(model: Page): EntityPage {
-        return EntityPage(
+    override fun mapToEntity(model: Page): LocalEntityPage {
+        return LocalEntityPage(
             pageId = model.pageId,
             pageName = model.pageName,
             createdAt = model.createdAt,
             modifiedAt = model.modifiedAt
         )
     }
-
 }

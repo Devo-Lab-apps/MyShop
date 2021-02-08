@@ -28,8 +28,8 @@ class NotebookSettingsViewModel
             ?: channel.send(NotebookSettingsEvent.ShowInvalidInputMessage(data.message?.getContentIfNotHandled()))
     }
 
-    fun deleteNotebook(notebookId: String) = viewModelScope.launch {
-        val data = notebookRepository.deleteNotebook(notebookId)
+    fun deleteNotebook(notebook: Notebook) = viewModelScope.launch {
+        val data = notebookRepository.deleteNotebook(notebook)
         data.data?.let {
             channel.send(NotebookSettingsEvent.NotebookDeleted("Notebook is deleted"))
         }

@@ -14,8 +14,16 @@ class NotebookViewModel @ViewModelInject constructor(val notebookRepository: Not
 
     fun getNotebooks() = viewModelScope.launch {
         try {
-            notebookRepository.getNotebooks().collect { notebooks ->
-                channel.send(NotebookEvent.GetNotebooks(notebooks))
+            notebookRepository.getNotebooks().collect { dataState ->
+                dataState.data?.let {
+                    channel.send(
+                        NotebookEvent.GetNotebooks(
+                            it.getContentIfNotHandled() ?: listOf()
+                        )
+                    )
+                }
+                    ?: channel.send(NotebookEvent.ShowInvalidInputMessage(dataState.message?.getContentIfNotHandled()))
+
             }
         } catch (ex: Exception) {
             channel.send(

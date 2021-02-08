@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface NotebookRepository {
 
-    suspend fun getNotebooks(): Flow<List<Notebook>>
+    suspend fun getNotebooks(): Flow<DataState<List<Notebook>>>
 
     suspend fun insertNotebooks(notebooks: List<Notebook>): DataState<List<Notebook>>
 
@@ -16,8 +16,8 @@ interface NotebookRepository {
 
     suspend fun updateNotebook(notebook: Notebook): DataState<Notebook>
 
-    suspend fun deleteNotebook(notebookId: String): DataState<String>
+    suspend fun deleteNotebook(notebook: Notebook): DataState<Notebook>
 
-    suspend fun deleteNotebooks(notebookIds: List<String>): DataState<String>
+    suspend fun deleteNotebooks(notebooks: List<Notebook>): DataState<List<Notebook>>
 
 }

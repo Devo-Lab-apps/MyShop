@@ -1,6 +1,6 @@
 package com.labs.devo.apps.myshop.data.db.remote.models.notebook
 
-data class EntityPage(
+data class RemoteEntityPage(
     val creatorAccountId: String = "",
     val consumerAccountId: String = "",
     val creatorNotebookId: String = "",
