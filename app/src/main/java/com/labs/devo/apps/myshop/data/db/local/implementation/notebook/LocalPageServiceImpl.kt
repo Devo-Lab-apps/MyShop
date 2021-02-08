@@ -4,6 +4,7 @@ import com.labs.devo.apps.myshop.data.db.local.abstraction.notebook.LocalPageSer
 import com.labs.devo.apps.myshop.data.db.local.database.dao.PageDao
 import com.labs.devo.apps.myshop.data.db.local.mapper.notebook.LocalPageMapper
 import com.labs.devo.apps.myshop.data.models.notebook.Page
+import com.labs.devo.apps.myshop.view.util.AsyncHelper
 import javax.inject.Inject
 
 class LocalPageServiceImpl
@@ -13,35 +14,49 @@ class LocalPageServiceImpl
 ) : LocalPageService {
 
     override suspend fun getPages(notebookId: String): List<Page> {
-        return mapper.entityListToPageList(dao.getPages(notebookId))
+        return AsyncHelper.runAsync {
+            mapper.entityListToPageList(dao.getPages(notebookId))
+        }
     }
 
     override suspend fun insertPages(pages: List<Page>): List<Page> {
-        dao.insertPages(mapper.pageListToEntityList(pages))
-        return pages
+        return AsyncHelper.runAsync {
+            dao.insertPages(mapper.pageListToEntityList(pages))
+            pages
+        }
     }
 
     override suspend fun insertPage(page: Page): Page {
-        dao.insertPage(mapper.mapToEntity(page))
-        return page
+        return AsyncHelper.runAsync {
+            dao.insertPage(mapper.mapToEntity(page))
+            page
+        }
     }
 
     override suspend fun updatePages(pages: List<Page>): List<Page> {
-        dao.updatePages(mapper.pageListToEntityList(pages))
-        return pages
+        return AsyncHelper.runAsync {
+            dao.updatePages(mapper.pageListToEntityList(pages))
+            pages
+        }
     }
 
     override suspend fun updatePage(page: Page): Page {
-        dao.updatePage(mapper.mapToEntity(page))
-        return page
+        return AsyncHelper.runAsync {
+            dao.updatePage(mapper.mapToEntity(page))
+            page
+        }
     }
 
     override suspend fun deletePage(page: Page) {
-        dao.deletePage(mapper.mapToEntity(page))
+        return AsyncHelper.runAsync {
+            dao.deletePage(mapper.mapToEntity(page))
+        }
     }
 
     override suspend fun deletePages(pages: List<Page>) {
-        dao.deletePages(mapper.pageListToEntityList(pages))
+        return AsyncHelper.runAsync {
+            dao.deletePages(mapper.pageListToEntityList(pages))
+        }
     }
 
 }

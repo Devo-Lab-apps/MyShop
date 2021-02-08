@@ -4,6 +4,7 @@ import com.labs.devo.apps.myshop.data.db.local.abstraction.notebook.LocalNoteboo
 import com.labs.devo.apps.myshop.data.db.local.database.dao.NotebookDao
 import com.labs.devo.apps.myshop.data.db.local.mapper.notebook.LocalNotebookMapper
 import com.labs.devo.apps.myshop.data.models.notebook.Notebook
+import com.labs.devo.apps.myshop.view.util.AsyncHelper
 import javax.inject.Inject
 
 class LocalNotebookServiceImpl @Inject
@@ -14,39 +15,53 @@ constructor(
     LocalNotebookService {
 
     override suspend fun getNotebooks(): List<Notebook> {
-        return mapper.entityListToNotebookList(dao.getNotebooks())
+        return AsyncHelper.runAsync {
+            mapper.entityListToNotebookList(dao.getNotebooks())
+        }
     }
 
     override suspend fun getNotebook(notebookId: String): Notebook {
-        return mapper.mapFromEntity(dao.getNotebook(notebookId))
+        return AsyncHelper.runAsync { mapper.mapFromEntity(dao.getNotebook(notebookId)) }
     }
 
     override suspend fun insertNotebooks(notebooks: List<Notebook>): List<Notebook> {
-        dao.insertNotebooks(mapper.notebookListToEntityList(notebooks))
-        return notebooks
+        return AsyncHelper.runAsync {
+            dao.insertNotebooks(mapper.notebookListToEntityList(notebooks))
+            notebooks
+        }
     }
 
     override suspend fun insertNotebook(notebook: Notebook): Notebook {
-        dao.insertNotebook(mapper.mapToEntity(notebook))
-        return notebook
+        return AsyncHelper.runAsync {
+            dao.insertNotebook(mapper.mapToEntity(notebook))
+            notebook
+        }
     }
 
     override suspend fun updateNotebooks(notebooks: List<Notebook>): List<Notebook> {
-        dao.updateNotebooks(mapper.notebookListToEntityList(notebooks))
-        return notebooks
+        return AsyncHelper.runAsync {
+            dao.updateNotebooks(mapper.notebookListToEntityList(notebooks))
+            notebooks
+        }
     }
 
     override suspend fun updateNotebook(notebook: Notebook): Notebook {
-        dao.updateNotebook(mapper.mapToEntity(notebook))
-        return notebook
+        return AsyncHelper.runAsync {
+            dao.updateNotebook(mapper.mapToEntity(notebook))
+            notebook
+        }
     }
 
     override suspend fun deleteNotebook(notebook: Notebook) {
-        dao.deleteNotebook(mapper.mapToEntity(notebook))
+        return AsyncHelper.runAsync {
+            dao.deleteNotebook(mapper.mapToEntity(notebook))
+        }
     }
 
     override suspend fun deleteNotebooks(notebooks: List<Notebook>) {
-        dao.deleteNotebooks(mapper.notebookListToEntityList(notebooks))
+        return AsyncHelper.runAsync {
+            dao.deleteNotebooks(mapper.notebookListToEntityList(notebooks))
+        }
     }
 
 }

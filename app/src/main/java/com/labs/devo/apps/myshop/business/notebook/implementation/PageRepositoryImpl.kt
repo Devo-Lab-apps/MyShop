@@ -19,10 +19,13 @@ class PageRepositoryImpl @Inject constructor(
         emit(DataState.loading<List<Page>>(true))
         try {
             var localPages = localPageService.getPages(notebookId)
-            if (localPages?.isEmpty() == true) {
+            if (localPages.isNullOrEmpty()) {
                 val remotePages = remotePageService.getPages(notebookId)
-                localPages = remotePages
+                if (remotePages.isNullOrEmpty()) {
+                    throw java.lang.Exception("No pages for the selected notebook")
+                }
 
+                localPages = localPageService.insertPages(remotePages)
             }
             emit(DataState.data(localPages))
         } catch (ex: Exception) {

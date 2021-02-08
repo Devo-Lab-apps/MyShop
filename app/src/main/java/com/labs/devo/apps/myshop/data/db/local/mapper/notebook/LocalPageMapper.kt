@@ -24,6 +24,10 @@ class LocalPageMapper : EntityMapper<LocalEntityPage, Page> {
 
     override fun mapFromEntity(entity: LocalEntityPage): Page {
         return Page(
+            creatorAccountId = entity.creatorAccountId,
+            consumerAccountId = entity.consumerAccountId,
+            creatorNotebookId = entity.creatorNotebookId,
+            consumerNotebookId = entity.consumerNotebookId,
             pageId = entity.pageId,
             pageName = entity.pageName,
             createdAt = entity.createdAt,
@@ -33,6 +37,10 @@ class LocalPageMapper : EntityMapper<LocalEntityPage, Page> {
 
     override fun mapToEntity(model: Page): LocalEntityPage {
         return LocalEntityPage(
+            creatorAccountId = model.creatorAccountId,
+            consumerAccountId = model.consumerAccountId,
+            creatorNotebookId = model.creatorNotebookId,
+            consumerNotebookId = model.consumerNotebookId,
             pageId = model.pageId,
             pageName = model.pageName,
             createdAt = model.createdAt,

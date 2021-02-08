@@ -84,11 +84,7 @@ class NotebookFragment : DialogFragment(R.layout.fragment_notebook) {
                 when (event) {
                     is NotebookViewModel.NotebookEvent.GetNotebooks -> {
                         val notebooks = event.notebooks
-                        if (notebooks.isEmpty()) {
-                            dataStateHandler.onDataStateChange(DataState.message<Nothing>("No notebooks present. Create one"))
-                        } else {
-                            dataStateHandler.onDataStateChange(DataState.loading<Nothing>(false))
-                        }
+                        dataStateHandler.onDataStateChange(event.dataState)
                         notebookAdapter.submitList(notebooks.toMutableList())
                     }
                     is NotebookViewModel.NotebookEvent.ShowInvalidInputMessage -> {

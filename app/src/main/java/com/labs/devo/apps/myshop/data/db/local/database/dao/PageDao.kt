@@ -14,7 +14,7 @@ interface PageDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPage(page: LocalEntityPage)
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPages(pages: List<LocalEntityPage>)
 
     @Update
