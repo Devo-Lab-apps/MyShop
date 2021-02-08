@@ -16,19 +16,27 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 
 @AndroidEntryPoint
-class AddNotebookFragment : Fragment(R.layout.add_notebook_fragment) {
+class AddEditNotebookFragment : Fragment(R.layout.add_notebook_fragment) {
 
     private lateinit var binding: AddNotebookFragmentBinding
 
-    private val viewModel: AddNotebookViewModel by viewModels()
+    private val viewModel: AddEditNotebookViewModel by viewModels()
 
     private lateinit var dataStateHandler: DataStateListener
+
+    private lateinit var operation: String
+
+    private var notebook: Notebook? = null
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = AddNotebookFragmentBinding.bind(view)
 
+        arguments?.apply {
+            notebook = getParcelable("notebook")
+            operation = getString(NotebookFragment.NotebookConstants.OPERATION).toString()
+        }
         initView()
 
         observeEvents()
@@ -37,13 +45,25 @@ class AddNotebookFragment : Fragment(R.layout.add_notebook_fragment) {
 
     private fun initView() {
         binding.apply {
-            addNotebookBtn.setOnClickListener {
-                val notebookName = notebookName.text.toString()
-                val notebook = Notebook(
-                    notebookName = notebookName
-                )
-                dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
-                viewModel.addNotebook(notebook)
+            addEditNotebookBtn.setOnClickListener {
+                addEditNotebookBtn.text = "Add Notebook"
+                if (operation == NotebookFragment.NotebookConstants.ADD_NOTEBOOK_OPERATION) {
+                    val notebookName = notebookName.text.toString()
+                    val notebook = Notebook(
+                        notebookName = notebookName
+                    )
+                    dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
+                    viewModel.addNotebook(notebook)
+                } else {
+                    addEditNotebookBtn.text = "Update Notebook"
+                    notebookName.setText(notebook!!.notebookName)
+                    val notebookName = notebookName.text.toString()
+                    val newNotebook = notebook!!.copy(
+                        notebookName = notebookName,
+                        modifiedAt = System.currentTimeMillis()
+                    )
+                    viewModel.updateNotebook(notebook!!, newNotebook)
+                }
             }
         }
     }
@@ -53,16 +73,24 @@ class AddNotebookFragment : Fragment(R.layout.add_notebook_fragment) {
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             viewModel.channelFlow.collect { event ->
                 when (event) {
-                    is AddNotebookViewModel.AddNotebookEvent.NotebookInserted -> {
+                    is AddEditNotebookViewModel.AddEditNotebookEvent.NotebookInserted -> {
                         dataStateHandler.onDataStateChange(DataState.message<Nothing>(event.msg))
                         findNavController().navigateUp()
                     }
-                    is AddNotebookViewModel.AddNotebookEvent.ShowInvalidInputMessage -> {
+                    is AddEditNotebookViewModel.AddEditNotebookEvent.ShowInvalidInputMessage -> {
                         if (event.msg != null) {
                             dataStateHandler.onDataStateChange(DataState.message<Nothing>(event.msg))
                         } else {
                             dataStateHandler.onDataStateChange(DataState.loading<Nothing>(false))
                         }
+                    }
+                    is AddEditNotebookViewModel.AddEditNotebookEvent.NotebookUpdated -> {
+                        dataStateHandler.onDataStateChange(DataState.message<String>(event.msg))
+                        findNavController().navigateUp()
+                    }
+                    is AddEditNotebookViewModel.AddEditNotebookEvent.NotebookDeleted -> {
+                        dataStateHandler.onDataStateChange(DataState.message<String>(event.msg))
+                        findNavController().navigateUp()
                     }
                 }
             }

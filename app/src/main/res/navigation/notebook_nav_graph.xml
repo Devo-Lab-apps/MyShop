@@ -11,11 +11,8 @@
         android:label="NotebookFragment"
         tools:layout="@layout/fragment_notebook">
         <action
-            android:id="@+id/action_notebookFragment_to_notebookSettings"
-            app:destination="@id/notebookSettings" />
-        <action
             android:id="@+id/action_notebookFragment_to_addNotebookFragment"
-            app:destination="@id/addNotebookFragment" />
+            app:destination="@id/addEditNotebookFragment" />
     </fragment>
     <fragment
         android:id="@+id/pageFragment"
@@ -27,13 +24,8 @@
             app:destination="@id/notebookFragment" />
     </fragment>
     <fragment
-        android:id="@+id/notebookSettings"
-        android:name="com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookSettingsFragment"
-        android:label="NotebookSettings"
-        tools:layout="@layout/notebook_settings_fragment"/>
-    <fragment
-        android:id="@+id/addNotebookFragment"
-        android:name="com.labs.devo.apps.myshop.view.activity.notebook.notebook.AddNotebookFragment"
+        android:id="@+id/addEditNotebookFragment"
+        android:name="com.labs.devo.apps.myshop.view.activity.notebook.notebook.AddEditNotebookFragment"
         android:label="AddNotebookFragment"
         tools:layout="@layout/add_notebook_fragment"/>
 </navigation>

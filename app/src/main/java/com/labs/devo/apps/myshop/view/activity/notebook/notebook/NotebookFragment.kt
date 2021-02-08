@@ -13,6 +13,9 @@ import com.labs.devo.apps.myshop.R
 import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.data.models.notebook.Notebook
 import com.labs.devo.apps.myshop.databinding.FragmentNotebookBinding
+import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment.NotebookConstants.ADD_NOTEBOOK_OPERATION
+import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment.NotebookConstants.EDIT_NOTEBOOK_OPERATION
+import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment.NotebookConstants.OPERATION
 import com.labs.devo.apps.myshop.view.adapter.notebook.NotebookListAdapter
 import com.labs.devo.apps.myshop.view.util.DataState
 import com.labs.devo.apps.myshop.view.util.DataStateListener
@@ -52,8 +55,11 @@ class NotebookFragment : DialogFragment(R.layout.fragment_notebook) {
                     dataStateHandler.onDataStateChange(DataState.message<Nothing>("You can't edit foreign transactions."))
                     return
                 }
-                val args = bundleOf("notebook" to notebook)
-                findNavController().navigate(R.id.notebookSettings, args)
+                val args = bundleOf(
+                    "notebook" to notebook,
+                    OPERATION to EDIT_NOTEBOOK_OPERATION
+                )
+                findNavController().navigate(R.id.addEditNotebookFragment, args)
             }
         })
 
@@ -66,8 +72,11 @@ class NotebookFragment : DialogFragment(R.layout.fragment_notebook) {
                 setHasFixedSize(true)
             }
 
-            addNotebookBtn.setOnClickListener {
-                findNavController().navigate(R.id.addNotebookFragment)
+            addEditNotebookBtn.setOnClickListener {
+                val args = bundleOf(
+                    OPERATION to ADD_NOTEBOOK_OPERATION
+                )
+                findNavController().navigate(R.id.addEditNotebookFragment, args)
             }
 
         }
@@ -105,6 +114,13 @@ class NotebookFragment : DialogFragment(R.layout.fragment_notebook) {
         } catch (e: ClassCastException) {
             println("$context must implement DataStateListener")
         }
+
+    }
+
+    object NotebookConstants {
+        const val OPERATION = "operation"
+        const val ADD_NOTEBOOK_OPERATION = "add_notebook"
+        const val EDIT_NOTEBOOK_OPERATION = "edit_notebook"
 
     }
 
