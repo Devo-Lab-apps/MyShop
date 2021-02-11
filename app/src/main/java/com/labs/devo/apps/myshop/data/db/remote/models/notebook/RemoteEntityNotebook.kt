@@ -9,5 +9,5 @@ data class RemoteEntityNotebook(
 
     val modifiedAt: Long = System.currentTimeMillis(),
 
-    val pages: List<String> = listOf()
+    val pages: MutableList<String> = mutableListOf()
 )

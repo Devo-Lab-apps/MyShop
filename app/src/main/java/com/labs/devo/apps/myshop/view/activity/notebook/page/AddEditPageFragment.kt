@@ -1,4 +1,4 @@
-package com.labs.devo.apps.myshop.view.activity.notebook.notebook
+package com.labs.devo.apps.myshop.view.activity.page.page
 
 import android.content.Context
 import android.os.Bundle
@@ -8,65 +8,77 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.labs.devo.apps.myshop.R
-import com.labs.devo.apps.myshop.data.models.notebook.Notebook
-import com.labs.devo.apps.myshop.databinding.AddNotebookFragmentBinding
-import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment.NotebookConstants.EDIT_NOTEBOOK_OPERATION
+import com.labs.devo.apps.myshop.business.helper.FirebaseConstants
+import com.labs.devo.apps.myshop.business.helper.UserManager
+import com.labs.devo.apps.myshop.data.models.notebook.Page
+import com.labs.devo.apps.myshop.databinding.AddEditPageFragmentBinding
+import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment.NotebookConstants.ADD_NOTEBOOK_OPERATION
+import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment.NotebookConstants.ADD_PAGE_OPERATION
+import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment.NotebookConstants.EDIT_PAGE_OPERATION
+import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment.NotebookConstants.OPERATION
+import com.labs.devo.apps.myshop.view.activity.notebook.page.AddEditPageViewModel
 import com.labs.devo.apps.myshop.view.util.DataState
 import com.labs.devo.apps.myshop.view.util.DataStateListener
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 
 @AndroidEntryPoint
-class AddEditNotebookFragment : Fragment(R.layout.add_notebook_fragment) {
+class AddEditPageFragment : Fragment(R.layout.add_edit_page_fragment) {
 
-    private lateinit var binding: AddNotebookFragmentBinding
 
-    private val viewModel: AddEditNotebookViewModel by viewModels()
+    private lateinit var binding: AddEditPageFragmentBinding
+
+    private val viewModel: AddEditPageViewModel by viewModels()
 
     private lateinit var dataStateHandler: DataStateListener
 
     private lateinit var operation: String
 
-    private var notebook: Notebook? = null
-
+    private var page: Page? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding = AddNotebookFragmentBinding.bind(view)
-
+        binding = AddEditPageFragmentBinding.bind(view)
         arguments?.apply {
-            notebook = getParcelable("notebook")
-            operation = getString(NotebookFragment.NotebookConstants.OPERATION).toString()
+            page = getParcelable("page")
+            operation = getString(OPERATION).toString()
         }
+
         initView()
 
         observeEvents()
     }
 
-
     private fun initView() {
         binding.apply {
-            addEditNotebookBtn.setOnClickListener {
-                if (operation == NotebookFragment.NotebookConstants.ADD_NOTEBOOK_OPERATION) {
-                    val notebookName = notebookName.text.toString()
-                    val notebook = Notebook(
-                        notebookName = notebookName
+            addEditPageBtn.setOnClickListener {
+                if (operation == ADD_PAGE_OPERATION) {
+                    val pageName = pageName.text.toString()
+                    val pageId = pageId.text.toString()
+                    val page = Page(
+                        creatorAccountId = UserManager.user!!.email,
+                        consumerAccountId = pageId,
+                        creatorNotebookId = "L4EnH4u6gfJ1JopyQ9rp",
+                        consumerNotebookId = FirebaseConstants.foreignNotebookKey,
+                        pageName = pageName
                     )
                     dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
-                    viewModel.addNotebook(notebook)
+                    viewModel.addPage(page)
                 } else {
                     dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
-                    val notebookName = notebookName.text.toString()
-                    val newNotebook = notebook!!.copy(
-                        notebookName = notebookName,
+                    val pageName = pageName.text.toString()
+                    val newPage = page!!.copy(
+                        pageName = pageName,
                         modifiedAt = System.currentTimeMillis()
                     )
-                    viewModel.updateNotebook(notebook!!, newNotebook)
+                    viewModel.updatePage(page!!, newPage)
                 }
             }
-            if (operation == EDIT_NOTEBOOK_OPERATION) {
-                addEditNotebookBtn.text = "Update Notebook"
-                notebookName.setText(notebook!!.notebookName)
+            if (operation == EDIT_PAGE_OPERATION) {
+                addEditPageBtn.text = "Update Page"
+                pageIdTv.visibility = View.GONE
+                pageId.visibility = View.GONE
+                pageName.setText(page!!.pageName)
             }
         }
     }
@@ -76,22 +88,22 @@ class AddEditNotebookFragment : Fragment(R.layout.add_notebook_fragment) {
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             viewModel.channelFlow.collect { event ->
                 when (event) {
-                    is AddEditNotebookViewModel.AddEditNotebookEvent.NotebookInserted -> {
+                    is AddEditPageViewModel.AddEditPageEvent.PageInserted -> {
                         dataStateHandler.onDataStateChange(DataState.message<Nothing>(event.msg))
                         findNavController().navigateUp()
                     }
-                    is AddEditNotebookViewModel.AddEditNotebookEvent.ShowInvalidInputMessage -> {
+                    is AddEditPageViewModel.AddEditPageEvent.ShowInvalidInputMessage -> {
                         if (event.msg != null) {
                             dataStateHandler.onDataStateChange(DataState.message<Nothing>(event.msg))
                         } else {
                             dataStateHandler.onDataStateChange(DataState.loading<Nothing>(false))
                         }
                     }
-                    is AddEditNotebookViewModel.AddEditNotebookEvent.NotebookUpdated -> {
+                    is AddEditPageViewModel.AddEditPageEvent.PageUpdated -> {
                         dataStateHandler.onDataStateChange(DataState.message<String>(event.msg))
                         findNavController().navigateUp()
                     }
-                    is AddEditNotebookViewModel.AddEditNotebookEvent.NotebookDeleted -> {
+                    is AddEditPageViewModel.AddEditPageEvent.PageDeleted -> {
                         dataStateHandler.onDataStateChange(DataState.message<String>(event.msg))
                         findNavController().navigateUp()
                     }
@@ -110,4 +122,5 @@ class AddEditNotebookFragment : Fragment(R.layout.add_notebook_fragment) {
         }
 
     }
+
 }

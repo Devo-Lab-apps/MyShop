@@ -1,5 +1,9 @@
 package com.labs.devo.apps.myshop.data.models.notebook
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
 data class Page(
     val creatorAccountId: String = "",
     val consumerAccountId: String = "",
@@ -10,4 +14,4 @@ data class Page(
 
     val createdAt: Long = System.currentTimeMillis(),
     val modifiedAt: Long = System.currentTimeMillis()
-)
+): Parcelable

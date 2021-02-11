@@ -39,9 +39,9 @@ class PageRepositoryImpl @Inject constructor(
 
     override suspend fun insertPages(pages: List<Page>): DataState<List<Page>> {
         return try {
-            val newPages = localPageService.insertPages(pages)
-            remotePageService.insertPages(newPages)
-            DataState.data(newPages)
+            val newPages = remotePageService.insertPages(pages)
+            val localPages = localPageService.insertPages(newPages)
+            DataState.data(localPages)
         } catch (ex: java.lang.Exception) {
             DataState.message(
                 ex.message ?: "An unknown error occurred. Please retry later."
@@ -51,9 +51,9 @@ class PageRepositoryImpl @Inject constructor(
 
     override suspend fun insertPage(page: Page): DataState<Page> {
         return try {
-            val newPage = localPageService.insertPage(page)
-            remotePageService.insertPage(newPage)
-            DataState.data(newPage)
+            val newPage = remotePageService.insertPage(page)
+            val localPage = localPageService.insertPage(newPage)
+            DataState.data(localPage)
         } catch (ex: java.lang.Exception) {
             DataState.message(
                 ex.message ?: "An unknown error occurred. Please retry later."
@@ -64,8 +64,8 @@ class PageRepositoryImpl @Inject constructor(
     override suspend fun updatePages(pages: List<Page>): DataState<List<Page>> {
         return try {
             val newPages = remotePageService.updatePages(pages)
-            localPageService.updatePages(newPages)
-            DataState.data(newPages)
+            val localPages = localPageService.updatePages(newPages)
+            DataState.data(localPages)
         } catch (ex: java.lang.Exception) {
             DataState.message(
                 ex.message ?: "An unknown error occurred. Please retry later."
@@ -76,8 +76,8 @@ class PageRepositoryImpl @Inject constructor(
     override suspend fun updatePage(page: Page): DataState<Page> {
         return try {
             val newPage = remotePageService.updatePage(page)
-            localPageService.updatePage(newPage)
-            DataState.data(newPage)
+            val localPages = localPageService.updatePage(newPage)
+            DataState.data(localPages)
         } catch (ex: java.lang.Exception) {
             DataState.message(
                 ex.message ?: "An unknown error occurred. Please retry later."

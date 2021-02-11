@@ -43,6 +43,7 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                 val pwd = loginPassword.text.toString()
                 //Disable to prevent repress
                 loginBtn.isEnabled = false
+                openSignupActivityBtn.isEnabled = false
 
                 viewModel.loginUser(LoginUserCredentials(emailId, pwd))
             }
@@ -100,6 +101,8 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                     }
                 }
                 binding.loginBtn.isEnabled = true
+                binding.openSignupActivityBtn.isEnabled = true
+
             }
         }
     }

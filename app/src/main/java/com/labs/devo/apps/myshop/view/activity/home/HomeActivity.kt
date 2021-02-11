@@ -60,11 +60,11 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             viewModel.channelFlow.collect { event ->
                 when (event) {
                     HomeViewModel.HomeViewModelEvent.LogoutUser -> {
-                        printLogD(TAG, "Logging out dut to some reason")
-                        auth.signOut()
+                        printLogD(TAG, "Logging out due to some reason")
                         showToast(
                             "You've been logged out of all devices."
                         )
+                        auth.signOut()
                         val intent = Intent(this@HomeActivity, AuthenticationActivity::class.java)
                         intent.flags =
                             Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK

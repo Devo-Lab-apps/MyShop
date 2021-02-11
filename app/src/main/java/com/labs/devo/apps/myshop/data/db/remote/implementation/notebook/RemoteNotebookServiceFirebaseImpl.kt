@@ -22,7 +22,7 @@ class RemoteNotebookServiceFirebaseImpl @Inject constructor(
     private val TAG = AppConstants.APP_PREFIX + javaClass.simpleName
 
     override suspend fun getNotebooks(): List<Notebook> {
-        val user = UserManager.user ?: throw UserNotInitializedException("User not initialized")
+        val user = UserManager.user ?: throw UserNotInitializedException()
 
         val querySnapshot = FirebaseHelper.getNotebookCollection(user.accountId)
             .get().await()
@@ -62,14 +62,14 @@ class RemoteNotebookServiceFirebaseImpl @Inject constructor(
 
     override suspend fun updateNotebooks(notebooks: List<Notebook>): List<Notebook> {
         val updatedNotebooks = mutableListOf<Notebook>()
-        val user = UserManager.user ?: throw UserNotInitializedException("User not initialized")
+        val user = UserManager.user ?: throw UserNotInitializedException()
 
         FirebaseHelper.runTransaction { transaction ->
             updatedNotebooks.forEach { notebook ->
                 val ref = FirebaseHelper.getNotebookReference(user.accountId, notebook.notebookId)
                 val existing = transaction.get(ref)
                 if (!existing.exists()) {
-                    throw NotebookNotFoundException("The notebook is not present and maybe deleted by another user.")
+                    throw NotebookNotFoundException()
                 }
             }
             updatedNotebooks.forEach { notebook ->
@@ -80,13 +80,13 @@ class RemoteNotebookServiceFirebaseImpl @Inject constructor(
     }
 
     override suspend fun updateNotebook(notebook: Notebook): Notebook {
-        val user = UserManager.user ?: throw UserNotInitializedException("User not initialized")
+        val user = UserManager.user ?: throw UserNotInitializedException()
         var updatedNotebook = notebook.copy()
         FirebaseHelper.runTransaction { transaction ->
             val ref = FirebaseHelper.getNotebookReference(user.accountId, notebook.notebookId)
             val existing = transaction.get(ref)
             if (!existing.exists()) {
-                throw NotebookNotFoundException("The notebook is not present and maybe deleted by another user.")
+                throw NotebookNotFoundException()
             }
             updatedNotebook = updateInDb(notebook, transaction)
         }
@@ -95,19 +95,19 @@ class RemoteNotebookServiceFirebaseImpl @Inject constructor(
 
     override suspend fun deleteNotebook(notebook: Notebook) {
         val notebookId = notebook.notebookId
-        val user = UserManager.user ?: throw UserNotInitializedException("User not initialized")
+        val user = UserManager.user ?: throw UserNotInitializedException()
         FirebaseHelper.runTransaction { transaction ->
             val ref = FirebaseHelper.getNotebookReference(user.accountId, notebookId)
             val existing = transaction.get(ref)
             if (!existing.exists()) {
-                throw NotebookNotFoundException("The notebook is not present and maybe deleted by another user.")
+                throw NotebookNotFoundException()
             }
             deleteFromDb(notebookId, transaction)
         }
     }
 
     override suspend fun deleteNotebooks(notebooks: List<Notebook>) {
-        val user = UserManager.user ?: throw UserNotInitializedException("User not initialized")
+        val user = UserManager.user ?: throw UserNotInitializedException()
         val notebookIds = notebooks.map { it.notebookId }
         FirebaseHelper.runTransaction { transaction ->
             notebookIds.forEach { notebookId ->
@@ -115,7 +115,7 @@ class RemoteNotebookServiceFirebaseImpl @Inject constructor(
                     FirebaseHelper.getNotebookReference(user.accountId, notebookId)
                 val existing = transaction.get(ref)
                 if (!existing.exists()) {
-                    throw NotebookNotFoundException("The notebook is not present and maybe deleted by another user.")
+                    throw NotebookNotFoundException()
                 }
             }
             notebookIds.forEach { notebookId -> deleteFromDb(notebookId, transaction) }
@@ -138,7 +138,7 @@ class RemoteNotebookServiceFirebaseImpl @Inject constructor(
 
     private fun insertInDb(notebook: Notebook): Notebook {
         checkIfForeign(notebook)
-        val user = UserManager.user ?: throw UserNotInitializedException("User not initialized")
+        val user = UserManager.user ?: throw UserNotInitializedException()
         val notebookId = FirebaseHelper.getNotebookReference(user.accountId).id
         val data = mapperRemote.mapToEntity(
             notebook.copy(
@@ -152,7 +152,7 @@ class RemoteNotebookServiceFirebaseImpl @Inject constructor(
 
     private fun updateInDb(notebook: Notebook, transaction: Transaction): Notebook {
         checkIfForeign(notebook)
-        val user = UserManager.user ?: throw UserNotInitializedException("User not initialized")
+        val user = UserManager.user ?: throw UserNotInitializedException()
         if (notebook.notebookId.isBlank()) {
             throw java.lang.Exception("Invalid notebook id passed.")
         }
