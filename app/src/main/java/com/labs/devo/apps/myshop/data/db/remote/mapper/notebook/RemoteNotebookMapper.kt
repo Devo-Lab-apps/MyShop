@@ -38,7 +38,7 @@ class RemoteNotebookMapper: EntityMapper<RemoteEntityNotebook, Notebook> {
             model.notebookName,
             model.createdAt,
             model.modifiedAt,
-            model.pages
+            model.pages.toMutableList()
         )
     }
 

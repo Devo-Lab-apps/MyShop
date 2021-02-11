@@ -46,9 +46,10 @@ object NotebookModule {
     @Singleton
     fun provideRemotePageService(
         remoteNotebookMapper: RemoteNotebookMapper,
-        remotePageMapper: RemotePageMapper
+        remotePageMapper: RemotePageMapper,
+        localNotebookService: LocalNotebookService
     ): RemotePageService =
-        RemotePageServiceFirebaseImpl(remoteNotebookMapper, remotePageMapper)
+        RemotePageServiceFirebaseImpl(remoteNotebookMapper, remotePageMapper, localNotebookService)
 
     @Provides
     @Singleton

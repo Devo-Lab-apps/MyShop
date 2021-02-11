@@ -26,6 +26,7 @@ class PageViewModel @ViewModelInject constructor(
         pageRepository.getPages(notebookId).collect { dataState ->
             printLogD(TAG, dataState)
             dataState.data?.let {
+
                 channel.send(
                     PageEvent.GetPagesEvent(
                         it.getContentIfNotHandled() ?: listOf(),

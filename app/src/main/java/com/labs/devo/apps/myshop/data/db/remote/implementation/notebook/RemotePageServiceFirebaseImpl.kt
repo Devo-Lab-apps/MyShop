@@ -4,20 +4,22 @@ import com.google.firebase.firestore.Transaction
 import com.labs.devo.apps.myshop.business.helper.FirebaseHelper
 import com.labs.devo.apps.myshop.business.helper.UserManager
 import com.labs.devo.apps.myshop.const.AppConstants
+import com.labs.devo.apps.myshop.data.db.local.abstraction.notebook.LocalNotebookService
 import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemotePageService
 import com.labs.devo.apps.myshop.data.db.remote.mapper.notebook.RemoteNotebookMapper
 import com.labs.devo.apps.myshop.data.db.remote.mapper.notebook.RemotePageMapper
 import com.labs.devo.apps.myshop.data.db.remote.models.notebook.RemoteEntityNotebook
 import com.labs.devo.apps.myshop.data.db.remote.models.notebook.RemoteEntityPage
 import com.labs.devo.apps.myshop.data.models.notebook.Page
-import com.labs.devo.apps.myshop.util.exceptions.PageNotFoundException
-import com.labs.devo.apps.myshop.util.exceptions.UserNotInitializedException
+import com.labs.devo.apps.myshop.util.exceptions.*
+import com.labs.devo.apps.myshop.view.util.AsyncHelper
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class RemotePageServiceFirebaseImpl @Inject constructor(
     private val remoteNotebookMapper: RemoteNotebookMapper,
-    private val remotePageMapper: RemotePageMapper
+    private val remotePageMapper: RemotePageMapper,
+    private val localNotebookService: LocalNotebookService
 ) : RemotePageService {
 
     private val TAG = AppConstants.APP_PREFIX + javaClass.simpleName
@@ -30,31 +32,34 @@ class RemotePageServiceFirebaseImpl @Inject constructor(
 
 
     override suspend fun insertPages(pages: List<Page>): List<Page> {
-        //TODO think of limit on pages
-//        val notebookId = pages.first { page -> true }.creatorNotebookId
-//        val existingPages = getPages(notebookId).asLiveData().value
-//
-//        if (existingPages?.size == 3) {
-//            return DataState.message("You can't have more than 3 pages per account.")
-//        }
+        if (pages.isEmpty()) {
+            throw NoPagesToCreateException()
+        }
         val insertedPages = mutableListOf<Page>()
-        FirebaseHelper.runWriteBatch {
-            pages.forEach { page ->
-                insertedPages.add(insertInDb(page))
+        val page1 = pages.first()
+        FirebaseHelper.runTransaction { transaction ->
+            val notebookEntity = getEntityNotebookFromTransaction(page1.creatorNotebookId, transaction)
+            if (notebookEntity.pages.size + pages.size > 50) {
+                throw PageLimitExceededException()
             }
+            pages.forEach { page ->
+                insertedPages.add(insertInDb(page, transaction))
+            }
+            val pageIds = pages.map { page -> page.pageId }
+            addPagesInNotebookEntity(notebookEntity, pageIds, transaction)
         }
         return insertedPages
     }
 
     override suspend fun insertPage(page: Page): Page {
-//        val existingPages = getPages(page.creatorNotebookId).first()
-//
-//        if (existingPages.size >= 3) {
-//            return DataState.message("You can't have more than 3 pages per account.")
-//        }
         var updatedPage: Page = page.copy()
-        FirebaseHelper.runWriteBatch {
-            updatedPage = insertInDb(page)
+        FirebaseHelper.runTransaction { transaction ->
+            val notebookEntity = getEntityNotebookFromTransaction(page.creatorNotebookId, transaction)
+            if (notebookEntity.pages.size >= 50) {
+                throw PageLimitExceededException()
+            }
+            updatedPage = insertInDb(page, transaction)
+            addPagesInNotebookEntity(notebookEntity, listOf(updatedPage.pageId), transaction)
         }
         return updatedPage
     }
@@ -68,7 +73,7 @@ class RemotePageServiceFirebaseImpl @Inject constructor(
                     FirebaseHelper.getPageReference(page.pageId)
                 val existing = transaction.get(ref)
                 if (!existing.exists()) {
-                    throw PageNotFoundException("The page is not present and maybe deleted by another user.")
+                    throw PageNotFoundException()
                 }
             }
             pages.forEach { page ->
@@ -85,7 +90,7 @@ class RemotePageServiceFirebaseImpl @Inject constructor(
                 FirebaseHelper.getPageReference(page.pageId)
             val existing = transaction.get(ref)
             if (!existing.exists()) {
-                throw PageNotFoundException("The page is not present and maybe deleted by another user.")
+                throw PageNotFoundException()
             }
             updatedPage = updateInDb(page, transaction)
         }
@@ -99,7 +104,7 @@ class RemotePageServiceFirebaseImpl @Inject constructor(
                 FirebaseHelper.getPageReference(pageId)
             val existing = transaction.get(ref)
             if (!existing.exists()) {
-                throw PageNotFoundException("The page is not present and maybe deleted by another user.")
+                throw PageNotFoundException()
             }
             deleteFromDb(pageId, transaction)
         }
@@ -113,29 +118,29 @@ class RemotePageServiceFirebaseImpl @Inject constructor(
                     FirebaseHelper.getPageReference(pageId)
                 val existing = transaction.get(ref)
                 if (!existing.exists()) {
-                    throw PageNotFoundException("The page is already deleted by another user.")
+                    throw PageNotFoundException()
                 }
             }
             pageIds.forEach { pageId -> deleteFromDb(pageId, transaction) }
         }
     }
 
-    private fun insertInDb(page: Page): Page {
-        val pageId = FirebaseHelper.getPageCollection().id
+    private fun insertInDb(page: Page, transaction: Transaction): Page {
+        val pageId = FirebaseHelper.getPageReference().id
         val data = remotePageMapper.mapToEntity(
             page.copy(
                 pageId = pageId
             )
         )
-        FirebaseHelper.getPageReference(pageId)
-            .set(data)
+        val pageRef = FirebaseHelper.getPageReference(pageId)
+        transaction.set(pageRef, data)
         return remotePageMapper.mapFromEntity(data)
     }
 
 
     private fun updateInDb(page: Page, transaction: Transaction): Page {
         if (page.pageId.isBlank()) {
-            throw PageNotFoundException("Invalid page id passed.")
+            throw PageNotFoundException()
         }
         val data = remotePageMapper.mapToEntity(
             page.copy(
@@ -149,14 +154,18 @@ class RemotePageServiceFirebaseImpl @Inject constructor(
     }
 
     private fun deleteFromDb(pageId: String, transaction: Transaction) {
+        //TODO remove from notebook list
         if (pageId.isBlank()) {
-            throw PageNotFoundException("Invalid page id passed.")
+            throw PageNotFoundException()
         }
         transaction.delete(FirebaseHelper.getPageReference(pageId))
     }
 
+    /**
+     * Get notebook entity from firebase with notebook id.
+     */
     private suspend fun getEntityNotebook(notebookId: String): RemoteEntityNotebook? {
-        val user = UserManager.user ?: throw UserNotInitializedException("User not initialized")
+        val user = UserManager.user ?: throw UserNotInitializedException()
 
         val documentSnapshot = FirebaseHelper.getNotebookReference(user.accountId, notebookId)
             .get().await()
@@ -165,15 +174,21 @@ class RemotePageServiceFirebaseImpl @Inject constructor(
     }
 
 
+    /**
+     * Get pages from notebook entity.
+     */
     private fun getNotebookPageIds(notebookRemoteEntity: RemoteEntityNotebook): List<String> {
         val notebook = remoteNotebookMapper.mapFromEntity(notebookRemoteEntity)
         return notebook.pages
     }
 
     /**
-     * This method will get the pages for a notebook in a batch of 10 pages.
+     * This method will get the pages for a notebook in a batch of 10 pages/request.
      */
     private suspend fun getPages(pageIds: List<String>): MutableList<Page> {
+        if (pageIds.isEmpty()) {
+            throw NoPagesForNotebookException()
+        }
         val pageIterations = pageIds.size / 10
         val pages = mutableListOf<Page>()
         FirebaseHelper.runTransaction {
@@ -196,5 +211,38 @@ class RemotePageServiceFirebaseImpl @Inject constructor(
             }
         }
         return pages
+    }
+
+    /**
+     * Add pages in notebook entity in firebase.
+     */
+    private fun addPagesInNotebookEntity(
+        notebookEntity: RemoteEntityNotebook,
+        pageIds: List<String>,
+        transaction: Transaction
+    ) {
+        val notebookId = notebookEntity.notebookId
+        val user = UserManager.user ?: throw UserNotInitializedException()
+        val notebookRef = FirebaseHelper.getNotebookReference(user.accountId, notebookId)
+        notebookEntity.pages.addAll(pageIds)
+        //run it in background because it is local
+        AsyncHelper.runAsyncInBackground {
+            localNotebookService.updateNotebook(remoteNotebookMapper.mapFromEntity(notebookEntity))
+        }
+        transaction.set(notebookRef, notebookEntity)
+    }
+
+    /**
+     * Get entity notebook from transaction obj for notebookId.
+     */
+    private fun getEntityNotebookFromTransaction(
+        notebookId: String,
+        transaction: Transaction
+    ): RemoteEntityNotebook {
+        val user = UserManager.user ?: throw UserNotInitializedException()
+        val notebookRef = FirebaseHelper.getNotebookReference(user.accountId, notebookId)
+        val documentSnapshot = transaction.get(notebookRef)
+        return documentSnapshot.toObject(RemoteEntityNotebook::class.java)
+            ?: throw NotebookNotFoundException()
     }
 }

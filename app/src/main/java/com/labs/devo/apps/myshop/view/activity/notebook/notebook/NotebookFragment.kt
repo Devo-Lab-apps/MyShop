@@ -49,6 +49,7 @@ class NotebookFragment : DialogFragment(R.layout.fragment_notebook) {
      * Init the view to be displayed.
      */
     private fun initView() {
+        dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
         notebookAdapter = NotebookListAdapter(object : NotebookListAdapter.OnNotebookClick {
             override fun onClick(notebook: Notebook) {
                 if (notebook.notebookId == "foreign" || notebook.notebookName == "Foreign") {
@@ -121,6 +122,8 @@ class NotebookFragment : DialogFragment(R.layout.fragment_notebook) {
         const val OPERATION = "operation"
         const val ADD_NOTEBOOK_OPERATION = "add_notebook"
         const val EDIT_NOTEBOOK_OPERATION = "edit_notebook"
+        const val ADD_PAGE_OPERATION = "add_page"
+        const val EDIT_PAGE_OPERATION = "edit_page"
 
     }
 
