@@ -105,4 +105,16 @@ class NotebookRepositoryImpl @Inject constructor(
             )
         }
     }
+
+    override suspend fun syncNotebooks(): DataState<List<Notebook>> {
+        return try {
+            localNotebookService.deleteNotebooks()
+            val notebooks = remoteNotebookService.getNotebooks()
+            DataState.data(localNotebookService.insertNotebooks(notebooks))
+        } catch (ex: java.lang.Exception) {
+            DataState.message(
+                ex.message ?: "An unknown error occurred. Please retry later."
+            )
+        }
+    }
 }

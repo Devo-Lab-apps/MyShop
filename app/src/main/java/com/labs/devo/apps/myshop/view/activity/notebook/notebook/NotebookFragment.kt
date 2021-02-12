@@ -80,6 +80,11 @@ class NotebookFragment : DialogFragment(R.layout.fragment_notebook) {
                 findNavController().navigate(R.id.addEditNotebookFragment, args)
             }
 
+            syncNotebooks.setOnClickListener {
+                dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
+                viewModel.syncNotebooks()
+            }
+
         }
 
 

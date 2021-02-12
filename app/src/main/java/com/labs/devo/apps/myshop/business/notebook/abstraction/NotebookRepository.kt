@@ -20,4 +20,6 @@ interface NotebookRepository {
 
     suspend fun deleteNotebooks(notebooks: List<Notebook>): DataState<List<Notebook>>
 
+    suspend fun syncNotebooks(): DataState<List<Notebook>>
+
 }

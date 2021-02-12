@@ -64,4 +64,10 @@ constructor(
         }
     }
 
+    override suspend fun deleteNotebooks() {
+        return AsyncHelper.runAsync {
+            dao.deleteNotebooks()
+        }
+    }
+
 }
