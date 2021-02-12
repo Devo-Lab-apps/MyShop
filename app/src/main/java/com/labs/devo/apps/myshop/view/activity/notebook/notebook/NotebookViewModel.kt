@@ -16,16 +16,7 @@ class NotebookViewModel @ViewModelInject constructor(val notebookRepository: Not
     fun getNotebooks() = viewModelScope.launch {
         try {
             notebookRepository.getNotebooks().collect { dataState ->
-                dataState.data?.let {
-                    channel.send(
-                        NotebookEvent.GetNotebooks(
-                            it.getContentIfNotHandled() ?: listOf(),
-                            dataState
-                        )
-                    )
-                }
-                    ?: channel.send(NotebookEvent.ShowInvalidInputMessage(dataState.message?.getContentIfNotHandled()))
-
+                handleGetNotebooks(dataState)
             }
         } catch (ex: Exception) {
             channel.send(
@@ -36,18 +27,26 @@ class NotebookViewModel @ViewModelInject constructor(val notebookRepository: Not
         }
     }
 
+    private suspend fun handleGetNotebooks(dataState: DataState<List<Notebook>>) {
+        dataState.data?.let {
+            channel.send(
+                NotebookEvent.GetNotebooks(
+                    it.getContentIfNotHandled() ?: listOf(),
+                    dataState
+                )
+            )
+        } ?: channel.send(
+            NotebookEvent.GetNotebooks(
+                listOf(),
+                dataState
+            )
+        )
+    }
+
     fun syncNotebooks() = viewModelScope.launch {
         try {
             val dataState = notebookRepository.syncNotebooks()
-            dataState.data?.let {
-                channel.send(
-                    NotebookEvent.GetNotebooks(
-                        it.getContentIfNotHandled() ?: listOf(),
-                        dataState
-                    )
-                )
-            }
-                ?: channel.send(NotebookEvent.ShowInvalidInputMessage(dataState.message?.getContentIfNotHandled()))
+            handleGetNotebooks(dataState)
         } catch (ex: Exception) {
             channel.send(
                 NotebookEvent.ShowInvalidInputMessage(

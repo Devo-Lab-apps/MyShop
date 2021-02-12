@@ -19,4 +19,6 @@ interface LocalPageService {
 
     suspend fun deletePages(pages: List<Page>)
 
+    suspend fun deletePages(notebookId: String)
+
 }
