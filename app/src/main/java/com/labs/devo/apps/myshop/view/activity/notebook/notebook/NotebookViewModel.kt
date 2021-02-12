@@ -30,7 +30,28 @@ class NotebookViewModel @ViewModelInject constructor(val notebookRepository: Not
         } catch (ex: Exception) {
             channel.send(
                 NotebookEvent.ShowInvalidInputMessage(
-                    ex.message ?: "Can't fetch the notebook. Please retry"
+                    ex.message ?: "Can't fetch the notebooks. Please retry"
+                )
+            )
+        }
+    }
+
+    fun syncNotebooks() = viewModelScope.launch {
+        try {
+            val dataState = notebookRepository.syncNotebooks()
+            dataState.data?.let {
+                channel.send(
+                    NotebookEvent.GetNotebooks(
+                        it.getContentIfNotHandled() ?: listOf(),
+                        dataState
+                    )
+                )
+            }
+                ?: channel.send(NotebookEvent.ShowInvalidInputMessage(dataState.message?.getContentIfNotHandled()))
+        } catch (ex: Exception) {
+            channel.send(
+                NotebookEvent.ShowInvalidInputMessage(
+                    ex.message ?: "Can't fetch the notebooks. Please retry"
                 )
             )
         }

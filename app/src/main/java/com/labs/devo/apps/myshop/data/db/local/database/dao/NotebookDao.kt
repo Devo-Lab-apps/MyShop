@@ -30,4 +30,7 @@ interface NotebookDao {
     @Delete
     suspend fun deleteNotebooks(notebooks: List<LocalEntityNotebook>)
 
+    @Query("DELETE FROM NOTEBOOK")
+    suspend fun deleteNotebooks()
+
 }

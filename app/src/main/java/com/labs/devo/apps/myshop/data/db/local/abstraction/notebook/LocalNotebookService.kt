@@ -20,4 +20,6 @@ interface LocalNotebookService {
 
     suspend fun deleteNotebooks(notebooks: List<Notebook>)
 
+    suspend fun deleteNotebooks()
+
 }
