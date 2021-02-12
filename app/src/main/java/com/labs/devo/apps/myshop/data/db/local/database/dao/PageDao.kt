@@ -2,7 +2,6 @@ package com.labs.devo.apps.myshop.data.db.local.database.dao
 
 import androidx.room.*
 import com.labs.devo.apps.myshop.data.db.local.models.notebook.LocalEntityPage
-import kotlinx.coroutines.flow.Flow
 
 
 @Dao
@@ -28,5 +27,8 @@ interface PageDao {
 
     @Delete
     suspend fun deletePages(pages: List<LocalEntityPage>)
+
+    @Query("DELETE FROM Page where creatorNotebookId = :notebookId")
+    suspend fun deletePages(notebookId: String)
 
 }

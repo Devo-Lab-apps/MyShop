@@ -108,4 +108,19 @@ class PageRepositoryImpl @Inject constructor(
             )
         }
     }
+
+    override suspend fun syncPages(notebookId: String): DataState<List<Page>> {
+        return try {
+            localPageService.deletePages(notebookId)
+            val remotePages = remotePageService.getPages(notebookId)
+            if (remotePages.isNullOrEmpty()) {
+                throw java.lang.Exception("No pages for the selected notebook")
+            }
+            DataState.data(localPageService.insertPages(remotePages))
+        } catch (ex: java.lang.Exception) {
+            DataState.message(
+                ex.message ?: "An unknown error occurred. Please retry later."
+            )
+        }
+    }
 }

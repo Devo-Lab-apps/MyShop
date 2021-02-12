@@ -59,4 +59,10 @@ class LocalPageServiceImpl
         }
     }
 
+    override suspend fun deletePages(notebookId: String) {
+        return AsyncHelper.runAsync {
+            dao.deletePages(notebookId)
+        }
+    }
+
 }

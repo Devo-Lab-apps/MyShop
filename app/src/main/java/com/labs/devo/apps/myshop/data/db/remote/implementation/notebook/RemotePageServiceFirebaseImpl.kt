@@ -38,7 +38,8 @@ class RemotePageServiceFirebaseImpl @Inject constructor(
         val insertedPages = mutableListOf<Page>()
         val page1 = pages.first()
         FirebaseHelper.runTransaction { transaction ->
-            val notebookEntity = getEntityNotebookFromTransaction(page1.creatorNotebookId, transaction)
+            val notebookEntity =
+                getEntityNotebookFromTransaction(page1.creatorNotebookId, transaction)
             if (notebookEntity.pages.size + pages.size > 50) {
                 throw PageLimitExceededException()
             }
@@ -54,7 +55,8 @@ class RemotePageServiceFirebaseImpl @Inject constructor(
     override suspend fun insertPage(page: Page): Page {
         var updatedPage: Page = page.copy()
         FirebaseHelper.runTransaction { transaction ->
-            val notebookEntity = getEntityNotebookFromTransaction(page.creatorNotebookId, transaction)
+            val notebookEntity =
+                getEntityNotebookFromTransaction(page.creatorNotebookId, transaction)
             if (notebookEntity.pages.size >= 50) {
                 throw PageLimitExceededException()
             }
@@ -191,23 +193,20 @@ class RemotePageServiceFirebaseImpl @Inject constructor(
         }
         val pageIterations = pageIds.size / 10
         val pages = mutableListOf<Page>()
-        FirebaseHelper.runTransaction {
-            for (i in 0..pageIterations) {
-                val startIndex = i * 10
-                val endIndex = ((i + 1) * 10).coerceAtMost(pageIds.size)
-                val ids = pageIds.subList(startIndex, endIndex)
-
-                FirebaseHelper.getPageCollection()
-                    .whereIn("pageId", ids).get().addOnSuccessListener { snapshot ->
-                        snapshot?.documents?.let {
-                            pages.addAll(
-                                it.map { s ->
-                                    val page = s.toObject(RemoteEntityPage::class.java)!!
-                                    remotePageMapper.mapFromEntity(page)
-                                }
-                            )
-                        }
+        for (i in 0..pageIterations) {
+            val startIndex = i * 10
+            val endIndex = ((i + 1) * 10).coerceAtMost(pageIds.size)
+            val ids = pageIds.subList(startIndex, endIndex)
+            //TODO make it transactional
+            val snapshot = FirebaseHelper.getPageCollection()
+                .whereIn("pageId", ids).get().await()
+            snapshot?.documents?.let {
+                pages.addAll(
+                    it.map { s ->
+                        val page = s.toObject(RemoteEntityPage::class.java)!!
+                        remotePageMapper.mapFromEntity(page)
                     }
+                )
             }
         }
         return pages

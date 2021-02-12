@@ -81,6 +81,11 @@ class PageFragment : Fragment(R.layout.fragment_page) {
                 findNavController().navigate(R.id.addEditPageFragment, args)
             }
 
+            syncPages.setOnClickListener {
+                dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
+                viewModel.syncPages("L4EnH4u6gfJ1JopyQ9rp")
+            }
+
         }
     }
 
