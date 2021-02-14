@@ -30,7 +30,7 @@ class LocalEntryServiceImpl
     override suspend fun insertEntry(entry: Entry): Entry {
         return AsyncHelper.runAsync {
             val e = mapper.mapToEntity(entry)
-            dao.updateEntry(e)
+            dao.insertEntry(e)
             entry
         }
     }

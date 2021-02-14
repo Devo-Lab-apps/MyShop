@@ -3,14 +3,19 @@ package com.labs.devo.apps.myshop.view.activity.notebook.entry
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.labs.devo.apps.myshop.R
+import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.data.models.notebook.Entry
 import com.labs.devo.apps.myshop.data.models.notebook.Page
 import com.labs.devo.apps.myshop.databinding.FragmentEntryBinding
+import com.labs.devo.apps.myshop.util.printLogD
+import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment
 import com.labs.devo.apps.myshop.view.adapter.entry.EntryListAdapter
 import com.labs.devo.apps.myshop.view.util.DataState
 import com.labs.devo.apps.myshop.view.util.DataStateListener
@@ -20,6 +25,7 @@ import kotlinx.coroutines.flow.collect
 @AndroidEntryPoint
 class EntryFragment : Fragment(R.layout.fragment_entry) {
 
+    private val TAG = AppConstants.APP_PREFIX + javaClass.simpleName
 
     private val viewModel: EntryViewModel by viewModels()
 
@@ -49,17 +55,33 @@ class EntryFragment : Fragment(R.layout.fragment_entry) {
         dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
         entryListAdapter = EntryListAdapter(object : EntryListAdapter.OnEntryClick {
             override fun onClick(entry: Entry) {
-                TODO("Not yet implemented")
+                val args = bundleOf(
+                    NotebookFragment.NotebookConstants.OPERATION to NotebookFragment.NotebookConstants.EDIT_ENTRY_OPERATION,
+                    "page" to page,
+                    "entry" to entry
+                )
+                findNavController().navigate(R.id.addEditEntryFragment, args)
             }
         })
 
+        entryListAdapter.submitList(mutableListOf())
         binding.apply {
             entryRecyclerView.apply {
                 setHasFixedSize(true)
                 layoutManager = LinearLayoutManager(requireContext())
                 adapter = entryListAdapter
             }
+            addEntry.setOnClickListener {
+                val args = bundleOf(
+                    NotebookFragment.NotebookConstants.OPERATION to NotebookFragment.NotebookConstants.ADD_ENTRY_OPERATION,
+                    "page" to page
+                )
+                findNavController().navigate(R.id.addEditEntryFragment, args)
+            }
         }
+//        val list = mutableListOf<Entry>()
+//        list.add(Entry(entryTitle = "Test"))
+
     }
 
     private fun observeEvents() {
@@ -72,8 +94,9 @@ class EntryFragment : Fragment(R.layout.fragment_entry) {
                         }
                     }
                     is EntryViewModel.EntryEvent.GetEntries -> {
+                        printLogD(TAG, event.entries)
                         dataStateHandler.onDataStateChange(event.dataState)
-                        entryListAdapter.submitList(event.entries)
+                        entryListAdapter.submitList(event.entries.toMutableList())
                     }
                 }
             }
