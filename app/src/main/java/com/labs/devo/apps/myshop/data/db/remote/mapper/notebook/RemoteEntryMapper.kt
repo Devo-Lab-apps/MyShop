@@ -24,12 +24,16 @@ class RemoteEntryMapper : EntityMapper<RemoteEntityEntry, Entry> {
     override fun mapFromEntity(entity: RemoteEntityEntry): Entry =
         Entry(
             entryId = entity.entryId,
-            pageId = entity.pageId
+            pageId = entity.pageId,
+            entryTitle = entity.entryTitle,
+            entryAmount = entity.amount
         )
 
     override fun mapToEntity(model: Entry): RemoteEntityEntry =
         RemoteEntityEntry(
             entryId = model.entryId,
-            pageId = model.pageId
+            pageId = model.pageId,
+            entryTitle = model.entryTitle,
+            amount = model.entryAmount
         )
 }

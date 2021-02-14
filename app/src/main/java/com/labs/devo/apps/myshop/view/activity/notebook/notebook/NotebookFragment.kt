@@ -64,7 +64,7 @@ class NotebookFragment : DialogFragment(R.layout.fragment_notebook) {
             }
         })
 
-        notebookAdapter.submitList(listOf(Notebook("", "")))
+        notebookAdapter.submitList(mutableListOf())
 
         binding.apply {
             notebooksRecyclerView.apply {
@@ -129,6 +129,8 @@ class NotebookFragment : DialogFragment(R.layout.fragment_notebook) {
         const val EDIT_NOTEBOOK_OPERATION = "edit_notebook"
         const val ADD_PAGE_OPERATION = "add_page"
         const val EDIT_PAGE_OPERATION = "edit_page"
+        const val ADD_ENTRY_OPERATION = "add_entry"
+        const val EDIT_ENTRY_OPERATION = "edit_entry"
 
     }
 

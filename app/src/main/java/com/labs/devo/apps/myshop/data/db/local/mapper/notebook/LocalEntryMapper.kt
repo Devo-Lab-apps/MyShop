@@ -25,13 +25,17 @@ class LocalEntryMapper : EntityMapper<LocalEntityEntry, Entry> {
     override fun mapFromEntity(entity: LocalEntityEntry): Entry =
         Entry(
             entryId = entity.entryId,
-            pageId = entity.pageId
+            pageId = entity.pageId,
+            entryTitle = entity.entryTitle,
+            entryAmount = entity.amount
         )
 
     override fun mapToEntity(model: Entry): LocalEntityEntry =
         LocalEntityEntry(
             entryId = model.entryId,
-            pageId = model.pageId
+            pageId = model.pageId,
+            entryTitle = model.entryTitle,
+            amount = model.entryAmount
         )
 
 }

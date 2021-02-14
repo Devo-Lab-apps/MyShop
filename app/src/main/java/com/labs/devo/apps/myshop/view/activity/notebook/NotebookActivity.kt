@@ -57,7 +57,6 @@ class NotebookActivity : AppCompatActivity(), DataStateListener {
      * Show progress bar.
      */
     private fun showProgressBar(isVisible: Boolean){
-        printLogD(TAG, isVisible)
         if(isVisible){
             binding.notebookProgressBar.visibility = View.VISIBLE
         }

@@ -8,4 +8,6 @@ data class LocalEntityEntry(
     @PrimaryKey
     val entryId: String,
     val pageId: String,
+    val entryTitle: String,
+    val amount: Double
 )
