@@ -25,6 +25,9 @@
         <action
             android:id="@+id/action_pageFragment_to_notebookFragment"
             app:destination="@id/notebookFragment" />
+        <action
+            android:id="@+id/action_pageFragment_to_entryFragment"
+            app:destination="@id/entryFragment" />
     </fragment>
     <fragment
         android:id="@+id/addEditNotebookFragment"
@@ -36,4 +39,10 @@
         android:name="com.labs.devo.apps.myshop.view.activity.page.page.AddEditPageFragment"
         android:label="AddEditPageFragment"
         tools:layout="@layout/add_edit_page_fragment"/>
+    <fragment
+        android:id="@+id/entryFragment"
+        android:name="com.labs.devo.apps.myshop.view.activity.notebook.entry.EntryFragment"
+        android:label="EntryFragment"
+        tools:layout="@layout/fragment_entry"
+        />
 </navigation>
