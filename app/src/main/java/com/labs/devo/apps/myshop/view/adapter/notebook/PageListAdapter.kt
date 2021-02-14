@@ -9,7 +9,10 @@ import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.data.models.notebook.Page
 import com.labs.devo.apps.myshop.databinding.PageItemViewBinding
 
-class PageListAdapter(val onPageClick: OnPageClick) :
+class PageListAdapter(
+    val onPageClick: OnPageClick,
+    val onPageSettingsSettingsClick: OnPageSettingsClick
+) :
     ListAdapter<Page, PageListAdapter.PageViewHolder>(DiffCallback()) {
 
     private val TAG = AppConstants.APP_PREFIX + javaClass.simpleName
@@ -22,11 +25,18 @@ class PageListAdapter(val onPageClick: OnPageClick) :
                 val pos = adapterPosition
                 if (pos != RecyclerView.NO_POSITION) {
                     binding.pageSettings.setOnClickListener {
+                        onPageSettingsSettingsClick.onClick(getItem(pos))
+                    }
+                    binding.root.setOnClickListener {
                         onPageClick.onClick(getItem(pos))
                     }
                 }
             }
         }
+    }
+
+    interface OnPageSettingsClick {
+        fun onClick(page: Page)
     }
 
     interface OnPageClick {

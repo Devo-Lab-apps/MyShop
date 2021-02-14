@@ -51,15 +51,24 @@ class PageFragment : Fragment(R.layout.fragment_page) {
 
     private fun initView() {
         dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
-        pageListAdapter = PageListAdapter(object : PageListAdapter.OnPageClick {
-            override fun onClick(page: Page) {
-                val args = bundleOf(
-                    OPERATION to EDIT_PAGE_OPERATION,
-                    "page" to page
-                )
-                findNavController().navigate(R.id.addEditPageFragment, args)
-            }
-        })
+        pageListAdapter = PageListAdapter(
+            object : PageListAdapter.OnPageClick {
+                override fun onClick(page: Page) {
+                    val args = bundleOf(
+                        "page" to page
+                    )
+                    findNavController().navigate(R.id.entryFragment, args)
+                }
+            },
+            object : PageListAdapter.OnPageSettingsClick {
+                override fun onClick(page: Page) {
+                    val args = bundleOf(
+                        OPERATION to EDIT_PAGE_OPERATION,
+                        "page" to page
+                    )
+                    findNavController().navigate(R.id.addEditPageFragment, args)
+                }
+            })
 
         pageListAdapter.submitList(mutableListOf())
 
