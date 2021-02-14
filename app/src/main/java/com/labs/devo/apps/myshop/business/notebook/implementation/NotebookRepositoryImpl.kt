@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class NotebookRepositoryImpl @Inject constructor(
-    val localNotebookService: LocalNotebookService,
-    val remoteNotebookService: RemoteNotebookService
+    private val localNotebookService: LocalNotebookService,
+    private val remoteNotebookService: RemoteNotebookService
 ) : NotebookRepository {
 
 

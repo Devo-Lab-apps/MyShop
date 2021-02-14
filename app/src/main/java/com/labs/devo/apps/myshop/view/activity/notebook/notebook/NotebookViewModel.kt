@@ -4,8 +4,10 @@ import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.viewModelScope
 import com.labs.devo.apps.myshop.business.notebook.abstraction.NotebookRepository
 import com.labs.devo.apps.myshop.data.models.notebook.Notebook
+import com.labs.devo.apps.myshop.util.printLogD
 import com.labs.devo.apps.myshop.view.util.BaseViewModel
 import com.labs.devo.apps.myshop.view.util.DataState
+import com.labs.devo.apps.myshop.view.util.Event
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -28,10 +30,15 @@ class NotebookViewModel @ViewModelInject constructor(val notebookRepository: Not
     }
 
     private suspend fun handleGetNotebooks(dataState: DataState<List<Notebook>>) {
-        dataState.data?.let {
+        dataState.data?.let { event ->
+            val notebooks = event.getContentIfNotHandled()
+            if (notebooks.isNullOrEmpty()) {
+                dataState.message = Event.messageEvent("No notebooks in this account.")
+                printLogD("No account in this account.")
+            }
             channel.send(
                 NotebookEvent.GetNotebooks(
-                    it.getContentIfNotHandled() ?: listOf(),
+                    notebooks ?: listOf(),
                     dataState
                 )
             )
