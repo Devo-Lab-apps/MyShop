@@ -6,6 +6,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.labs.devo.apps.myshop.business.auth.abstraction.UserAuth
 import com.labs.devo.apps.myshop.business.auth.implementation.FirebaseUserAuth
+import com.labs.devo.apps.myshop.data.db.local.database.dao.EntryDao
 import com.labs.devo.apps.myshop.data.db.local.database.dao.NotebookDao
 import com.labs.devo.apps.myshop.data.db.local.database.dao.PageDao
 import com.labs.devo.apps.myshop.data.db.local.database.database.NotebookDatabase
@@ -40,9 +41,9 @@ class AppModule {
     @Singleton
     fun providesNotebookDatabase(
         app: Application
-    ) =  Room.databaseBuilder(app, NotebookDatabase::class.java, "notebook_database")
-            .fallbackToDestructiveMigration()
-            .build()
+    ) = Room.databaseBuilder(app, NotebookDatabase::class.java, "notebook_database")
+        .fallbackToDestructiveMigration()
+        .build()
 
 
     @Provides
@@ -52,5 +53,9 @@ class AppModule {
     @Provides
     @Singleton
     fun provideNotebookDao(database: NotebookDatabase): NotebookDao = database.notebookDao()
+
+    @Provides
+    @Singleton
+    fun provideEntryDao(database: NotebookDatabase): EntryDao = database.entryDao()
 
 }

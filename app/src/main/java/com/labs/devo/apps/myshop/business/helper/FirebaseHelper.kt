@@ -5,6 +5,7 @@ import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Transaction
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.account
+import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.entry
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.notebook
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.page
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.user
@@ -16,6 +17,7 @@ object FirebaseConstants {
     const val account = "account"
     const val notebook = "notebook"
     const val page = "page"
+    const val entry = "entry"
     const val foreignNotebookName = "Foreign"
     const val foreignNotebookKey = "foreign"
 }
@@ -71,6 +73,18 @@ object FirebaseHelper {
 
     fun getPageReference(): DocumentReference {
         return db.collection(page).document()
+    }
+
+    fun getEntryCollection(pageId: String): CollectionReference {
+        return getPageCollection().document(pageId).collection(entry)
+    }
+
+    fun getEntryReference(pageId: String, entryId: String): DocumentReference {
+        return getEntryCollection(pageId).document(entryId)
+    }
+
+    fun getEntryReference(pageId: String): DocumentReference {
+        return getEntryCollection(pageId).document()
     }
 
     suspend fun runWriteBatch(f: () -> Unit) {
