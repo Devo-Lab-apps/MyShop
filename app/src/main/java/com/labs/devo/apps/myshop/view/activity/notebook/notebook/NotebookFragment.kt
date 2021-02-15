@@ -13,6 +13,7 @@ import com.labs.devo.apps.myshop.R
 import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.data.models.notebook.Notebook
 import com.labs.devo.apps.myshop.databinding.FragmentNotebookBinding
+import com.labs.devo.apps.myshop.util.PreferencesManager
 import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment.NotebookConstants.ADD_NOTEBOOK_OPERATION
 import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment.NotebookConstants.EDIT_NOTEBOOK_OPERATION
 import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment.NotebookConstants.OPERATION
@@ -21,6 +22,8 @@ import com.labs.devo.apps.myshop.view.util.DataState
 import com.labs.devo.apps.myshop.view.util.DataStateListener
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class NotebookFragment : DialogFragment(R.layout.fragment_notebook) {
@@ -34,6 +37,9 @@ class NotebookFragment : DialogFragment(R.layout.fragment_notebook) {
     private lateinit var notebookAdapter: NotebookListAdapter
 
     private lateinit var dataStateHandler: DataStateListener
+
+    @Inject
+    lateinit var preferencesManager: PreferencesManager
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -50,19 +56,32 @@ class NotebookFragment : DialogFragment(R.layout.fragment_notebook) {
      */
     private fun initView() {
         dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
-        notebookAdapter = NotebookListAdapter(object : NotebookListAdapter.OnNotebookClick {
-            override fun onClick(notebook: Notebook) {
-                if (notebook.notebookId == "foreign" || notebook.notebookName == "Foreign") {
-                    dataStateHandler.onDataStateChange(DataState.message<Nothing>("You can't edit foreign transactions."))
-                    return
+        notebookAdapter = NotebookListAdapter(
+            object : NotebookListAdapter.OnNotebookClick {
+                override fun onClick(notebook: Notebook) {
+                    dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
+                    lifecycleScope.launch {
+                        preferencesManager.updateCurrentSelectedNotebook(
+                            Pair(notebook.notebookId, notebook.notebookName)
+                        )
+                        findNavController().navigateUp()
+                    }
                 }
-                val args = bundleOf(
-                    "notebook" to notebook,
-                    OPERATION to EDIT_NOTEBOOK_OPERATION
-                )
-                findNavController().navigate(R.id.addEditNotebookFragment, args)
+            },
+            object : NotebookListAdapter.OnNotebookSettingsClick {
+                override fun onClick(notebook: Notebook) {
+                    if (notebook.notebookId == "foreign" || notebook.notebookName == "Foreign") {
+                        dataStateHandler.onDataStateChange(DataState.message<Nothing>("You can't edit foreign transactions."))
+                        return
+                    }
+                    val args = bundleOf(
+                        "notebook" to notebook,
+                        OPERATION to EDIT_NOTEBOOK_OPERATION
+                    )
+                    findNavController().navigate(R.id.addEditNotebookFragment, args)
+                }
             }
-        })
+        )
 
         notebookAdapter.submitList(mutableListOf())
 
@@ -131,6 +150,7 @@ class NotebookFragment : DialogFragment(R.layout.fragment_notebook) {
         const val EDIT_PAGE_OPERATION = "edit_page"
         const val ADD_ENTRY_OPERATION = "add_entry"
         const val EDIT_ENTRY_OPERATION = "edit_entry"
+        const val NOTEBOOK_ID = "notebook_id"
 
     }
 

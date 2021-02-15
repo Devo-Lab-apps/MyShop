@@ -1,6 +1,6 @@
 package com.labs.devo.apps.myshop.data.db.local.mapper.notebook
 
-import com.labs.devo.apps.myshop.business.helper.EntityMapper
+import com.labs.devo.apps.myshop.view.util.EntityMapper
 import com.labs.devo.apps.myshop.data.db.local.models.notebook.LocalEntityPage
 import com.labs.devo.apps.myshop.data.models.notebook.Page
 

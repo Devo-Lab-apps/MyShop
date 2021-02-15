@@ -1,4 +1,4 @@
-package com.labs.devo.apps.myshop.business.helper
+package com.labs.devo.apps.myshop.view.util
 
 interface EntityMapper <Entity, Model>{
 
