@@ -14,14 +14,18 @@ import com.labs.devo.apps.myshop.R
 import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.data.models.notebook.Page
 import com.labs.devo.apps.myshop.databinding.FragmentPageBinding
+import com.labs.devo.apps.myshop.util.PreferencesManager
 import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment.NotebookConstants.ADD_PAGE_OPERATION
 import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment.NotebookConstants.EDIT_PAGE_OPERATION
+import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment.NotebookConstants.NOTEBOOK_ID
 import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment.NotebookConstants.OPERATION
 import com.labs.devo.apps.myshop.view.adapter.Page.PageListAdapter
 import com.labs.devo.apps.myshop.view.util.DataState
 import com.labs.devo.apps.myshop.view.util.DataStateListener
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class PageFragment : Fragment(R.layout.fragment_page) {
@@ -36,14 +40,17 @@ class PageFragment : Fragment(R.layout.fragment_page) {
 
     private lateinit var dataStateHandler: DataStateListener
 
+    @Inject
+    lateinit var preferencesManager: PreferencesManager
+
+    private lateinit var notebookId: String
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentPageBinding.bind(view)
 
         initView()
-
-        viewModel.getPages("L4EnH4u6gfJ1JopyQ9rp")
         observeEvents()
 
     }
@@ -51,6 +58,8 @@ class PageFragment : Fragment(R.layout.fragment_page) {
 
     private fun initView() {
         dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
+        binding.selectNotebookButton.isEnabled = false
+        binding.syncPages.isEnabled = false
         pageListAdapter = PageListAdapter(
             object : PageListAdapter.OnPageClick {
                 override fun onClick(page: Page) {
@@ -85,14 +94,15 @@ class PageFragment : Fragment(R.layout.fragment_page) {
 
             addPageBtn.setOnClickListener {
                 val args = bundleOf(
-                    OPERATION to ADD_PAGE_OPERATION
+                    OPERATION to ADD_PAGE_OPERATION,
+                    NOTEBOOK_ID to notebookId
                 )
                 findNavController().navigate(R.id.addEditPageFragment, args)
             }
 
             syncPages.setOnClickListener {
                 dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
-                viewModel.syncPages("L4EnH4u6gfJ1JopyQ9rp")
+                viewModel.syncPages(notebookId)
             }
 
         }
@@ -100,6 +110,16 @@ class PageFragment : Fragment(R.layout.fragment_page) {
 
 
     private fun observeEvents() {
+        lifecycleScope.launch {
+            preferencesManager.currentSelectedNotebook.collect { pair ->
+                notebookId = pair.first
+                binding.selectNotebookButton.text = pair.second
+                viewModel.getPages(notebookId)
+                binding.selectNotebookButton.isEnabled = true
+                binding.syncPages.isEnabled = true
+            }
+        }
+
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             viewModel.channelFlow.collect { event ->
                 when (event) {

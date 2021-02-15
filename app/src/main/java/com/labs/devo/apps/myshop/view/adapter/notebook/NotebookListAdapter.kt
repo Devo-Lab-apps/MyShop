@@ -10,7 +10,10 @@ import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.data.models.notebook.Notebook
 import com.labs.devo.apps.myshop.databinding.NotebookItemViewBinding
 
-class NotebookListAdapter(val onNotebookClick: OnNotebookClick) :
+class NotebookListAdapter(
+    val onNotebookClick: OnNotebookClick,
+    val onNotebookSettingsClick: OnNotebookSettingsClick
+) :
     ListAdapter<Notebook, NotebookListAdapter.NotebookViewHolder>(DiffCallback()) {
 
     private val TAG = AppConstants.APP_PREFIX + javaClass.simpleName
@@ -23,11 +26,18 @@ class NotebookListAdapter(val onNotebookClick: OnNotebookClick) :
                 val pos = adapterPosition
                 if (pos != NO_POSITION) {
                     binding.notebookSettings.setOnClickListener {
+                        onNotebookSettingsClick.onClick(getItem(pos))
+                    }
+                    binding.root.setOnClickListener {
                         onNotebookClick.onClick(getItem(pos))
                     }
                 }
             }
         }
+    }
+
+    interface OnNotebookSettingsClick {
+        fun onClick(notebook: Notebook)
     }
 
     interface OnNotebookClick {

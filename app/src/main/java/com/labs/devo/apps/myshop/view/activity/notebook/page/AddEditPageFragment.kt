@@ -10,11 +10,12 @@ import androidx.navigation.fragment.findNavController
 import com.labs.devo.apps.myshop.R
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants
 import com.labs.devo.apps.myshop.business.helper.UserManager
+import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.data.models.notebook.Page
 import com.labs.devo.apps.myshop.databinding.AddEditPageFragmentBinding
-import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment.NotebookConstants.ADD_NOTEBOOK_OPERATION
 import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment.NotebookConstants.ADD_PAGE_OPERATION
 import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment.NotebookConstants.EDIT_PAGE_OPERATION
+import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment.NotebookConstants.NOTEBOOK_ID
 import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment.NotebookConstants.OPERATION
 import com.labs.devo.apps.myshop.view.activity.notebook.page.AddEditPageViewModel
 import com.labs.devo.apps.myshop.view.util.DataState
@@ -25,6 +26,7 @@ import kotlinx.coroutines.flow.collect
 @AndroidEntryPoint
 class AddEditPageFragment : Fragment(R.layout.add_edit_page_fragment) {
 
+    private val TAG = AppConstants.APP_PREFIX + javaClass.simpleName
 
     private lateinit var binding: AddEditPageFragmentBinding
 
@@ -36,13 +38,17 @@ class AddEditPageFragment : Fragment(R.layout.add_edit_page_fragment) {
 
     private var page: Page? = null
 
+    private var notebookId: String? = null
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = AddEditPageFragmentBinding.bind(view)
         arguments?.apply {
             page = getParcelable("page")
             operation = getString(OPERATION).toString()
+            notebookId = getString(NOTEBOOK_ID).toString()
         }
+
 
         initView()
 
@@ -58,7 +64,7 @@ class AddEditPageFragment : Fragment(R.layout.add_edit_page_fragment) {
                     val page = Page(
                         creatorAccountId = UserManager.user!!.email,
                         consumerAccountId = pageId,
-                        creatorNotebookId = "L4EnH4u6gfJ1JopyQ9rp",
+                        creatorNotebookId = notebookId!!,
                         consumerNotebookId = FirebaseConstants.foreignNotebookKey,
                         pageName = pageName
                     )
@@ -73,6 +79,7 @@ class AddEditPageFragment : Fragment(R.layout.add_edit_page_fragment) {
                     )
                     viewModel.updatePage(page!!, newPage)
                 }
+                addEditPageBtn.isEnabled = false
             }
             if (operation == EDIT_PAGE_OPERATION) {
                 addEditPageBtn.text = "Update Page"
@@ -108,6 +115,7 @@ class AddEditPageFragment : Fragment(R.layout.add_edit_page_fragment) {
                         findNavController().navigateUp()
                     }
                 }
+                binding.addEditPageBtn.isEnabled = true
             }
         }
     }
