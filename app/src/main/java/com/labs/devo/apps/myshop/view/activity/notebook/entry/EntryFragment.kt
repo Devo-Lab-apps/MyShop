@@ -78,10 +78,12 @@ class EntryFragment : Fragment(R.layout.fragment_entry) {
                 )
                 findNavController().navigate(R.id.addEditEntryFragment, args)
             }
-        }
-//        val list = mutableListOf<Entry>()
-//        list.add(Entry(entryTitle = "Test"))
 
+            syncEntries.setOnClickListener {
+                dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
+                viewModel.syncEntries(page.pageId)
+            }
+        }
     }
 
     private fun observeEvents() {

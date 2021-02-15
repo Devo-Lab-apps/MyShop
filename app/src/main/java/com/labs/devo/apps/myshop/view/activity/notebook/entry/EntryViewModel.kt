@@ -37,6 +37,19 @@ class EntryViewModel
             ?: channel.send(EntryEvent.ShowInvalidInputMessage(dataState.message?.getContentIfNotHandled()))
     }
 
+    fun syncEntries(pageId: String) = viewModelScope.launch {
+        try {
+            val dataState = entryRepository.syncEntries(pageId)
+            handleGetEntries(dataState)
+        } catch (ex: Exception) {
+            channel.send(
+                EntryEvent.ShowInvalidInputMessage(
+                    ex.message ?: "Can't sync pages. Please try again."
+                )
+            )
+        }
+    }
+
 
     sealed class EntryEvent {
 
