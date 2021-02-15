@@ -13,7 +13,7 @@ class LocalEntryServiceImpl
     val mapper: LocalEntryMapper
 ) : LocalEntryService {
 
-    override suspend fun getEntries(pageId: String): List<Entry>? {
+    override suspend fun getEntries(pageId: String): List<Entry> {
         return AsyncHelper.runAsync {
             mapper.entityListToPageList(dao.getEntries(pageId))
         }
