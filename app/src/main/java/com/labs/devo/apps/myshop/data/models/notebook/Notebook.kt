@@ -5,7 +5,6 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class Notebook(
-
     var notebookId: String = "",
 
     val notebookName: String = "",
@@ -15,4 +14,8 @@ data class Notebook(
     val modifiedAt: Long = System.currentTimeMillis(),
 
     val pages: List<String> = listOf()
+
 ): Parcelable
+//creatorUserId, accountId
+// metadata
+    //isImported, isForeign, importerUserId, importedAt
