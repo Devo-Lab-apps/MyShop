@@ -4,7 +4,7 @@ import com.labs.devo.apps.myshop.data.models.notebook.Entry
 
 interface LocalEntryService {
 
-    suspend fun getEntries(pageId: String): List<Entry>?
+    suspend fun getEntries(pageId: String, searchQuery: String): List<Entry>?
 
     suspend fun insertEntries(entries: List<Entry>): List<Entry>
 

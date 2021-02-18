@@ -10,7 +10,7 @@
 
 
         <androidx.appcompat.widget.Toolbar
-            android:id="@+id/notebooks_toolbar"
+            android:id="@+id/page_toolbar"
             android:layout_width="0dp"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/colorPrimary"
@@ -30,13 +30,6 @@
                     android:drawableEnd="@drawable/ic_baseline_keyboard_arrow_down_24"
                     android:text="No notebook selected" />
 
-                <ImageButton
-                    android:id="@+id/sync_pages"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_marginEnd="8dp"
-                    android:src="@drawable/ic_baseline_refresh_24" />
             </RelativeLayout>
 
         </androidx.appcompat.widget.Toolbar>

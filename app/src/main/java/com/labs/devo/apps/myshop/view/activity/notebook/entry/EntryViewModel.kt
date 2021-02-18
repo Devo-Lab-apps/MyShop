@@ -15,8 +15,8 @@ class EntryViewModel
     BaseViewModel<EntryViewModel.EntryEvent>() {
 
 
-    fun getEntries(pageId: String) = viewModelScope.launch {
-        entryRepository.getEntries(pageId).collect { dataState ->
+    fun getEntries(pageId: String, searchQuery: String) = viewModelScope.launch {
+        entryRepository.getEntries(pageId, searchQuery).collect { dataState ->
             handleGetEntries(dataState)
         }
     }

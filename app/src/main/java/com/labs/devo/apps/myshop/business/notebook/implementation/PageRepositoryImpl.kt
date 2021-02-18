@@ -15,10 +15,13 @@ class PageRepositoryImpl @Inject constructor(
 ) : PageRepository {
 
 
-    override suspend fun getPages(notebookId: String): Flow<DataState<List<Page>>> = flow {
+    override suspend fun getPages(notebookId: String, searchQuery: String): Flow<DataState<List<Page>>> = flow {
         emit(DataState.loading<List<Page>>(true))
         try {
-            var localPages = localPageService.getPages(notebookId)
+            var localPages = localPageService.getPages(notebookId, searchQuery)
+            if (searchQuery != "" && localPages.isNullOrEmpty()) {
+                throw Exception("No records for this search query.")
+            }
             if (localPages.isNullOrEmpty()) {
                 val remotePages = remotePageService.getPages(notebookId)
                 if (remotePages.isNullOrEmpty()) {

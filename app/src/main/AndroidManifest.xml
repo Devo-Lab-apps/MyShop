@@ -12,7 +12,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MyShop">
-        <activity android:name=".view.activity.notebook.NotebookActivity" />
+        <activity android:name=".view.activity.notebook.NotebookActivity"
+            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"/>
         <activity android:name=".view.activity.auth.AuthenticationActivity" />
         <activity android:name=".view.activity.splash.SplashActivity">
             <intent-filter>

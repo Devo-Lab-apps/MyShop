@@ -7,8 +7,9 @@ import com.labs.devo.apps.myshop.data.db.local.models.notebook.LocalEntityEntry
 @Dao
 interface EntryDao {
 
-    @Query("SELECT * FROM Entry WHERE pageId = :pageId")
-    fun getEntries(pageId: String): List<LocalEntityEntry>
+    //TODO add order by
+    @Query("SELECT * FROM Entry WHERE pageId = :pageId and entryTitle LIKE '%' || :searchQuery || '%'")
+    fun getEntries(pageId: String, searchQuery: String): List<LocalEntityEntry>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertEntry(entry: LocalEntityEntry)
