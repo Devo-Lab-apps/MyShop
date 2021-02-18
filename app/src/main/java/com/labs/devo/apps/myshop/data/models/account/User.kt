@@ -14,3 +14,4 @@ data class User(
     val signedUpInAt: Long = 0,
     //TODO add other profile attributes
 )
+//permissions(Ints),

@@ -20,3 +20,11 @@ data class Entry(
 ): Parcelable {
     val entryCreatedAt: String = SimpleDateFormat(AppConstants.DATE_FORMAT, Locale.US).format(Date(createdAt))
 }
+//isRepeatingEntry
+//metadata
+    // -timeOfRepeat,
+    // -frequencyOfRepetition,
+    // -notificationId,
+    // -isPaid
+    // -repeatEndsAt
+    // -automaticallyCreateEntryEveryday
