@@ -13,9 +13,9 @@ class LocalPageServiceImpl
     val dao: PageDao
 ) : LocalPageService {
 
-    override suspend fun getPages(notebookId: String): List<Page> {
+    override suspend fun getPages(notebookId: String, searchQuery: String): List<Page> {
         return AsyncHelper.runAsync {
-            mapper.entityListToPageList(dao.getPages(notebookId))
+            mapper.entityListToPageList(dao.getPages(notebookId, searchQuery))
         }
     }
 

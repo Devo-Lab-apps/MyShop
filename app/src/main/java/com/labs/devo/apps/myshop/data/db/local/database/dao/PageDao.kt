@@ -7,8 +7,8 @@ import com.labs.devo.apps.myshop.data.db.local.models.notebook.LocalEntityPage
 @Dao
 interface PageDao {
 
-    @Query("SELECT * FROM PAGE WHERE creatorNotebookId = :notebookId")
-    fun getPages(notebookId: String): List<LocalEntityPage>
+    @Query("SELECT * FROM PAGE WHERE creatorNotebookId = :notebookId and pageName LIKE '%' || :searchQuery || '%' ORDER BY createdAt DESC")
+    fun getPages(notebookId: String, searchQuery: String): List<LocalEntityPage>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPage(page: LocalEntityPage)

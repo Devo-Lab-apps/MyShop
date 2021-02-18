@@ -2,7 +2,11 @@ package com.labs.devo.apps.myshop.view.activity.notebook.entry
 
 import android.content.Context
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
+import androidx.appcompat.widget.SearchView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -14,7 +18,9 @@ import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.data.models.notebook.Entry
 import com.labs.devo.apps.myshop.data.models.notebook.Page
 import com.labs.devo.apps.myshop.databinding.FragmentEntryBinding
+import com.labs.devo.apps.myshop.util.extensions.onQueryTextChanged
 import com.labs.devo.apps.myshop.util.printLogD
+import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity
 import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment
 import com.labs.devo.apps.myshop.view.adapter.entry.EntryListAdapter
 import com.labs.devo.apps.myshop.view.util.DataState
@@ -47,11 +53,13 @@ class EntryFragment : Fragment(R.layout.fragment_entry) {
 
         initView()
         observeEvents()
-        viewModel.getEntries(page.pageId)
+        viewModel.getEntries(page.pageId, "")
     }
 
 
     private fun initView() {
+        (activity as NotebookActivity).setSupportActionBar(binding.entryToolbar)
+        setHasOptionsMenu(true)
         dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
         entryListAdapter = EntryListAdapter(object : EntryListAdapter.OnEntryClick {
             override fun onClick(entry: Entry) {
@@ -78,11 +86,7 @@ class EntryFragment : Fragment(R.layout.fragment_entry) {
                 )
                 findNavController().navigate(R.id.addEditEntryFragment, args)
             }
-
-            syncEntries.setOnClickListener {
-                dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
-                viewModel.syncEntries(page.pageId)
-            }
+            entryToolbar.title = page.pageName
         }
     }
 
@@ -102,6 +106,35 @@ class EntryFragment : Fragment(R.layout.fragment_entry) {
                     }
                 }
             }
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.menu_entry_fragment, menu)
+
+        val searchItem = menu.findItem(R.id.action_search_entry)
+        val searchView = searchItem.actionView as SearchView
+
+        searchView.onQueryTextChanged {
+            viewModel.getEntries(page.pageId, it)
+        }
+
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_sort_entry_by_date -> {
+                true
+            }
+            R.id.action_sort_entry_by_name -> {
+                true
+            }
+            R.id.action_sync_entries -> {
+                dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
+                viewModel.syncEntries(page.pageId)
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 

@@ -5,7 +5,7 @@ import com.labs.devo.apps.myshop.data.models.notebook.Page
 interface LocalPageService {
 
 
-    suspend fun getPages(notebookId: String): List<Page>?
+    suspend fun getPages(notebookId: String, searchQuery: String): List<Page>?
 
     suspend fun insertPages(pages: List<Page>): List<Page>
 

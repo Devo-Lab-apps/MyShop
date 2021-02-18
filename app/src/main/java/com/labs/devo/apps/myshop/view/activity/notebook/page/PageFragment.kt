@@ -2,7 +2,12 @@ package com.labs.devo.apps.myshop.view.activity.notebook.page
 
 import android.content.Context
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
+import androidx.appcompat.widget.SearchView
+
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -15,6 +20,8 @@ import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.data.models.notebook.Page
 import com.labs.devo.apps.myshop.databinding.FragmentPageBinding
 import com.labs.devo.apps.myshop.util.PreferencesManager
+import com.labs.devo.apps.myshop.util.extensions.onQueryTextChanged
+import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity
 import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment.NotebookConstants.ADD_PAGE_OPERATION
 import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment.NotebookConstants.EDIT_PAGE_OPERATION
 import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment.NotebookConstants.NOTEBOOK_ID
@@ -57,9 +64,10 @@ class PageFragment : Fragment(R.layout.fragment_page) {
 
 
     private fun initView() {
+        (activity as NotebookActivity).setSupportActionBar(binding.pageToolbar)
+        setHasOptionsMenu(true)
         dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
         binding.selectNotebookButton.isEnabled = false
-        binding.syncPages.isEnabled = false
         pageListAdapter = PageListAdapter(
             object : PageListAdapter.OnPageClick {
                 override fun onClick(page: Page) {
@@ -99,12 +107,6 @@ class PageFragment : Fragment(R.layout.fragment_page) {
                 )
                 findNavController().navigate(R.id.addEditPageFragment, args)
             }
-
-            syncPages.setOnClickListener {
-                dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
-                viewModel.syncPages(notebookId)
-            }
-
         }
     }
 
@@ -114,9 +116,8 @@ class PageFragment : Fragment(R.layout.fragment_page) {
             preferencesManager.currentSelectedNotebook.collect { pair ->
                 notebookId = pair.first
                 binding.selectNotebookButton.text = pair.second
-                viewModel.getPages(notebookId)
+                viewModel.getPages(notebookId, "")
                 binding.selectNotebookButton.isEnabled = true
-                binding.syncPages.isEnabled = true
             }
         }
 
@@ -148,6 +149,35 @@ class PageFragment : Fragment(R.layout.fragment_page) {
         options.setPopEnterAnim(R.anim.pop_enter_notebook_fragment)
         options.setPopExitAnim(R.anim.pop_exit_notebook_fragment)
         findNavController().navigate(R.id.notebookFragment, null, options.build())
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.menu_page_fragment, menu)
+
+        val searchItem = menu.findItem(R.id.action_search_page)
+        val searchView = searchItem.actionView as SearchView
+
+        searchView.onQueryTextChanged {
+            viewModel.getPages(notebookId, it)
+        }
+
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_sort_page_by_date -> {
+                true
+            }
+            R.id.action_sort_page_by_name -> {
+                true
+            }
+            R.id.action_sync_pages -> {
+                dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
+                viewModel.syncPages(notebookId)
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     override fun onAttach(context: Context) {

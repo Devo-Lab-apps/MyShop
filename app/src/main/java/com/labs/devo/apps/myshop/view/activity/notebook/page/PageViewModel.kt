@@ -2,13 +2,16 @@ package com.labs.devo.apps.myshop.view.activity.notebook.page
 
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.viewModelScope
+import com.labs.devo.apps.myshop.business.helper.FirebaseConstants
 import com.labs.devo.apps.myshop.business.notebook.abstraction.PageRepository
 import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.data.models.notebook.Page
 import com.labs.devo.apps.myshop.view.util.BaseViewModel
 import com.labs.devo.apps.myshop.view.util.DataState
 import com.labs.devo.apps.myshop.view.util.Event
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 
 class PageViewModel @ViewModelInject constructor(
@@ -21,9 +24,9 @@ class PageViewModel @ViewModelInject constructor(
         channel.send(PageEvent.NavigateToNotebookFragment)
     }
 
-    fun getPages(notebookId: String) = viewModelScope.launch {
+    fun getPages(notebookId: String, searchQuery: String) = viewModelScope.launch {
         try {
-            pageRepository.getPages(notebookId).collect { dataState ->
+            pageRepository.getPages(notebookId, searchQuery).collect { dataState ->
                 handleGetPages(dataState)
             }
         } catch (ex: Exception) {

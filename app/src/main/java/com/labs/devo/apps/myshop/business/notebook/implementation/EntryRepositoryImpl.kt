@@ -15,10 +15,16 @@ class EntryRepositoryImpl
     val remoteEntryService: RemoteEntryService
 ) : EntryRepository {
 
-    override suspend fun getEntries(pageId: String): Flow<DataState<List<Entry>>> = flow {
+    override suspend fun getEntries(
+        pageId: String,
+        searchQuery: String
+    ): Flow<DataState<List<Entry>>> = flow {
         emit(DataState.loading<List<Entry>>(true))
         try {
-            var localEntries = localEntryService.getEntries(pageId)
+            var localEntries = localEntryService.getEntries(pageId, searchQuery)
+            if (searchQuery != "" && localEntries.isNullOrEmpty()) {
+                throw Exception("No record for this search query.")
+            }
             if (localEntries.isNullOrEmpty()) {
                 val entries = remoteEntryService.getEntries(pageId)
                 localEntries = localEntryService.insertEntries(entries)
