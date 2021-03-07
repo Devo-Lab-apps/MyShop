@@ -1,15 +1,15 @@
 package com.labs.devo.apps.myshop.data.db.local.database.dao
 
 import androidx.room.*
+import androidx.sqlite.db.SimpleSQLiteQuery
 import com.labs.devo.apps.myshop.data.db.local.models.notebook.LocalEntityEntry
 
 
 @Dao
 interface EntryDao {
 
-    //TODO add order by
-    @Query("SELECT * FROM Entry WHERE pageId = :pageId and entryTitle LIKE '%' || :searchQuery || '%'")
-    fun getEntries(pageId: String, searchQuery: String): List<LocalEntityEntry>
+    @RawQuery
+    fun getEntries(simpleSQLiteQuery: SimpleSQLiteQuery): List<LocalEntityEntry>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertEntry(entry: LocalEntityEntry)

@@ -2,11 +2,12 @@ package com.labs.devo.apps.myshop.business.notebook.abstraction
 
 import com.labs.devo.apps.myshop.data.models.notebook.Entry
 import com.labs.devo.apps.myshop.view.util.DataState
+import com.labs.devo.apps.myshop.view.util.QueryParams
 import kotlinx.coroutines.flow.Flow
 
 interface EntryRepository {
 
-    suspend fun getEntries(pageId: String, searchQuery: String): Flow<DataState<List<Entry>>>
+    suspend fun getEntries(pageId: String, queryParams: QueryParams): Flow<DataState<List<Entry>>>
 
     suspend fun insertEntries(entries: List<Entry>): DataState<List<Entry>>
 

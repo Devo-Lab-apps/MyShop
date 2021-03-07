@@ -5,6 +5,7 @@ import com.labs.devo.apps.myshop.data.db.local.abstraction.notebook.LocalPageSer
 import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemotePageService
 import com.labs.devo.apps.myshop.data.models.notebook.Page
 import com.labs.devo.apps.myshop.view.util.DataState
+import com.labs.devo.apps.myshop.view.util.QueryParams
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
@@ -15,11 +16,14 @@ class PageRepositoryImpl @Inject constructor(
 ) : PageRepository {
 
 
-    override suspend fun getPages(notebookId: String, searchQuery: String): Flow<DataState<List<Page>>> = flow {
+    override suspend fun getPages(
+        notebookId: String,
+        queryParams: QueryParams
+    ): Flow<DataState<List<Page>>> = flow {
         emit(DataState.loading<List<Page>>(true))
         try {
-            var localPages = localPageService.getPages(notebookId, searchQuery)
-            if (searchQuery != "" && localPages.isNullOrEmpty()) {
+            var localPages = localPageService.getPages(notebookId, queryParams)
+            if (queryParams.whereQuery.isNotEmpty() && localPages.isNullOrEmpty()) {
                 throw Exception("No records for this search query.")
             }
             if (localPages.isNullOrEmpty()) {

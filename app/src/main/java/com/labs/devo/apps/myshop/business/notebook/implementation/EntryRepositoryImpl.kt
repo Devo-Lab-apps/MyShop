@@ -5,6 +5,7 @@ import com.labs.devo.apps.myshop.data.db.local.abstraction.notebook.LocalEntrySe
 import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemoteEntryService
 import com.labs.devo.apps.myshop.data.models.notebook.Entry
 import com.labs.devo.apps.myshop.view.util.DataState
+import com.labs.devo.apps.myshop.view.util.QueryParams
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
@@ -17,12 +18,12 @@ class EntryRepositoryImpl
 
     override suspend fun getEntries(
         pageId: String,
-        searchQuery: String
+        queryParams: QueryParams
     ): Flow<DataState<List<Entry>>> = flow {
         emit(DataState.loading<List<Entry>>(true))
         try {
-            var localEntries = localEntryService.getEntries(pageId, searchQuery)
-            if (searchQuery != "" && localEntries.isNullOrEmpty()) {
+            var localEntries = localEntryService.getEntries(pageId, queryParams)
+            if (queryParams.whereQuery.isNotEmpty() && localEntries.isNullOrEmpty()) {
                 throw Exception("No record for this search query.")
             }
             if (localEntries.isNullOrEmpty()) {

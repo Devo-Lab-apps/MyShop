@@ -38,13 +38,13 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
             }
 
             loginBtn.setOnClickListener {
-                dataStateHandler.onDataStateChange(DataState.loading<Boolean>(true))
+//                dataStateHandler.onDataStateChange(DataState.loading<Boolean>(true))
                 val emailId = loginEmailAddress.text.toString()
                 val pwd = loginPassword.text.toString()
                 //Disable to prevent repress
                 loginBtn.isEnabled = false
                 openSignupActivityBtn.isEnabled = false
-
+                loginProgressBar.visibility = View.VISIBLE
                 viewModel.loginUser(LoginUserCredentials(emailId, pwd))
             }
         }
@@ -102,7 +102,7 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                 }
                 binding.loginBtn.isEnabled = true
                 binding.openSignupActivityBtn.isEnabled = true
-
+                binding.loginProgressBar.visibility = View.GONE
             }
         }
     }

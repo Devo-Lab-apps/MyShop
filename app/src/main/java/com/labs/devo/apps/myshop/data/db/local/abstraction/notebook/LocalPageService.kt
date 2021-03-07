@@ -1,11 +1,12 @@
 package com.labs.devo.apps.myshop.data.db.local.abstraction.notebook
 
 import com.labs.devo.apps.myshop.data.models.notebook.Page
+import com.labs.devo.apps.myshop.view.util.QueryParams
 
 interface LocalPageService {
 
 
-    suspend fun getPages(notebookId: String, searchQuery: String): List<Page>?
+    suspend fun getPages(notebookId: String, queryParams: QueryParams): List<Page>?
 
     suspend fun insertPages(pages: List<Page>): List<Page>
 

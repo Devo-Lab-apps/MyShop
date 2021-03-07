@@ -7,6 +7,7 @@ import com.labs.devo.apps.myshop.data.models.notebook.Entry
 import com.labs.devo.apps.myshop.view.util.BaseViewModel
 import com.labs.devo.apps.myshop.view.util.DataState
 import com.labs.devo.apps.myshop.view.util.Event
+import com.labs.devo.apps.myshop.view.util.QueryParams
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -15,8 +16,8 @@ class EntryViewModel
     BaseViewModel<EntryViewModel.EntryEvent>() {
 
 
-    fun getEntries(pageId: String, searchQuery: String) = viewModelScope.launch {
-        entryRepository.getEntries(pageId, searchQuery).collect { dataState ->
+    fun getEntries(pageId: String, queryParams: QueryParams) = viewModelScope.launch {
+        entryRepository.getEntries(pageId, queryParams).collect { dataState ->
             handleGetEntries(dataState)
         }
     }

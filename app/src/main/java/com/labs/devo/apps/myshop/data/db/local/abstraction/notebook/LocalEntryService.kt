@@ -1,10 +1,11 @@
 package com.labs.devo.apps.myshop.data.db.local.abstraction.notebook
 
 import com.labs.devo.apps.myshop.data.models.notebook.Entry
+import com.labs.devo.apps.myshop.view.util.QueryParams
 
 interface LocalEntryService {
 
-    suspend fun getEntries(pageId: String, searchQuery: String): List<Entry>?
+    suspend fun getEntries(pageId: String, queryParams: QueryParams): List<Entry>?
 
     suspend fun insertEntries(entries: List<Entry>): List<Entry>
 
