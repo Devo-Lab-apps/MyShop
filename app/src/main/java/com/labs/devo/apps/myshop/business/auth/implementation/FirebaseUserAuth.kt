@@ -4,14 +4,16 @@ import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.labs.devo.apps.myshop.business.auth.abstraction.UserAuth
+import com.labs.devo.apps.myshop.business.helper.FirebaseConstants
 import com.labs.devo.apps.myshop.business.helper.FirebaseHelper
 import com.labs.devo.apps.myshop.const.AppConstants
+import com.labs.devo.apps.myshop.data.db.remote.models.notebook.NotebookMetadataConstants
+import com.labs.devo.apps.myshop.data.db.remote.models.notebook.RemoteEntityNotebook
 import com.labs.devo.apps.myshop.data.models.account.Account
 import com.labs.devo.apps.myshop.data.models.account.User
 import com.labs.devo.apps.myshop.data.models.auth.AuthenticationResult
 import com.labs.devo.apps.myshop.data.models.auth.LoginUserCredentials
 import com.labs.devo.apps.myshop.data.models.auth.SignUpUserCredentials
-import com.labs.devo.apps.myshop.data.models.notebook.Notebook
 import com.labs.devo.apps.myshop.util.AppData
 import com.labs.devo.apps.myshop.util.printLogD
 import com.labs.devo.apps.myshop.view.util.DataState
@@ -136,7 +138,7 @@ class FirebaseUserAuth @Inject constructor(val auth: FirebaseAuth) :
                 res.user?.let { u ->
                     val account = createAccountInDb(email)
                     user = createUserInDb(email, account.accountId, u.uid)
-                    createForeignNotebook(account.accountId)
+                    createForeignNotebook(u.uid, account.accountId)
                     u.sendEmailVerification()
                 }
             }
@@ -158,13 +160,19 @@ class FirebaseUserAuth @Inject constructor(val auth: FirebaseAuth) :
         }
     }
 
-    private suspend fun createForeignNotebook(accountId: String) {
-        val notebook = Notebook(
-            "foreign",
-            "Foreign"
+    private suspend fun createForeignNotebook(uid: String, accountId: String) {
+        val notebook = RemoteEntityNotebook(
+            FirebaseConstants.foreignNotebookKey,
+            FirebaseConstants.foreignNotebookName,
+            creatorUserId = uid,
+            accountId = accountId,
+            metadata = mapOf(
+                NotebookMetadataConstants.isForeign to "true",
+                NotebookMetadataConstants.isImported to "false",
+            )
         )
         FirebaseHelper.getNotebookCollection(accountId)
-            .document("foreign").set(notebook).await()
+            .document(FirebaseConstants.foreignNotebookKey).set(notebook).await()
     }
 
     /**

@@ -9,5 +9,18 @@ data class RemoteEntityNotebook(
 
     val modifiedAt: Long = System.currentTimeMillis(),
 
-    val pages: MutableList<String> = mutableListOf()
+    val pages: MutableList<String> = mutableListOf(),
+
+    val creatorUserId: String = "",
+
+    val accountId: String = "",
+
+    val metadata: Map<String, String> = mapOf()
 )
+
+object NotebookMetadataConstants {
+    const val isForeign = "isForeign"
+    const val isImported = "isImported"
+    const val importerUserId = "importerUserId"
+
+}

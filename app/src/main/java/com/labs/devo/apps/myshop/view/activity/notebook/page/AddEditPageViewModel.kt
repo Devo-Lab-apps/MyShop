@@ -8,7 +8,7 @@ import com.labs.devo.apps.myshop.view.util.BaseViewModel
 import kotlinx.coroutines.launch
 
 class AddEditPageViewModel @ViewModelInject
-constructor(val pageRepository: PageRepository) :
+constructor(private val pageRepository: PageRepository) :
     BaseViewModel<AddEditPageViewModel.AddEditPageEvent>() {
 
 

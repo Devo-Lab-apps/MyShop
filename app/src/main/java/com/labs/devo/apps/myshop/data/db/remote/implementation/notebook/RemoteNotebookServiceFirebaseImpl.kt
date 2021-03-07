@@ -53,7 +53,7 @@ class RemoteNotebookServiceFirebaseImpl @Inject constructor(
         if (existingNotebooks.size >= 3) {
             throw NotebookLimitExceededException("You can't have more than 3 notebooks per account.")
         }
-        var insertedNotebook = notebook.copy()
+        var insertedNotebook = notebook
         FirebaseHelper.runWriteBatch {
             insertedNotebook = insertInDb(notebook)
         }
@@ -142,7 +142,9 @@ class RemoteNotebookServiceFirebaseImpl @Inject constructor(
         val notebookId = FirebaseHelper.getNotebookReference(user.accountId).id
         val data = mapperRemote.mapToEntity(
             notebook.copy(
-                notebookId = notebookId
+                notebookId = notebookId,
+                creatorUserId = user.uid,
+                accountId = user.accountId
             )
         )
         FirebaseHelper.getNotebookReference(user.accountId, notebookId).set(data)

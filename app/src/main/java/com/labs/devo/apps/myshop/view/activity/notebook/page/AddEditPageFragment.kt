@@ -58,12 +58,13 @@ class AddEditPageFragment : Fragment(R.layout.add_edit_page_fragment) {
     private fun initView() {
         binding.apply {
             addEditPageBtn.setOnClickListener {
+                addEditPageBtn.isEnabled = false
                 if (operation == ADD_PAGE_OPERATION) {
                     val pageName = pageName.text.toString()
                     val pageId = pageId.text.toString()
                     val page = Page(
-                        creatorAccountId = UserManager.user!!.email,
-                        consumerAccountId = pageId,
+                        creatorUserId = UserManager.user!!.email,
+                        consumerUserId = pageId,
                         creatorNotebookId = notebookId!!,
                         consumerNotebookId = FirebaseConstants.foreignNotebookKey,
                         pageName = pageName
@@ -79,7 +80,6 @@ class AddEditPageFragment : Fragment(R.layout.add_edit_page_fragment) {
                     )
                     viewModel.updatePage(page!!, newPage)
                 }
-                addEditPageBtn.isEnabled = false
             }
             if (operation == EDIT_PAGE_OPERATION) {
                 addEditPageBtn.text = "Update Page"

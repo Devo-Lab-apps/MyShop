@@ -20,5 +20,13 @@ data class LocalEntityNotebook(
     @NotNull
     val modifiedAt: Long = System.currentTimeMillis(),
 
-    val pages: List<String> = listOf()
+    val pages: List<String> = listOf(),
+
+    @NotNull
+    val creatorUserId: String = "",
+
+    @NotNull
+    val accountId: String = "",
+
+    val metadata: Map<String, String> = mapOf()
 )

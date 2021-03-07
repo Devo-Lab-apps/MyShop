@@ -1,6 +1,9 @@
 package com.labs.devo.apps.myshop.data.db.remote.implementation.notebook
 
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.Transaction
+import com.labs.devo.apps.myshop.business.helper.FirebaseConstants
 import com.labs.devo.apps.myshop.business.helper.FirebaseHelper
 import com.labs.devo.apps.myshop.business.helper.UserManager
 import com.labs.devo.apps.myshop.const.AppConstants
@@ -10,8 +13,10 @@ import com.labs.devo.apps.myshop.data.db.remote.mapper.notebook.RemoteNotebookMa
 import com.labs.devo.apps.myshop.data.db.remote.mapper.notebook.RemotePageMapper
 import com.labs.devo.apps.myshop.data.db.remote.models.notebook.RemoteEntityNotebook
 import com.labs.devo.apps.myshop.data.db.remote.models.notebook.RemoteEntityPage
+import com.labs.devo.apps.myshop.data.models.account.User
 import com.labs.devo.apps.myshop.data.models.notebook.Page
 import com.labs.devo.apps.myshop.util.exceptions.*
+import com.labs.devo.apps.myshop.util.extensions.isValidEmail
 import com.labs.devo.apps.myshop.view.util.AsyncHelper
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -53,17 +58,20 @@ class RemotePageServiceFirebaseImpl @Inject constructor(
     }
 
     override suspend fun insertPage(page: Page): Page {
-        var updatedPage: Page = page.copy()
+        if (!page.consumerUserId.isValidEmail()) {
+            throw java.lang.Exception("Invalid receiver's email.")
+        }
+        var createdPage: Page = page.copy()
         FirebaseHelper.runTransaction { transaction ->
             val notebookEntity =
                 getEntityNotebookFromTransaction(page.creatorNotebookId, transaction)
             if (notebookEntity.pages.size >= 50) {
                 throw PageLimitExceededException()
             }
-            updatedPage = insertInDb(page, transaction)
-            addPagesInNotebookEntity(notebookEntity, listOf(updatedPage.pageId), transaction)
+            createdPage = insertInDb(page, transaction)
+            addPagesInNotebookEntity(notebookEntity, listOf(createdPage.pageId), transaction)
         }
-        return updatedPage
+        return createdPage
     }
 
     override suspend fun updatePages(pages: List<Page>): List<Page> {
@@ -130,6 +138,10 @@ class RemotePageServiceFirebaseImpl @Inject constructor(
 
     private fun insertInDb(page: Page, transaction: Transaction): Page {
         val pageId = FirebaseHelper.getPageReference().id
+        val foreignSnapshot = foreignSnapshot(page, transaction, pageId)
+        if (foreignSnapshot.exists()) {
+            insertInForeign(foreignSnapshot, transaction, pageId)
+        }
         val data = remotePageMapper.mapToEntity(
             page.copy(
                 pageId = pageId
@@ -138,6 +150,33 @@ class RemotePageServiceFirebaseImpl @Inject constructor(
         val pageRef = FirebaseHelper.getPageReference(pageId)
         transaction.set(pageRef, data)
         return remotePageMapper.mapFromEntity(data)
+    }
+
+    private fun insertInForeign(
+        foreignSnapshot: DocumentSnapshot,
+        transaction: Transaction,
+        pageId: String
+    ) {
+        val user = foreignSnapshot.toObject(User::class.java)!!
+        val foreignRef = FirebaseHelper.getNotebookReference(
+            user.accountId,
+            FirebaseConstants.foreignNotebookKey
+        )
+        transaction.update(
+            foreignRef, mapOf(
+                "pages" to FieldValue.arrayUnion(pageId)
+            )
+        )
+    }
+
+    private fun foreignSnapshot(
+        page: Page,
+        transaction: Transaction,
+        pageId: String
+    ): DocumentSnapshot {
+        val receiver = page.consumerUserId
+        val ref = FirebaseHelper.getUsersDocReference(receiver)
+        return transaction.get(ref)
     }
 
 
