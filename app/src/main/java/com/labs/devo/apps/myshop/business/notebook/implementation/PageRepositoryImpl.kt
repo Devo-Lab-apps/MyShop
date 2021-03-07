@@ -1,6 +1,8 @@
 package com.labs.devo.apps.myshop.business.notebook.implementation
 
+import com.labs.devo.apps.myshop.business.helper.PermissionsHelper.checkPermissions
 import com.labs.devo.apps.myshop.business.notebook.abstraction.PageRepository
+import com.labs.devo.apps.myshop.const.Permissions
 import com.labs.devo.apps.myshop.data.db.local.abstraction.notebook.LocalPageService
 import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemotePageService
 import com.labs.devo.apps.myshop.data.models.notebook.Page
@@ -22,6 +24,7 @@ class PageRepositoryImpl @Inject constructor(
     ): Flow<DataState<List<Page>>> = flow {
         emit(DataState.loading<List<Page>>(true))
         try {
+            checkPermissions(Permissions.GET_PAGE)
             var localPages = localPageService.getPages(notebookId, queryParams)
             if (queryParams.whereQuery.isNotEmpty() && localPages.isNullOrEmpty()) {
                 throw Exception("No records for this search query.")
@@ -46,6 +49,7 @@ class PageRepositoryImpl @Inject constructor(
 
     override suspend fun insertPages(pages: List<Page>): DataState<List<Page>> {
         return try {
+            checkPermissions(Permissions.CREATE_PAGE)
             val newPages = remotePageService.insertPages(pages)
             val localPages = localPageService.insertPages(newPages)
             DataState.data(localPages)
@@ -58,6 +62,7 @@ class PageRepositoryImpl @Inject constructor(
 
     override suspend fun insertPage(page: Page): DataState<Page> {
         return try {
+            checkPermissions(Permissions.CREATE_PAGE)
             val newPage = remotePageService.insertPage(page)
             val localPage = localPageService.insertPage(newPage)
             DataState.data(localPage)
@@ -70,6 +75,7 @@ class PageRepositoryImpl @Inject constructor(
 
     override suspend fun updatePages(pages: List<Page>): DataState<List<Page>> {
         return try {
+            checkPermissions(Permissions.CREATE_PAGE)
             val newPages = remotePageService.updatePages(pages)
             val localPages = localPageService.updatePages(newPages)
             DataState.data(localPages)
@@ -82,6 +88,7 @@ class PageRepositoryImpl @Inject constructor(
 
     override suspend fun updatePage(page: Page): DataState<Page> {
         return try {
+            checkPermissions(Permissions.CREATE_PAGE)
             val newPage = remotePageService.updatePage(page)
             val localPages = localPageService.updatePage(newPage)
             DataState.data(localPages)
@@ -94,6 +101,7 @@ class PageRepositoryImpl @Inject constructor(
 
     override suspend fun deletePage(page: Page): DataState<Page> {
         return try {
+            checkPermissions(Permissions.DELETE_PAGE)
             remotePageService.deletePage(page)
             localPageService.deletePage(page)
             DataState.data(page)
@@ -106,6 +114,7 @@ class PageRepositoryImpl @Inject constructor(
 
     override suspend fun deletePages(pages: List<Page>): DataState<List<Page>> {
         return try {
+            checkPermissions(Permissions.DELETE_PAGE)
             remotePageService.deletePages(pages)
             localPageService.deletePages(pages)
             DataState.data(pages)

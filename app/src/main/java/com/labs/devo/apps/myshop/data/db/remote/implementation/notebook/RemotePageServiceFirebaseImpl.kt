@@ -101,6 +101,7 @@ class RemotePageServiceFirebaseImpl @Inject constructor(
 
     override suspend fun deletePage(page: Page) {
         val pageId = page.pageId
+        //TODO decide whether to delete entries also
         FirebaseHelper.runTransaction { transaction ->
             val ref =
                 FirebaseHelper.getPageReference(pageId)
