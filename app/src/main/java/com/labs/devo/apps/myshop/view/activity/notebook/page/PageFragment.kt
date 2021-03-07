@@ -7,7 +7,6 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.widget.SearchView
-
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -26,16 +25,19 @@ import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragmen
 import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment.NotebookConstants.EDIT_PAGE_OPERATION
 import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment.NotebookConstants.NOTEBOOK_ID
 import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment.NotebookConstants.OPERATION
-import com.labs.devo.apps.myshop.view.adapter.Page.PageListAdapter
-import com.labs.devo.apps.myshop.view.util.DataState
-import com.labs.devo.apps.myshop.view.util.DataStateListener
+import com.labs.devo.apps.myshop.view.adapter.notebook.PageListAdapter
+import com.labs.devo.apps.myshop.view.util.*
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class PageFragment : Fragment(R.layout.fragment_page) {
+class PageFragment : Fragment(R.layout.fragment_page), PageListAdapter.OnPageClick,
+    PageListAdapter.OnPageSettingsClick {
 
     private val TAG = AppConstants.APP_PREFIX + javaClass.simpleName
 
@@ -51,6 +53,8 @@ class PageFragment : Fragment(R.layout.fragment_page) {
     lateinit var preferencesManager: PreferencesManager
 
     private lateinit var notebookId: String
+
+    private lateinit var queryParams: QueryParams
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
@@ -68,24 +72,7 @@ class PageFragment : Fragment(R.layout.fragment_page) {
         setHasOptionsMenu(true)
         dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
         binding.selectNotebookButton.isEnabled = false
-        pageListAdapter = PageListAdapter(
-            object : PageListAdapter.OnPageClick {
-                override fun onClick(page: Page) {
-                    val args = bundleOf(
-                        "page" to page
-                    )
-                    findNavController().navigate(R.id.entryFragment, args)
-                }
-            },
-            object : PageListAdapter.OnPageSettingsClick {
-                override fun onClick(page: Page) {
-                    val args = bundleOf(
-                        OPERATION to EDIT_PAGE_OPERATION,
-                        "page" to page
-                    )
-                    findNavController().navigate(R.id.addEditPageFragment, args)
-                }
-            })
+        pageListAdapter = PageListAdapter(this, this)
 
         pageListAdapter.submitList(mutableListOf())
 
@@ -113,10 +100,16 @@ class PageFragment : Fragment(R.layout.fragment_page) {
 
     private fun observeEvents() {
         lifecycleScope.launch {
-            preferencesManager.currentSelectedNotebook.collect { pair ->
-                notebookId = pair.first
-                binding.selectNotebookButton.text = pair.second
-                viewModel.getPages(notebookId, "")
+            combine(
+                preferencesManager.currentSelectedNotebook,
+                preferencesManager.pageQueryParams
+            ) { notebook, qp ->
+                Pair(notebook, qp)
+            }.collect { (notebook, qp) ->
+                notebookId = notebook.first
+                queryParams = qp
+                binding.selectNotebookButton.text = notebook.second
+                viewModel.getPages(notebookId, queryParams)
                 binding.selectNotebookButton.isEnabled = true
             }
         }
@@ -158,17 +151,28 @@ class PageFragment : Fragment(R.layout.fragment_page) {
         val searchView = searchItem.actionView as SearchView
 
         searchView.onQueryTextChanged {
-            viewModel.getPages(notebookId, it)
+            val whereQuery = queryParams.whereQuery
+            val colName = Page::pageName.name
+            whereQuery[colName] = WhereClause("LIKE", "%$it%", QUERY_TYPE.STRING)
+            viewModel.getPages(notebookId, queryParams)
         }
-
     }
+
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_sort_page_by_date -> {
+                QueryHelper.handleOrderBy(Page::modifiedAt.name, queryParams)
+                CoroutineScope(Dispatchers.IO).launch {
+                    preferencesManager.updatePageQueryParams(queryParams)
+                }
                 true
             }
             R.id.action_sort_page_by_name -> {
+                QueryHelper.handleOrderBy(Page::pageName.name, queryParams)
+                CoroutineScope(Dispatchers.IO).launch {
+                    preferencesManager.updatePageQueryParams(queryParams)
+                }
                 true
             }
             R.id.action_sync_pages -> {
@@ -188,5 +192,21 @@ class PageFragment : Fragment(R.layout.fragment_page) {
             println("$context must implement DataStateListener")
         }
 
+    }
+
+    override fun onPageSettingsClick(page: Page) {
+        val args = bundleOf(
+            OPERATION to EDIT_PAGE_OPERATION,
+            "page" to page
+        )
+        findNavController().navigate(R.id.addEditPageFragment, args)
+    }
+
+
+    override fun onClick(page: Page) {
+        val args = bundleOf(
+            "page" to page
+        )
+        findNavController().navigate(R.id.entryFragment, args)
     }
 }

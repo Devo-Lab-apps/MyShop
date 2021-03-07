@@ -1,4 +1,4 @@
-package com.labs.devo.apps.myshop.view.adapter.Page
+package com.labs.devo.apps.myshop.view.adapter.notebook
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -25,7 +25,7 @@ class PageListAdapter(
                 val pos = adapterPosition
                 if (pos != RecyclerView.NO_POSITION) {
                     binding.pageSettings.setOnClickListener {
-                        onPageSettingsSettingsClick.onClick(getItem(pos))
+                        onPageSettingsSettingsClick.onPageSettingsClick(getItem(pos))
                     }
                     binding.root.setOnClickListener {
                         onPageClick.onClick(getItem(pos))
@@ -36,7 +36,7 @@ class PageListAdapter(
     }
 
     interface OnPageSettingsClick {
-        fun onClick(page: Page)
+        fun onPageSettingsClick(page: Page)
     }
 
     interface OnPageClick {

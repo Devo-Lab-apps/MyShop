@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.room.Room
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.gson.Gson
 import com.labs.devo.apps.myshop.business.auth.abstraction.UserAuth
 import com.labs.devo.apps.myshop.business.auth.implementation.FirebaseUserAuth
 import com.labs.devo.apps.myshop.data.db.local.database.dao.EntryDao
@@ -57,5 +58,9 @@ class AppModule {
     @Provides
     @Singleton
     fun provideEntryDao(database: NotebookDatabase): EntryDao = database.entryDao()
+
+    @Provides
+    @Singleton
+    fun provideGson(): Gson = Gson()
 
 }

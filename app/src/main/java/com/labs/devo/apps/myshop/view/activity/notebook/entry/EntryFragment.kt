@@ -18,18 +18,21 @@ import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.data.models.notebook.Entry
 import com.labs.devo.apps.myshop.data.models.notebook.Page
 import com.labs.devo.apps.myshop.databinding.FragmentEntryBinding
+import com.labs.devo.apps.myshop.util.PreferencesManager
 import com.labs.devo.apps.myshop.util.extensions.onQueryTextChanged
-import com.labs.devo.apps.myshop.util.printLogD
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity
 import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment
 import com.labs.devo.apps.myshop.view.adapter.entry.EntryListAdapter
-import com.labs.devo.apps.myshop.view.util.DataState
-import com.labs.devo.apps.myshop.view.util.DataStateListener
+import com.labs.devo.apps.myshop.view.util.*
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
-class EntryFragment : Fragment(R.layout.fragment_entry) {
+class EntryFragment : Fragment(R.layout.fragment_entry), EntryListAdapter.OnEntryClick {
 
     private val TAG = AppConstants.APP_PREFIX + javaClass.simpleName
 
@@ -43,6 +46,11 @@ class EntryFragment : Fragment(R.layout.fragment_entry) {
 
     private lateinit var dataStateHandler: DataStateListener
 
+    @Inject
+    lateinit var preferencesManager: PreferencesManager
+
+    private lateinit var queryParams: QueryParams
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentEntryBinding.bind(view)
@@ -53,7 +61,7 @@ class EntryFragment : Fragment(R.layout.fragment_entry) {
 
         initView()
         observeEvents()
-        viewModel.getEntries(page.pageId, "")
+
     }
 
 
@@ -61,16 +69,7 @@ class EntryFragment : Fragment(R.layout.fragment_entry) {
         (activity as NotebookActivity).setSupportActionBar(binding.entryToolbar)
         setHasOptionsMenu(true)
         dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
-        entryListAdapter = EntryListAdapter(object : EntryListAdapter.OnEntryClick {
-            override fun onClick(entry: Entry) {
-                val args = bundleOf(
-                    NotebookFragment.NotebookConstants.OPERATION to NotebookFragment.NotebookConstants.EDIT_ENTRY_OPERATION,
-                    "page" to page,
-                    "entry" to entry
-                )
-                findNavController().navigate(R.id.addEditEntryFragment, args)
-            }
-        })
+        entryListAdapter = EntryListAdapter(this)
 
         entryListAdapter.submitList(mutableListOf())
         binding.apply {
@@ -91,6 +90,13 @@ class EntryFragment : Fragment(R.layout.fragment_entry) {
     }
 
     private fun observeEvents() {
+        lifecycleScope.launch {
+            preferencesManager.entryQueryParams.collect { qp ->
+                queryParams = qp
+                viewModel.getEntries(page.pageId, queryParams)
+            }
+        }
+
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             viewModel.channelFlow.collect { event ->
                 when (event) {
@@ -100,7 +106,6 @@ class EntryFragment : Fragment(R.layout.fragment_entry) {
                         }
                     }
                     is EntryViewModel.EntryEvent.GetEntries -> {
-                        printLogD(TAG, event.entries)
                         dataStateHandler.onDataStateChange(event.dataState)
                         entryListAdapter.submitList(event.entries.toMutableList())
                     }
@@ -116,7 +121,10 @@ class EntryFragment : Fragment(R.layout.fragment_entry) {
         val searchView = searchItem.actionView as SearchView
 
         searchView.onQueryTextChanged {
-            viewModel.getEntries(page.pageId, it)
+            val whereQuery = queryParams.whereQuery
+            val colName = Entry::entryTitle.name
+            whereQuery[colName] = WhereClause("LIKE", "%$it%", QUERY_TYPE.STRING)
+            viewModel.getEntries(page.pageId, queryParams)
         }
 
     }
@@ -124,9 +132,17 @@ class EntryFragment : Fragment(R.layout.fragment_entry) {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_sort_entry_by_date -> {
+                QueryHelper.handleOrderBy(Page::modifiedAt.name, queryParams)
+                CoroutineScope(Dispatchers.IO).launch {
+                    preferencesManager.updateEntryQueryParams(queryParams)
+                }
                 true
             }
             R.id.action_sort_entry_by_name -> {
+                QueryHelper.handleOrderBy(Page::pageName.name, queryParams)
+                CoroutineScope(Dispatchers.IO).launch {
+                    preferencesManager.updateEntryQueryParams(queryParams)
+                }
                 true
             }
             R.id.action_sync_entries -> {
@@ -146,5 +162,14 @@ class EntryFragment : Fragment(R.layout.fragment_entry) {
             println("$context must implement DataStateListener")
         }
 
+    }
+
+    override fun onClick(entry: Entry) {
+        val args = bundleOf(
+            NotebookFragment.NotebookConstants.OPERATION to NotebookFragment.NotebookConstants.EDIT_ENTRY_OPERATION,
+            "page" to page,
+            "entry" to entry
+        )
+        findNavController().navigate(R.id.addEditEntryFragment, args)
     }
 }
