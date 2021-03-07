@@ -12,6 +12,7 @@ data class User(
     val profileImageUrl: String = "",
     var loggedInAt: Long = 0,
     val signedUpInAt: Long = 0,
+    val permissions: List<Int> = listOf(),
+    @field:JvmField val isMasterUser: Boolean = true
     //TODO add other profile attributes
 )
-//permissions(Ints),

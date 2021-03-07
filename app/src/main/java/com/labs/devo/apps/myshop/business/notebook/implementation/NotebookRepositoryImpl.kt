@@ -1,6 +1,8 @@
 package com.labs.devo.apps.myshop.business.notebook.implementation
 
+import com.labs.devo.apps.myshop.business.helper.PermissionsHelper.checkPermissions
 import com.labs.devo.apps.myshop.business.notebook.abstraction.NotebookRepository
+import com.labs.devo.apps.myshop.const.Permissions
 import com.labs.devo.apps.myshop.data.db.local.abstraction.notebook.LocalNotebookService
 import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemoteNotebookService
 import com.labs.devo.apps.myshop.data.models.notebook.Notebook
@@ -18,6 +20,7 @@ class NotebookRepositoryImpl @Inject constructor(
     override suspend fun getNotebooks(): Flow<DataState<List<Notebook>>> = flow {
         emit(DataState.loading<List<Notebook>>(true))
         try {
+            checkPermissions(Permissions.GET_NOTEBOOK)
             var localNotebooks = localNotebookService.getNotebooks()
             if (localNotebooks.isNullOrEmpty()) {
                 val notebooks = remoteNotebookService.getNotebooks()
@@ -34,7 +37,9 @@ class NotebookRepositoryImpl @Inject constructor(
     }
 
     override suspend fun insertNotebooks(notebooks: List<Notebook>): DataState<List<Notebook>> {
+
         return try {
+            checkPermissions(Permissions.CREATE_NOTEBOOK)
             val insertedNotebooks = remoteNotebookService.insertNotebooks(notebooks)
             val localInsertedNotebooks = localNotebookService.insertNotebooks(insertedNotebooks)
             DataState.data(localInsertedNotebooks)
@@ -46,7 +51,9 @@ class NotebookRepositoryImpl @Inject constructor(
     }
 
     override suspend fun insertNotebook(notebook: Notebook): DataState<Notebook> {
+
         return try {
+            checkPermissions(Permissions.CREATE_NOTEBOOK)
             val insertNotebook = remoteNotebookService.insertNotebook(notebook)
             val localInsertedNotebook = localNotebookService.insertNotebook(insertNotebook)
             DataState.data(localInsertedNotebook)
@@ -58,7 +65,9 @@ class NotebookRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateNotebooks(notebooks: List<Notebook>): DataState<List<Notebook>> {
+
         return try {
+            checkPermissions(Permissions.CREATE_NOTEBOOK)
             val updatedNotebooks = remoteNotebookService.updateNotebooks(notebooks)
             val localUpdated = localNotebookService.updateNotebooks(updatedNotebooks)
             DataState.data(localUpdated)
@@ -71,7 +80,9 @@ class NotebookRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateNotebook(notebook: Notebook): DataState<Notebook> {
+
         return try {
+            checkPermissions(Permissions.CREATE_NOTEBOOK)
             val updatedNotebook = remoteNotebookService.updateNotebook(notebook)
             val localUpdatedNotebook = localNotebookService.updateNotebook(updatedNotebook)
             DataState.data(localUpdatedNotebook)
@@ -84,6 +95,7 @@ class NotebookRepositoryImpl @Inject constructor(
 
     override suspend fun deleteNotebook(notebook: Notebook): DataState<Notebook> {
         return try {
+            checkPermissions(Permissions.DELETE_NOTEBOOK)
             remoteNotebookService.deleteNotebook(notebook)
             localNotebookService.deleteNotebook(notebook)
             DataState.data(notebook)
@@ -96,6 +108,7 @@ class NotebookRepositoryImpl @Inject constructor(
 
     override suspend fun deleteNotebooks(notebooks: List<Notebook>): DataState<List<Notebook>> {
         return try {
+            checkPermissions(Permissions.DELETE_NOTEBOOK)
             remoteNotebookService.deleteNotebooks(notebooks)
             localNotebookService.deleteNotebooks(notebooks)
             DataState.data(notebooks)
