@@ -5,6 +5,7 @@ import androidx.datastore.preferences.createDataStore
 import androidx.datastore.preferences.edit
 import androidx.datastore.preferences.preferencesKey
 import com.google.gson.Gson
+import com.labs.devo.apps.myshop.business.helper.FirebaseConstants
 import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.data.db.remote.models.notebook.ImportStatus
 import com.labs.devo.apps.myshop.view.util.QueryParams
@@ -24,7 +25,7 @@ class PreferencesManager @Inject constructor(@ApplicationContext context: Contex
     val currentSelectedNotebook =
         dataStore.data.map { prefs ->
             val v = prefs[PreferenceKeys.currentSelectedNotebook]
-                ?: "$$"
+                ?: FirebaseConstants.foreignNotebookKey + "$$" + FirebaseConstants.foreignNotebookName
             val s = v.split("$$")
             Pair(s[0], s[1])
         }

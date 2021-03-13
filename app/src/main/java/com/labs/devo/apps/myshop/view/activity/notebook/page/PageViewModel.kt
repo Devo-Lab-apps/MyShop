@@ -70,11 +70,6 @@ class PageViewModel @ViewModelInject constructor(
             )
     }
 
-    fun importForeignPages() = viewModelScope.launch {
-        pageRepository.importForeignPages()
-//        pageRepository.importedForeignNotebook()
-    }
-
 
     sealed class PageEvent {
         object NavigateToNotebookFragment : PageEvent()
