@@ -7,6 +7,7 @@ import com.labs.devo.apps.myshop.business.auth.abstraction.UserAuth
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants
 import com.labs.devo.apps.myshop.business.helper.FirebaseHelper
 import com.labs.devo.apps.myshop.const.AppConstants
+import com.labs.devo.apps.myshop.data.db.remote.models.notebook.ImportStatus
 import com.labs.devo.apps.myshop.data.db.remote.models.notebook.NotebookMetadataConstants
 import com.labs.devo.apps.myshop.data.db.remote.models.notebook.RemoteEntityNotebook
 import com.labs.devo.apps.myshop.data.models.account.Account
@@ -168,7 +169,7 @@ class FirebaseUserAuth @Inject constructor(val auth: FirebaseAuth) :
             accountId = accountId,
             metadata = mapOf(
                 NotebookMetadataConstants.isForeign to "true",
-                NotebookMetadataConstants.isImported to "false",
+                NotebookMetadataConstants.importStatus to "${ImportStatus.IMPORTING.ordinal}",
             )
         )
         FirebaseHelper.getNotebookCollection(accountId)

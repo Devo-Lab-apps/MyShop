@@ -20,7 +20,10 @@ data class RemoteEntityNotebook(
 
 object NotebookMetadataConstants {
     const val isForeign = "isForeign"
-    const val isImported = "isImported"
-    const val importerUserId = "importerUserId"
+    const val importStatus = "isImported"
+}
 
+enum class ImportStatus {
+    IMPORTED,
+    IMPORTING
 }

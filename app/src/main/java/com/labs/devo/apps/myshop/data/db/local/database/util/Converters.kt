@@ -4,8 +4,9 @@ import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.lang.reflect.Type
+import javax.inject.Singleton
 
-
+@Singleton
 object Converters {
     @TypeConverter
     @JvmStatic
@@ -19,5 +20,19 @@ object Converters {
     fun fromList(list: List<String>): String {
         val gson = Gson()
         return gson.toJson(list)
+    }
+
+    @TypeConverter
+    @JvmStatic
+    fun fromMapString(value: String): Map<String, String> {
+        val mapType: Type = object : TypeToken<Map<String, String>>() {}.type
+        return Gson().fromJson(value, mapType)
+    }
+
+    @TypeConverter
+    @JvmStatic
+    fun fromMap(map: Map<String, String>): String {
+        val gson = Gson()
+        return gson.toJson(map)
     }
 }

@@ -10,7 +10,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.labs.devo.apps.myshop.R
+import com.labs.devo.apps.myshop.business.helper.FirebaseConstants
 import com.labs.devo.apps.myshop.const.AppConstants
+import com.labs.devo.apps.myshop.data.db.remote.models.notebook.NotebookMetadataConstants
 import com.labs.devo.apps.myshop.data.models.notebook.Notebook
 import com.labs.devo.apps.myshop.databinding.FragmentNotebookBinding
 import com.labs.devo.apps.myshop.util.PreferencesManager
@@ -119,7 +121,18 @@ class NotebookFragment : DialogFragment(R.layout.fragment_notebook) {
                     is NotebookViewModel.NotebookEvent.GetNotebooks -> {
                         val notebooks = event.notebooks
                         dataStateHandler.onDataStateChange(event.dataState)
+                        val foreignNotebook =
+                            notebooks.firstOrNull { notebook -> notebook.notebookId == FirebaseConstants.foreignNotebookKey }
+                        if (foreignNotebook == null) {
+                            dataStateHandler.onDataStateChange(DataState.message<Nothing>("Some error occurred."))
+                            // clog("foreign can't be null).
+                            return@collect
+                        }
                         notebookAdapter.submitList(notebooks.toMutableList())
+                        foreignNotebook.metadata[NotebookMetadataConstants.importStatus]?.let { s ->
+                            val status = s.toInt()
+                            preferencesManager.setForeignImported(status)
+                        }
                     }
                     is NotebookViewModel.NotebookEvent.ShowInvalidInputMessage -> {
                         if (event.msg != null) {
