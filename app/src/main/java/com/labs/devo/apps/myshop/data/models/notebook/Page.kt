@@ -5,8 +5,8 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class Page(
-    val creatorAccountId: String = "",
-    val consumerAccountId: String = "",
+    val creatorUserId: String = "",
+    val consumerUserId: String = "",
     val creatorNotebookId: String = "",
     val consumerNotebookId: String = "",
     val pageId: String = "",
@@ -15,6 +15,6 @@ data class Page(
     val createdAt: Long = System.currentTimeMillis(),
     val modifiedAt: Long = System.currentTimeMillis()
 ): Parcelable
-//creatorUserId, consumerUserId, pageContactNumber, pageDisplayImage, isSubscriber
+//creatorUserName, creatorAccountId, consumerAccountId, pageContactNumber, pageDisplayImage, isSubscriber
 //metadata
     // -cycleDuration, foreignPageName

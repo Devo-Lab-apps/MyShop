@@ -13,9 +13,14 @@ data class Notebook(
 
     val modifiedAt: Long = System.currentTimeMillis(),
 
-    val pages: List<String> = listOf()
+    val pages: List<String> = listOf(),
 
-): Parcelable
-//creatorUserId, accountId
+    val creatorUserId: String = "",
+
+    val accountId: String = "",
+
+    val metadata: Map<String, String> = mapOf()
+
+) : Parcelable
 // metadata
-    //isImported, isForeign, importerUserId, importedAt
+//isImported, isForeign, importerUserId, importedAt

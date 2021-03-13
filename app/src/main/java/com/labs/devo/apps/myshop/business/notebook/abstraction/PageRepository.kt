@@ -1,6 +1,5 @@
 package com.labs.devo.apps.myshop.business.notebook.abstraction
 
-import androidx.room.RawQuery
 import com.labs.devo.apps.myshop.data.models.notebook.Page
 import com.labs.devo.apps.myshop.view.util.DataState
 import com.labs.devo.apps.myshop.view.util.QueryParams

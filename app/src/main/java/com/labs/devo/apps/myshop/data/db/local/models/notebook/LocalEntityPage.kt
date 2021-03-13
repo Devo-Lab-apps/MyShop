@@ -8,8 +8,8 @@ import androidx.room.PrimaryKey
     tableName = "Page"
 )
 data class LocalEntityPage(
-    val creatorAccountId: String = "",
-    val consumerAccountId: String = "",
+    val creatorUserId: String = "",
+    val consumerUserId: String = "",
     val creatorNotebookId: String = "",
     val consumerNotebookId: String = "",
 

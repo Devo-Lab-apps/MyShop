@@ -1,8 +1,8 @@
 package com.labs.devo.apps.myshop.data.db.local.mapper.notebook
 
-import com.labs.devo.apps.myshop.view.util.EntityMapper
 import com.labs.devo.apps.myshop.data.db.local.models.notebook.LocalEntityNotebook
 import com.labs.devo.apps.myshop.data.models.notebook.Notebook
+import com.labs.devo.apps.myshop.view.util.EntityMapper
 
 class LocalNotebookMapper : EntityMapper<LocalEntityNotebook, Notebook> {
 
@@ -28,7 +28,10 @@ class LocalNotebookMapper : EntityMapper<LocalEntityNotebook, Notebook> {
             notebookName = entity.notebookName,
             createdAt = entity.createdAt,
             modifiedAt = entity.modifiedAt,
-            pages = entity.pages
+            pages = entity.pages,
+            entity.creatorUserId,
+            entity.accountId,
+            entity.metadata
         )
     }
 
@@ -38,7 +41,10 @@ class LocalNotebookMapper : EntityMapper<LocalEntityNotebook, Notebook> {
             notebookName = model.notebookName,
             createdAt = model.createdAt,
             modifiedAt = model.modifiedAt,
-            pages = model.pages
+            pages = model.pages,
+            model.creatorUserId,
+            model.accountId,
+            model.metadata
         )
     }
 }

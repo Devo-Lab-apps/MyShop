@@ -2,7 +2,6 @@ package com.labs.devo.apps.myshop.view.activity.notebook.page
 
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.viewModelScope
-import com.labs.devo.apps.myshop.business.helper.FirebaseConstants
 import com.labs.devo.apps.myshop.business.notebook.abstraction.PageRepository
 import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.data.models.notebook.Page
@@ -10,9 +9,7 @@ import com.labs.devo.apps.myshop.view.util.BaseViewModel
 import com.labs.devo.apps.myshop.view.util.DataState
 import com.labs.devo.apps.myshop.view.util.Event
 import com.labs.devo.apps.myshop.view.util.QueryParams
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 
 class PageViewModel @ViewModelInject constructor(

@@ -28,7 +28,10 @@ class RemoteNotebookMapper: EntityMapper<RemoteEntityNotebook, Notebook> {
             remoteEntity.notebookName,
             remoteEntity.createdAt,
             remoteEntity.modifiedAt,
-            remoteEntity.pages
+            remoteEntity.pages,
+            remoteEntity.creatorUserId,
+            remoteEntity.accountId,
+            remoteEntity.metadata
         )
     }
 
@@ -38,7 +41,10 @@ class RemoteNotebookMapper: EntityMapper<RemoteEntityNotebook, Notebook> {
             model.notebookName,
             model.createdAt,
             model.modifiedAt,
-            model.pages.toMutableList()
+            model.pages.toMutableList(),
+            model.creatorUserId,
+            model.accountId,
+            model.metadata
         )
     }
 

@@ -15,7 +15,9 @@ import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.labs.devo.apps.myshop.R
+import com.labs.devo.apps.myshop.business.helper.FirebaseConstants
 import com.labs.devo.apps.myshop.const.AppConstants
+import com.labs.devo.apps.myshop.data.db.remote.models.notebook.ImportStatus
 import com.labs.devo.apps.myshop.data.models.notebook.Page
 import com.labs.devo.apps.myshop.databinding.FragmentPageBinding
 import com.labs.devo.apps.myshop.util.PreferencesManager
@@ -102,14 +104,19 @@ class PageFragment : Fragment(R.layout.fragment_page), PageListAdapter.OnPageCli
         lifecycleScope.launch {
             combine(
                 preferencesManager.currentSelectedNotebook,
-                preferencesManager.pageQueryParams
-            ) { notebook, qp ->
-                Pair(notebook, qp)
-            }.collect { (notebook, qp) ->
+                preferencesManager.pageQueryParams,
+                preferencesManager.importStatus
+            ) { notebook, qp, isForeignImported ->
+                Triple(notebook, qp, isForeignImported)
+            }.collect { (notebook, qp, isForeignImported) ->
                 notebookId = notebook.first
                 queryParams = qp
                 binding.selectNotebookButton.text = notebook.second
-                viewModel.getPages(notebookId, queryParams)
+                if (notebookId != FirebaseConstants.foreignNotebookKey || isForeignImported == ImportStatus.IMPORTED.ordinal) {
+                    viewModel.getPages(notebookId, queryParams)
+                } else {
+                    dataStateHandler.onDataStateChange(DataState.message<Nothing>("Pages for foreign notebook are being imported. Please try to sync notebooks."))
+                }
                 binding.selectNotebookButton.isEnabled = true
             }
         }

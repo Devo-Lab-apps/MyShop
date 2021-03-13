@@ -24,8 +24,8 @@ class LocalPageMapper : EntityMapper<LocalEntityPage, Page> {
 
     override fun mapFromEntity(entity: LocalEntityPage): Page {
         return Page(
-            creatorAccountId = entity.creatorAccountId,
-            consumerAccountId = entity.consumerAccountId,
+            creatorUserId = entity.creatorUserId,
+            consumerUserId = entity.consumerUserId,
             creatorNotebookId = entity.creatorNotebookId,
             consumerNotebookId = entity.consumerNotebookId,
             pageId = entity.pageId,
@@ -37,8 +37,8 @@ class LocalPageMapper : EntityMapper<LocalEntityPage, Page> {
 
     override fun mapToEntity(model: Page): LocalEntityPage {
         return LocalEntityPage(
-            creatorAccountId = model.creatorAccountId,
-            consumerAccountId = model.consumerAccountId,
+            creatorUserId = model.creatorUserId,
+            consumerUserId = model.consumerUserId,
             creatorNotebookId = model.creatorNotebookId,
             consumerNotebookId = model.consumerNotebookId,
             pageId = model.pageId,

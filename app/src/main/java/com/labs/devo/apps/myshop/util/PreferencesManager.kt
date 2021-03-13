@@ -7,6 +7,7 @@ import androidx.datastore.preferences.preferencesKey
 import com.google.gson.Gson
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants
 import com.labs.devo.apps.myshop.const.AppConstants
+import com.labs.devo.apps.myshop.data.db.remote.models.notebook.ImportStatus
 import com.labs.devo.apps.myshop.view.util.QueryParams
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.map
@@ -40,6 +41,16 @@ class PreferencesManager @Inject constructor(@ApplicationContext context: Contex
             gson.fromJson(prefs[PreferenceKeys.entryQueryParams], QueryParams::class.java)
                 ?: QueryParams()
         }
+
+    val importStatus = dataStore.data.map { prefs ->
+        prefs[PreferenceKeys.importStatus] ?: ImportStatus.IMPORTING.ordinal
+    }
+
+    suspend fun setForeignImported(importStatus: Int) {
+        dataStore.edit { prefs ->
+            prefs[PreferenceKeys.importStatus] = importStatus
+        }
+    }
 
     suspend fun updatePageQueryParams(params: QueryParams?) {
         dataStore.edit { prefs ->
@@ -82,6 +93,8 @@ class PreferencesManager @Inject constructor(@ApplicationContext context: Contex
             preferencesKey<String>("page_query_params")
         val entryQueryParams =
             preferencesKey<String>("entry_query_params")
+        val importStatus =
+            preferencesKey<Int>("import_status")
     }
 
 }
