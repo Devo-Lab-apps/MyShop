@@ -2,13 +2,12 @@ package com.labs.devo.apps.myshop.view.activity.home
 
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.viewModelScope
-import com.labs.devo.apps.myshop.business.account.abstraction.AccountRepository
-import com.labs.devo.apps.myshop.business.account.abstraction.UserRepository
+import com.labs.devo.apps.myshop.data.repo.account.abstraction.AccountRepository
+import com.labs.devo.apps.myshop.data.repo.account.abstraction.UserRepository
 import com.labs.devo.apps.myshop.business.helper.UserManager
 import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.data.models.account.User
 import com.labs.devo.apps.myshop.util.AppData
-import com.labs.devo.apps.myshop.util.printLogD
 import com.labs.devo.apps.myshop.view.util.BaseViewModel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch

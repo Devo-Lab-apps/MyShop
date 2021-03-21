@@ -1,56 +1,93 @@
-package com.labs.devo.apps.myshop.business.notebook.implementation
+package com.labs.devo.apps.myshop.data.repo.notebook.implementation
 
-import com.labs.devo.apps.myshop.business.helper.PermissionsHelper
+import androidx.paging.ExperimentalPagingApi
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import com.labs.devo.apps.myshop.business.helper.PermissionsHelper.checkPermissions
-import com.labs.devo.apps.myshop.business.notebook.abstraction.EntryRepository
 import com.labs.devo.apps.myshop.const.Permissions
 import com.labs.devo.apps.myshop.data.db.local.abstraction.notebook.LocalEntryService
+import com.labs.devo.apps.myshop.data.db.local.database.database.NotebookDatabase
 import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemoteEntryService
+import com.labs.devo.apps.myshop.data.mediator.EntryRemoteMediator
 import com.labs.devo.apps.myshop.data.models.notebook.Entry
+import com.labs.devo.apps.myshop.data.repo.notebook.abstraction.EntryRepository
 import com.labs.devo.apps.myshop.view.util.DataState
-import com.labs.devo.apps.myshop.view.util.QueryParams
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class EntryRepositoryImpl
 @Inject constructor(
     private val localEntryService: LocalEntryService,
+    private val notebookDatabase: NotebookDatabase,
     private val remoteEntryService: RemoteEntryService
 ) : EntryRepository {
 
+    @ExperimentalPagingApi
     override suspend fun getEntries(
         pageId: String,
-        queryParams: QueryParams
-    ): Flow<DataState<List<Entry>>> = flow {
+        searchQuery: String,
+        orderBy: String,
+        forceRefresh: Boolean
+    ): Flow<PagingData<Entry>> = Pager(
+        config = PagingConfig(pageSize = 20, maxSize = 100),
+        remoteMediator = EntryRemoteMediator(
+            pageId,
+            searchQuery,
+            orderBy,
+            forceRefresh,
+            notebookDatabase,
+            remoteEntryService
+        ),
+        pagingSourceFactory = { localEntryService.getEntries(pageId, searchQuery, orderBy) }
+    ).flow
 
-        emit(DataState.loading<List<Entry>>(true))
-        try {
+    override suspend fun getEntry(entryId: String): DataState<Entry> {
+        return try {
             checkPermissions(Permissions.GET_ENTRY)
-            var localEntries = localEntryService.getEntries(pageId, queryParams)
-            if (queryParams.whereQuery.isNotEmpty() && localEntries.isNullOrEmpty()) {
-                throw Exception("No record for this search query.")
+            var entry = localEntryService.getEntry(entryId)
+            if (entry == null) {
+                //TODO set this f
+                entry = remoteEntryService.getEntries(entryId, "", "")[0]
             }
-            if (localEntries.isNullOrEmpty()) {
-                val entries = remoteEntryService.getEntries(pageId)
-                localEntries = localEntryService.insertEntries(entries)
-            }
-            emit(DataState.data(localEntries))
+            DataState.data(entry)
         } catch (ex: Exception) {
-            emit(
-                DataState.message<List<Entry>>(
-                    ex.message ?: "An unknown error occurred. Please retry later."
-                )
+            DataState.message(
+                ex.message ?: "An unknown error occurred. Please retry later."
             )
         }
     }
+
+//    flow
+//    {
+//
+//        emit(DataState.loading<List<Entry>>(true))
+//        try {
+//            checkPermissions(Permissions.GET_ENTRY)
+//            var localEntries = localEntryService.getEntries(pageId, queryParams)
+//            if (queryParams.whereQuery.isNotEmpty() && localEntries.isNullOrEmpty()) {
+//                throw Exception("No record for this search query.")
+//            }
+//            if (localEntries.isNullOrEmpty()) {
+//                val entries = remoteEntryService.getEntries(pageId)
+//                localEntries = localEntryService.insertEntries(entries)
+//            }
+//            emit(DataState.data(localEntries))
+//        } catch (ex: Exception) {
+//            emit(
+//                DataState.message<List<Entry>>(
+//                    ex.message ?: "An unknown error occurred. Please retry later."
+//                )
+//            )
+//        }
+//    }
 
     override suspend fun insertEntries(entries: List<Entry>): DataState<List<Entry>> {
         return try {
             checkPermissions(Permissions.CREATE_ENTRY)
             val insertedEntries = remoteEntryService.insertEntries(entries)
-            val localInsertedEntries = localEntryService.insertEntries(insertedEntries)
-            DataState.data(localInsertedEntries)
+            localEntryService.insertEntries(insertedEntries)
+            DataState.data(insertedEntries)
         } catch (ex: Exception) {
             DataState.message(
                 ex.message ?: "An unknown error occurred. Please retry later."
@@ -61,9 +98,9 @@ class EntryRepositoryImpl
     override suspend fun insertEntry(entry: Entry): DataState<Entry> {
         return try {
             checkPermissions(Permissions.CREATE_ENTRY)
-            val insertEntry = remoteEntryService.insertEntry(entry)
-            val localInsertedEntry = localEntryService.insertEntry(insertEntry)
-            DataState.data(localInsertedEntry)
+            val insertedEntry = remoteEntryService.insertEntry(entry)
+            localEntryService.insertEntry(insertedEntry)
+            DataState.data(insertedEntry)
         } catch (ex: Exception) {
             DataState.message(
                 ex.message ?: "An unknown error occurred. Please retry later."
@@ -75,8 +112,8 @@ class EntryRepositoryImpl
         return try {
             checkPermissions(Permissions.CREATE_ENTRY)
             val updatedEntries = remoteEntryService.updateEntries(entries)
-            val localUpdated = localEntryService.updateEntries(updatedEntries)
-            DataState.data(localUpdated)
+            localEntryService.updateEntries(updatedEntries)
+            DataState.data(updatedEntries)
         } catch (ex: Exception) {
             DataState.message(
                 ex.message ?: "An unknown error occurred. Please retry later."
@@ -88,8 +125,8 @@ class EntryRepositoryImpl
         return try {
             checkPermissions(Permissions.CREATE_ENTRY)
             val updatedEntry = remoteEntryService.updateEntry(entry)
-            val localUpdatedEntry = localEntryService.updateEntry(updatedEntry)
-            DataState.data(localUpdatedEntry)
+            localEntryService.updateEntry(updatedEntry)
+            DataState.data(updatedEntry)
         } catch (ex: Exception) {
             DataState.message(
                 ex.message ?: "An unknown error occurred. Please retry later."
@@ -126,8 +163,9 @@ class EntryRepositoryImpl
     override suspend fun syncEntries(pageId: String): DataState<List<Entry>> {
         return try {
             localEntryService.deleteEntries(pageId)
-            val entries = remoteEntryService.getEntries(pageId)
-            DataState.data(localEntryService.insertEntries(entries))
+            val entries = remoteEntryService.getEntries(pageId, "", "")
+            localEntryService.insertEntries(entries)
+            DataState.data(entries)
         } catch (ex: java.lang.Exception) {
             DataState.message(
                 ex.message ?: "An unknown error occurred. Please retry later."

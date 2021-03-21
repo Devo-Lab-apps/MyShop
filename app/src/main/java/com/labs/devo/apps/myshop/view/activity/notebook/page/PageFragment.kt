@@ -13,11 +13,13 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
+import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.labs.devo.apps.myshop.R
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants
 import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.data.db.remote.models.notebook.ImportStatus
+import com.labs.devo.apps.myshop.data.mediator.GenericLoadStateAdapter
 import com.labs.devo.apps.myshop.data.models.notebook.Page
 import com.labs.devo.apps.myshop.databinding.FragmentPageBinding
 import com.labs.devo.apps.myshop.util.PreferencesManager
@@ -28,11 +30,11 @@ import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragmen
 import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment.NotebookConstants.NOTEBOOK_ID
 import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment.NotebookConstants.OPERATION
 import com.labs.devo.apps.myshop.view.adapter.notebook.PageListAdapter
-import com.labs.devo.apps.myshop.view.util.*
+import com.labs.devo.apps.myshop.view.util.DataState
+import com.labs.devo.apps.myshop.view.util.DataStateListener
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -56,8 +58,6 @@ class PageFragment : Fragment(R.layout.fragment_page), PageListAdapter.OnPageCli
 
     private lateinit var notebookId: String
 
-    private lateinit var queryParams: QueryParams
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
         super.onViewCreated(view, savedInstanceState)
@@ -75,9 +75,6 @@ class PageFragment : Fragment(R.layout.fragment_page), PageListAdapter.OnPageCli
         dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
         binding.selectNotebookButton.isEnabled = false
         pageListAdapter = PageListAdapter(this, this)
-
-        pageListAdapter.submitList(mutableListOf())
-
         binding.apply {
             selectNotebookButton.setOnClickListener {
                 viewModel.onNotebookSelect()
@@ -86,7 +83,17 @@ class PageFragment : Fragment(R.layout.fragment_page), PageListAdapter.OnPageCli
             pageRecyclerView.apply {
                 setHasFixedSize(true)
                 layoutManager = LinearLayoutManager(requireContext())
-                adapter = pageListAdapter
+                adapter = pageListAdapter.withLoadStateFooter(
+                    GenericLoadStateAdapter(pageListAdapter::retry)
+                )
+                itemAnimator?.changeDuration = 0
+            }
+
+
+            viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+                viewModel.pages.collectLatest { data ->
+                    pageListAdapter.submitData(data)
+                }
             }
 
             addPageBtn.setOnClickListener {
@@ -104,20 +111,39 @@ class PageFragment : Fragment(R.layout.fragment_page), PageListAdapter.OnPageCli
         lifecycleScope.launch {
             combine(
                 preferencesManager.currentSelectedNotebook,
-                preferencesManager.pageQueryParams,
                 preferencesManager.importStatus
-            ) { notebook, qp, isForeignImported ->
-                Triple(notebook, qp, isForeignImported)
-            }.collect { (notebook, qp, isForeignImported) ->
+            ) { notebook, isForeignImported ->
+                Pair(notebook, isForeignImported)
+            }.collect { (notebook, isForeignImported) ->
                 notebookId = notebook.first
-                queryParams = qp
                 binding.selectNotebookButton.text = notebook.second
                 if (notebookId != FirebaseConstants.foreignNotebookKey || isForeignImported == ImportStatus.IMPORTED.ordinal) {
-                    viewModel.getPages(notebookId, queryParams)
+                    viewModel.setNotebookId(notebookId)
                 } else {
                     dataStateHandler.onDataStateChange(DataState.message<Nothing>("Pages for foreign notebook are being imported. Please try to sync notebooks."))
                 }
                 binding.selectNotebookButton.isEnabled = true
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            pageListAdapter.loadStateFlow.collectLatest { state ->
+                when (state.refresh) {
+                    is LoadState.Error -> {
+                        val error = (state.refresh as LoadState.Error).error
+                        dataStateHandler.onDataStateChange(
+                            DataState.message<Nothing>(
+                                error.message ?: "An error occurred"
+                            )
+                        )
+                    }
+                    is LoadState.Loading -> {
+                        dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
+                    }
+                    else -> {
+                        dataStateHandler.onDataStateChange(DataState.loading<Nothing>(false))
+                    }
+                }
             }
         }
 
@@ -127,11 +153,6 @@ class PageFragment : Fragment(R.layout.fragment_page), PageListAdapter.OnPageCli
                     is PageViewModel.PageEvent.NavigateToNotebookFragment -> {
                         showNotebookFragment()
                     }
-                    is PageViewModel.PageEvent.GetPagesEvent -> {
-                        dataStateHandler.onDataStateChange(event.dataState)
-                        val pages = event.pages
-                        pageListAdapter.submitList(pages)
-                    }
                     is PageViewModel.PageEvent.ShowInvalidInputMessage -> {
                         if (event.msg != null) {
                             dataStateHandler.onDataStateChange(DataState.message<Nothing>(event.msg))
@@ -139,6 +160,7 @@ class PageFragment : Fragment(R.layout.fragment_page), PageListAdapter.OnPageCli
                     }
                 }
             }
+
         }
     }
 
@@ -158,10 +180,7 @@ class PageFragment : Fragment(R.layout.fragment_page), PageListAdapter.OnPageCli
         val searchView = searchItem.actionView as SearchView
 
         searchView.onQueryTextChanged {
-            val whereQuery = queryParams.whereQuery
-            val colName = Page::pageName.name
-            whereQuery[colName] = WhereClause("LIKE", "%$it%", QUERY_TYPE.STRING)
-            viewModel.getPages(notebookId, queryParams)
+            viewModel.setSearchQuery(it)
         }
     }
 
@@ -169,22 +188,16 @@ class PageFragment : Fragment(R.layout.fragment_page), PageListAdapter.OnPageCli
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_sort_page_by_date -> {
-                QueryHelper.handleOrderBy(Page::modifiedAt.name, queryParams)
-                CoroutineScope(Dispatchers.IO).launch {
-                    preferencesManager.updatePageQueryParams(queryParams)
-                }
+                viewModel.setOrderBy(Page::modifiedAt.name)
                 true
             }
             R.id.action_sort_page_by_name -> {
-                QueryHelper.handleOrderBy(Page::pageName.name, queryParams)
-                CoroutineScope(Dispatchers.IO).launch {
-                    preferencesManager.updatePageQueryParams(queryParams)
-                }
+                viewModel.setOrderBy(Page::pageName.name)
                 true
             }
             R.id.action_sync_pages -> {
                 dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
-                viewModel.syncPages(notebookId)
+                viewModel.syncPages()
                 true
             }
             else -> super.onOptionsItemSelected(item)

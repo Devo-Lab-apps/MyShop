@@ -2,6 +2,7 @@ package com.labs.devo.apps.myshop.data.db.remote.implementation.notebook
 
 import com.google.firebase.firestore.Transaction
 import com.labs.devo.apps.myshop.business.helper.FirebaseHelper
+import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemoteEntryService
 import com.labs.devo.apps.myshop.data.db.remote.mapper.notebook.RemoteEntryMapper
 import com.labs.devo.apps.myshop.data.db.remote.models.notebook.RemoteEntityEntry
@@ -15,9 +16,15 @@ import javax.inject.Inject
 class RemoteEntryServiceFirebaseImpl
 @Inject constructor(val mapper: RemoteEntryMapper) : RemoteEntryService {
 
-    override suspend fun getEntries(pageId: String): List<Entry> {
+    private val TAG = AppConstants.APP_PREFIX + javaClass.simpleName
+
+    override suspend fun getEntries(
+        pageId: String,
+        query: String,
+        startAfter: String?
+    ): List<Entry> {
         checkIfPageExists(pageId)
-        return get(pageId)
+        return get(pageId, query, startAfter)
     }
 
     override suspend fun insertEntries(entries: List<Entry>): List<Entry> {
@@ -108,8 +115,10 @@ class RemoteEntryServiceFirebaseImpl
         return entry
     }
 
-    private suspend fun get(pageId: String): List<Entry> {
-        val ss = FirebaseHelper.getEntryCollection(pageId).get().await()
+    private suspend fun get(pageId: String, query: String, sf: String?): List<Entry> {
+        val startAfter = sf ?: ""
+        val ss = FirebaseHelper.getEntryCollection(pageId)
+            .orderBy("entryId").startAfter(startAfter).limit(10).get().await()
         return ss?.documents?.map { ds ->
             val obj = ds.toObject(RemoteEntityEntry::class.java)!!
             mapper.mapFromEntity(obj)

@@ -10,11 +10,12 @@ import com.labs.devo.apps.myshop.business.auth.implementation.FirebaseUserAuth
 import com.labs.devo.apps.myshop.data.db.local.database.dao.EntryDao
 import com.labs.devo.apps.myshop.data.db.local.database.dao.NotebookDao
 import com.labs.devo.apps.myshop.data.db.local.database.dao.PageDao
+import com.labs.devo.apps.myshop.data.db.local.database.dao.RemoteKeyDao
 import com.labs.devo.apps.myshop.data.db.local.database.database.NotebookDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ApplicationComponent
+import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 
@@ -22,7 +23,7 @@ import javax.inject.Singleton
  * App level module to provide singleton dependencies.
  */
 @Module
-@InstallIn(ApplicationComponent::class)
+@InstallIn(SingletonComponent::class)
 class AppModule {
 
     @Provides
@@ -58,6 +59,10 @@ class AppModule {
     @Provides
     @Singleton
     fun provideEntryDao(database: NotebookDatabase): EntryDao = database.entryDao()
+
+    @Provides
+    @Singleton
+    fun provideRemoteKeyDao(database: NotebookDatabase): RemoteKeyDao = database.remoteKeyDao()
 
     @Provides
     @Singleton

@@ -12,23 +12,25 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.labs.devo.apps.myshop.R
 import com.labs.devo.apps.myshop.const.AppConstants
+import com.labs.devo.apps.myshop.data.mediator.GenericLoadStateAdapter
 import com.labs.devo.apps.myshop.data.models.notebook.Entry
 import com.labs.devo.apps.myshop.data.models.notebook.Page
 import com.labs.devo.apps.myshop.databinding.FragmentEntryBinding
 import com.labs.devo.apps.myshop.util.PreferencesManager
 import com.labs.devo.apps.myshop.util.extensions.onQueryTextChanged
+import com.labs.devo.apps.myshop.util.printLogD
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity
 import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment
 import com.labs.devo.apps.myshop.view.adapter.entry.EntryListAdapter
-import com.labs.devo.apps.myshop.view.util.*
+import com.labs.devo.apps.myshop.view.util.DataState
+import com.labs.devo.apps.myshop.view.util.DataStateListener
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.collectLatest
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -49,8 +51,6 @@ class EntryFragment : Fragment(R.layout.fragment_entry), EntryListAdapter.OnEntr
     @Inject
     lateinit var preferencesManager: PreferencesManager
 
-    private lateinit var queryParams: QueryParams
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentEntryBinding.bind(view)
@@ -70,13 +70,20 @@ class EntryFragment : Fragment(R.layout.fragment_entry), EntryListAdapter.OnEntr
         setHasOptionsMenu(true)
         dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
         entryListAdapter = EntryListAdapter(this)
-
-        entryListAdapter.submitList(mutableListOf())
         binding.apply {
             entryRecyclerView.apply {
                 setHasFixedSize(true)
                 layoutManager = LinearLayoutManager(requireContext())
-                adapter = entryListAdapter
+                adapter = entryListAdapter.withLoadStateFooter(
+                    GenericLoadStateAdapter(entryListAdapter::retry)
+                )
+                itemAnimator?.changeDuration = 0
+            }
+
+            viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+                viewModel.entries.collectLatest { data ->
+                    entryListAdapter.submitData(data)
+                }
             }
             addEntry.setOnClickListener {
                 val args = bundleOf(
@@ -90,13 +97,28 @@ class EntryFragment : Fragment(R.layout.fragment_entry), EntryListAdapter.OnEntr
     }
 
     private fun observeEvents() {
-        lifecycleScope.launch {
-            preferencesManager.entryQueryParams.collect { qp ->
-                queryParams = qp
-                viewModel.getEntries(page.pageId, queryParams)
+
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            viewModel.setPageId(page.pageId)
+            entryListAdapter.loadStateFlow.collectLatest { state ->
+                when (state.refresh) {
+                    is LoadState.Error -> {
+                        val error = (state.refresh as LoadState.Error).error
+                        dataStateHandler.onDataStateChange(
+                            DataState.message<Nothing>(
+                                error.message ?: "An error occurred"
+                            )
+                        )
+                    }
+                    is LoadState.Loading -> {
+                        dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
+                    }
+                    else -> {
+                        dataStateHandler.onDataStateChange(DataState.loading<Nothing>(false))
+                    }
+                }
             }
         }
-
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             viewModel.channelFlow.collect { event ->
                 when (event) {
@@ -104,10 +126,6 @@ class EntryFragment : Fragment(R.layout.fragment_entry), EntryListAdapter.OnEntr
                         if (event.msg != null) {
                             dataStateHandler.onDataStateChange(DataState.message<Nothing>(event.msg))
                         }
-                    }
-                    is EntryViewModel.EntryEvent.GetEntries -> {
-                        dataStateHandler.onDataStateChange(event.dataState)
-                        entryListAdapter.submitList(event.entries.toMutableList())
                     }
                 }
             }
@@ -121,10 +139,7 @@ class EntryFragment : Fragment(R.layout.fragment_entry), EntryListAdapter.OnEntr
         val searchView = searchItem.actionView as SearchView
 
         searchView.onQueryTextChanged {
-            val whereQuery = queryParams.whereQuery
-            val colName = Entry::entryTitle.name
-            whereQuery[colName] = WhereClause("LIKE", "%$it%", QUERY_TYPE.STRING)
-            viewModel.getEntries(page.pageId, queryParams)
+            viewModel.setSearchQuery(it)
         }
 
     }
@@ -132,22 +147,16 @@ class EntryFragment : Fragment(R.layout.fragment_entry), EntryListAdapter.OnEntr
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_sort_entry_by_date -> {
-                QueryHelper.handleOrderBy(Page::modifiedAt.name, queryParams)
-                CoroutineScope(Dispatchers.IO).launch {
-                    preferencesManager.updateEntryQueryParams(queryParams)
-                }
+                viewModel.setOrderBy(Entry::modifiedAt.name)
                 true
             }
             R.id.action_sort_entry_by_name -> {
-                QueryHelper.handleOrderBy(Page::pageName.name, queryParams)
-                CoroutineScope(Dispatchers.IO).launch {
-                    preferencesManager.updateEntryQueryParams(queryParams)
-                }
+                viewModel.setOrderBy(Entry::entryTitle.name)
                 true
             }
             R.id.action_sync_entries -> {
                 dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
-                viewModel.syncEntries(page.pageId)
+                viewModel.syncEntries()
                 true
             }
             else -> super.onOptionsItemSelected(item)

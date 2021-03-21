@@ -29,10 +29,14 @@ class RemotePageServiceFirebaseImpl @Inject constructor(
 
     private val TAG = AppConstants.APP_PREFIX + javaClass.simpleName
 
-    override suspend fun getPages(notebookId: String): List<Page>? {
+    override suspend fun getPages(
+        notebookId: String,
+        searchQuery: String,
+        startAfter: String?
+    ): List<Page>? {
         val notebookEntity = getEntityNotebook(notebookId) ?: return null
         val pageIds = getNotebookPageIds(notebookEntity)
-        return getPages(pageIds)
+        return get(pageIds, searchQuery, startAfter)
     }
 
 
@@ -227,27 +231,34 @@ class RemotePageServiceFirebaseImpl @Inject constructor(
     /**
      * This method will get the pages for a notebook in a batch of 10 pages/request.
      */
-    private suspend fun getPages(pageIds: List<String>): MutableList<Page> {
+    //TODO paginate
+    private suspend fun get(
+        pids: List<String>,
+        searchQuery: String,
+        startAfter: String?
+    ): MutableList<Page> {
+        val pageIds = if (startAfter == null) {
+            pids.subList(0, 10.coerceAtMost(pids.size))
+        } else {
+            val sortedList =
+                pids.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER, { it }))
+            val startAfterIndex = sortedList.indexOf(startAfter)
+            pids.subList(startAfterIndex, (startAfterIndex + 10).coerceAtMost(pids.size))
+        }
+
         if (pageIds.isEmpty()) {
             throw NoPagesForNotebookException()
         }
-        val pageIterations = pageIds.size / 10
         val pages = mutableListOf<Page>()
-        for (i in 0..pageIterations) {
-            val startIndex = i * 10
-            val endIndex = ((i + 1) * 10).coerceAtMost(pageIds.size)
-            val ids = pageIds.subList(startIndex, endIndex)
-            //TODO make it transactional
-            val snapshot = FirebaseHelper.getPageCollection()
-                .whereIn("pageId", ids).get().await()
-            snapshot?.documents?.let {
-                pages.addAll(
-                    it.map { s ->
-                        val page = s.toObject(RemoteEntityPage::class.java)!!
-                        remotePageMapper.mapFromEntity(page)
-                    }
-                )
-            }
+        val snapshot = FirebaseHelper.getPageCollection()
+            .whereIn("pageId", pageIds).get().await()
+        snapshot?.documents?.let {
+            pages.addAll(
+                it.map { s ->
+                    val page = s.toObject(RemoteEntityPage::class.java)!!
+                    remotePageMapper.mapFromEntity(page)
+                }
+            )
         }
         return pages
     }

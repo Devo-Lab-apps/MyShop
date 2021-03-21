@@ -2,7 +2,7 @@ package com.labs.devo.apps.myshop.view.activity.notebook.page
 
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.viewModelScope
-import com.labs.devo.apps.myshop.business.notebook.abstraction.PageRepository
+import com.labs.devo.apps.myshop.data.repo.notebook.abstraction.PageRepository
 import com.labs.devo.apps.myshop.data.models.notebook.Page
 import com.labs.devo.apps.myshop.view.util.BaseViewModel
 import kotlinx.coroutines.launch

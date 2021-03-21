@@ -1,13 +1,20 @@
-package com.labs.devo.apps.myshop.business.notebook.abstraction
+package com.labs.devo.apps.myshop.data.repo.notebook.abstraction
 
+import androidx.paging.PagingData
 import com.labs.devo.apps.myshop.data.models.notebook.Page
 import com.labs.devo.apps.myshop.view.util.DataState
-import com.labs.devo.apps.myshop.view.util.QueryParams
 import kotlinx.coroutines.flow.Flow
 
 interface PageRepository {
 
-    suspend fun getPages(notebookId: String, queryParams: QueryParams): Flow<DataState<List<Page>>>
+    suspend fun getPages(
+        notebookId: String,
+        searchQuery: String,
+        orderBy: String,
+        forceRefresh: Boolean
+    ): Flow<PagingData<Page>>
+
+    suspend fun getPage(pageId: String): Page
 
     suspend fun insertPages(pages: List<Page>): DataState<List<Page>>
 

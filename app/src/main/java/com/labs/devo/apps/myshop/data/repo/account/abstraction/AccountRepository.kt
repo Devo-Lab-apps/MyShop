@@ -1,4 +1,4 @@
-package com.labs.devo.apps.myshop.business.account.abstraction
+package com.labs.devo.apps.myshop.data.repo.account.abstraction
 
 import com.labs.devo.apps.myshop.data.models.account.Account
 import com.labs.devo.apps.myshop.view.util.DataState
