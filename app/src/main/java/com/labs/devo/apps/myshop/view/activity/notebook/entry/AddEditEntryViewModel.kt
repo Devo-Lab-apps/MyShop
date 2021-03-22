@@ -24,8 +24,8 @@ class AddEditEntryViewModel @ViewModelInject constructor(private val entryReposi
             channel.send(AddEditEntryEvent.ShowInvalidInputMessage("Entry being updated is different"))
             return@launch
         }
-        if (entry.entryTitle == prevEntry.entryTitle) {
-            channel.send(AddEditEntryEvent.ShowInvalidInputMessage("Entry's title is not changed"))
+        if (entry.entryTitle == prevEntry.entryTitle && entry.entryAmount == prevEntry.entryAmount) {
+            channel.send(AddEditEntryEvent.ShowInvalidInputMessage("Entry is not changed. Change to retry."))
             return@launch
         }
         val data = entryRepository.updateEntry(entry)

@@ -8,6 +8,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.labs.devo.apps.myshop.R
+import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.data.models.notebook.Entry
 import com.labs.devo.apps.myshop.data.models.notebook.Page
 import com.labs.devo.apps.myshop.databinding.AddEditEntryFragmentBinding
@@ -20,6 +21,7 @@ import kotlinx.coroutines.flow.collect
 @AndroidEntryPoint
 class AddEditEntryFragment : Fragment(R.layout.add_edit_entry_fragment) {
 
+    private val TAG = AppConstants.APP_PREFIX + javaClass.simpleName
 
     private lateinit var binding: AddEditEntryFragmentBinding
 
@@ -63,18 +65,22 @@ class AddEditEntryFragment : Fragment(R.layout.add_edit_entry_fragment) {
                 } else {
                     dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
                     val entryTitle = entryTitle.text.toString()
+                    val entryAmount = entryAmount.text.toString().toDouble()
                     val newEntry = entry!!.copy(
                         entryTitle = entryTitle,
+                        entryAmount = entryAmount,
                         modifiedAt = System.currentTimeMillis()
                     )
                     viewModel.updateEntry(entry!!, newEntry)
                 }
             }
-            if (operation == NotebookFragment.NotebookConstants.EDIT_PAGE_OPERATION) {
+
+            if (operation == NotebookFragment.NotebookConstants.EDIT_ENTRY_OPERATION) {
                 addEditEntryBtn.text = "Update Entry"
-                entryAmountTv.visibility = View.GONE
-                entryAmount.visibility = View.GONE
-                entryTitle.setText(entry!!.entryTitle)
+                entry?.let { e ->
+                    entryTitle.setText(e.entryTitle)
+                    entryAmount.setText(e.entryAmount.toString())
+                }
             }
         }
     }
