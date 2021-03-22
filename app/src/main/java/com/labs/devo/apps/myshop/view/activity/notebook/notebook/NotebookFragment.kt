@@ -123,16 +123,18 @@ class NotebookFragment : DialogFragment(R.layout.fragment_notebook) {
                         dataStateHandler.onDataStateChange(event.dataState)
                         val foreignNotebook =
                             notebooks.firstOrNull { notebook -> notebook.notebookId == FirebaseConstants.foreignNotebookKey }
-                        if (foreignNotebook == null) {
-                            dataStateHandler.onDataStateChange(DataState.message<Nothing>("Some error occurred."))
-                            // clog("foreign can't be null).
-                            return@collect
+                        if (foreignNotebook != null) {
+                            foreignNotebook.metadata[NotebookMetadataConstants.importStatus]?.let { s ->
+                                val status = s.toInt()
+                                preferencesManager.setForeignImported(status)
+                            }
+                        } else {
+                            //TODO handle it some way
+//                            dataStateHandler.onDataStateChange(DataState.message<Nothing>("Some error occurred."))
+//                            // clog("foreign can't be null).
+//                            return@collect
                         }
                         notebookAdapter.submitList(notebooks.toMutableList())
-                        foreignNotebook.metadata[NotebookMetadataConstants.importStatus]?.let { s ->
-                            val status = s.toInt()
-                            preferencesManager.setForeignImported(status)
-                        }
                     }
                     is NotebookViewModel.NotebookEvent.ShowInvalidInputMessage -> {
                         if (event.msg != null) {

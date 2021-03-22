@@ -2,12 +2,12 @@ package com.labs.devo.apps.myshop.view.activity.notebook.entry
 
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.viewModelScope
-import com.labs.devo.apps.myshop.business.notebook.abstraction.EntryRepository
 import com.labs.devo.apps.myshop.data.models.notebook.Entry
+import com.labs.devo.apps.myshop.data.repo.notebook.abstraction.EntryRepository
 import com.labs.devo.apps.myshop.view.util.BaseViewModel
 import kotlinx.coroutines.launch
 
-class AddEditEntryViewModel @ViewModelInject constructor(val entryRepository: EntryRepository) :
+class AddEditEntryViewModel @ViewModelInject constructor(private val entryRepository: EntryRepository) :
     BaseViewModel<AddEditEntryViewModel.AddEditEntryEvent>() {
 
 

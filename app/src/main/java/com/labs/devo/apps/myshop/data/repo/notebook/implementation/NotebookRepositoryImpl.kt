@@ -1,11 +1,12 @@
-package com.labs.devo.apps.myshop.business.notebook.implementation
+package com.labs.devo.apps.myshop.data.repo.notebook.implementation
 
 import com.labs.devo.apps.myshop.business.helper.PermissionsHelper.checkPermissions
-import com.labs.devo.apps.myshop.business.notebook.abstraction.NotebookRepository
 import com.labs.devo.apps.myshop.const.Permissions
 import com.labs.devo.apps.myshop.data.db.local.abstraction.notebook.LocalNotebookService
 import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemoteNotebookService
 import com.labs.devo.apps.myshop.data.models.notebook.Notebook
+import com.labs.devo.apps.myshop.data.repo.notebook.abstraction.NotebookRepository
+import com.labs.devo.apps.myshop.util.exceptions.NotebookNotFoundException
 import com.labs.devo.apps.myshop.view.util.DataState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -21,12 +22,13 @@ class NotebookRepositoryImpl @Inject constructor(
         emit(DataState.loading<List<Notebook>>(true))
         try {
             checkPermissions(Permissions.GET_NOTEBOOK)
-            var localNotebooks = localNotebookService.getNotebooks()
-            if (localNotebooks.isNullOrEmpty()) {
-                val notebooks = remoteNotebookService.getNotebooks()
-                localNotebooks = localNotebookService.insertNotebooks(notebooks)
+            var notebooks = localNotebookService.getNotebooks()
+            if (notebooks.isNullOrEmpty()) {
+                val remoteNotebooks = remoteNotebookService.getNotebooks()
+                localNotebookService.insertNotebooks(remoteNotebooks)
+                notebooks = remoteNotebooks
             }
-            emit(DataState.data(localNotebooks))
+            emit(DataState.data(notebooks))
         } catch (ex: Exception) {
             emit(
                 DataState.message<List<Notebook>>(
@@ -36,13 +38,22 @@ class NotebookRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun insertNotebooks(notebooks: List<Notebook>): DataState<List<Notebook>> {
+    override suspend fun getNotebook(notebookId: String): Notebook {
+        try {
+            checkPermissions(Permissions.GET_NOTEBOOK)
+            val localNotebook = localNotebookService.getNotebook(notebookId)
+            return localNotebook ?: throw NotebookNotFoundException()
+        } catch (ex: java.lang.Exception) {
+            throw NotebookNotFoundException()
+        }
+    }
 
+    override suspend fun insertNotebooks(notebooks: List<Notebook>): DataState<List<Notebook>> {
         return try {
             checkPermissions(Permissions.CREATE_NOTEBOOK)
             val insertedNotebooks = remoteNotebookService.insertNotebooks(notebooks)
-            val localInsertedNotebooks = localNotebookService.insertNotebooks(insertedNotebooks)
-            DataState.data(localInsertedNotebooks)
+            localNotebookService.insertNotebooks(insertedNotebooks)
+            DataState.data(insertedNotebooks)
         } catch (ex: Exception) {
             DataState.message(
                 ex.message ?: "An unknown error occurred. Please retry later."
@@ -55,8 +66,8 @@ class NotebookRepositoryImpl @Inject constructor(
         return try {
             checkPermissions(Permissions.CREATE_NOTEBOOK)
             val insertNotebook = remoteNotebookService.insertNotebook(notebook)
-            val localInsertedNotebook = localNotebookService.insertNotebook(insertNotebook)
-            DataState.data(localInsertedNotebook)
+            localNotebookService.insertNotebook(insertNotebook)
+            DataState.data(insertNotebook)
         } catch (ex: Exception) {
             DataState.message(
                 ex.message ?: "An unknown error occurred. Please retry later."
@@ -69,8 +80,8 @@ class NotebookRepositoryImpl @Inject constructor(
         return try {
             checkPermissions(Permissions.CREATE_NOTEBOOK)
             val updatedNotebooks = remoteNotebookService.updateNotebooks(notebooks)
-            val localUpdated = localNotebookService.updateNotebooks(updatedNotebooks)
-            DataState.data(localUpdated)
+            localNotebookService.updateNotebooks(updatedNotebooks)
+            DataState.data(updatedNotebooks)
         } catch (ex: Exception) {
             DataState.message(
                 ex.message ?: "An unknown error occurred. Please retry later."
@@ -84,8 +95,8 @@ class NotebookRepositoryImpl @Inject constructor(
         return try {
             checkPermissions(Permissions.CREATE_NOTEBOOK)
             val updatedNotebook = remoteNotebookService.updateNotebook(notebook)
-            val localUpdatedNotebook = localNotebookService.updateNotebook(updatedNotebook)
-            DataState.data(localUpdatedNotebook)
+            localNotebookService.updateNotebook(updatedNotebook)
+            DataState.data(updatedNotebook)
         } catch (ex: Exception) {
             DataState.message(
                 ex.message ?: "An unknown error occurred. Please retry later."
@@ -123,7 +134,8 @@ class NotebookRepositoryImpl @Inject constructor(
         return try {
             localNotebookService.deleteNotebooks()
             val notebooks = remoteNotebookService.getNotebooks()
-            DataState.data(localNotebookService.insertNotebooks(notebooks))
+            localNotebookService.insertNotebooks(notebooks)
+            DataState.data(notebooks)
         } catch (ex: java.lang.Exception) {
             DataState.message(
                 ex.message ?: "An unknown error occurred. Please retry later."

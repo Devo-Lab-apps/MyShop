@@ -4,7 +4,7 @@ import com.labs.devo.apps.myshop.data.models.notebook.Page
 
 interface RemotePageService {
 
-    suspend fun getPages(notebookId: String): List<Page>?
+    suspend fun getPages(notebookId: String, searchQuery: String, startAfter: String?): List<Page>?
 
     suspend fun insertPages(pages: List<Page>): List<Page>
 

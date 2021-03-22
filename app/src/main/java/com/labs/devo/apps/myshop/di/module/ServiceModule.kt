@@ -9,9 +9,6 @@ import com.labs.devo.apps.myshop.data.db.local.database.dao.PageDao
 import com.labs.devo.apps.myshop.data.db.local.implementation.notebook.LocalEntryServiceImpl
 import com.labs.devo.apps.myshop.data.db.local.implementation.notebook.LocalNotebookServiceImpl
 import com.labs.devo.apps.myshop.data.db.local.implementation.notebook.LocalPageServiceImpl
-import com.labs.devo.apps.myshop.data.db.local.mapper.notebook.LocalEntryMapper
-import com.labs.devo.apps.myshop.data.db.local.mapper.notebook.LocalNotebookMapper
-import com.labs.devo.apps.myshop.data.db.local.mapper.notebook.LocalPageMapper
 import com.labs.devo.apps.myshop.data.db.remote.abstraction.account.AccountService
 import com.labs.devo.apps.myshop.data.db.remote.abstraction.account.UserService
 import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemoteEntryService
@@ -28,11 +25,11 @@ import com.labs.devo.apps.myshop.data.db.remote.mapper.notebook.RemotePageMapper
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ApplicationComponent
+import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 @Module
-@InstallIn(ApplicationComponent::class)
+@InstallIn(SingletonComponent::class)
 object ServiceModule {
 
 
@@ -52,10 +49,9 @@ object ServiceModule {
     @Provides
     @Singleton
     fun provideLocalNotebookService(
-        notebookDao: NotebookDao,
-        localNotebookMapper: LocalNotebookMapper
+        notebookDao: NotebookDao
     ): LocalNotebookService =
-        LocalNotebookServiceImpl(localNotebookMapper, notebookDao)
+        LocalNotebookServiceImpl(notebookDao)
 
     @Provides
     @Singleton
@@ -69,10 +65,9 @@ object ServiceModule {
     @Provides
     @Singleton
     fun provideLocalPageService(
-        pageDao: PageDao,
-        localNotebookMapper: LocalPageMapper
+        pageDao: PageDao
     ): LocalPageService =
-        LocalPageServiceImpl(localNotebookMapper, pageDao)
+        LocalPageServiceImpl(pageDao)
 
     @Provides
     @Singleton
@@ -85,8 +80,7 @@ object ServiceModule {
     @Singleton
     fun provideLocalEntryService(
         pageDao: EntryDao,
-        localNotebookMapper: LocalEntryMapper
     ): LocalEntryService =
-        LocalEntryServiceImpl(pageDao, localNotebookMapper)
+        LocalEntryServiceImpl(pageDao)
 
 }

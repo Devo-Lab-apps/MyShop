@@ -1,34 +1,34 @@
 package com.labs.devo.apps.myshop.data.db.local.database.dao
 
 import androidx.room.*
-import com.labs.devo.apps.myshop.data.db.local.models.notebook.LocalEntityNotebook
+import com.labs.devo.apps.myshop.data.models.notebook.Notebook
 
 @Dao
 interface NotebookDao {
 
     @Query("SELECT * FROM Notebook")
-    fun getNotebooks(): List<LocalEntityNotebook>
+    fun getNotebooks(): List<Notebook>
 
     @Query("SELECT * FROM Notebook WHERE notebookId = :notebookId")
-    fun getNotebook(notebookId: String): LocalEntityNotebook
+    fun getNotebook(notebookId: String): Notebook
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertNotebook(notebook: LocalEntityNotebook)
+    suspend fun insertNotebook(notebook: Notebook)
 
     @Insert
-    suspend fun insertNotebooks(notebooks: List<LocalEntityNotebook>)
+    suspend fun insertNotebooks(notebooks: List<Notebook>)
 
     @Update
-    suspend fun updateNotebook(notebook: LocalEntityNotebook)
+    suspend fun updateNotebook(notebook: Notebook)
 
     @Update
-    suspend fun updateNotebooks(notebooks: List<LocalEntityNotebook>)
+    suspend fun updateNotebooks(notebooks: List<Notebook>)
 
     @Delete
-    suspend fun deleteNotebook(notebook: LocalEntityNotebook)
+    suspend fun deleteNotebook(notebook: Notebook)
 
     @Delete
-    suspend fun deleteNotebooks(notebooks: List<LocalEntityNotebook>)
+    suspend fun deleteNotebooks(notebooks: List<Notebook>)
 
     @Query("DELETE FROM NOTEBOOK")
     suspend fun deleteNotebooks()

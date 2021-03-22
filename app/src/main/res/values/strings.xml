@@ -3,4 +3,5 @@
 
     <string name="open_drawer_description">Open Drawer</string>
     <string name="close_drawer_description">Close drawer</string>
+    <string name="unknown_error_occurred">An unknown error occurred</string>
 </resources>

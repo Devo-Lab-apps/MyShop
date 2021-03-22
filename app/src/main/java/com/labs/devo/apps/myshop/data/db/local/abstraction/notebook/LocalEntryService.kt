@@ -1,19 +1,25 @@
 package com.labs.devo.apps.myshop.data.db.local.abstraction.notebook
 
+import androidx.paging.PagingSource
 import com.labs.devo.apps.myshop.data.models.notebook.Entry
-import com.labs.devo.apps.myshop.view.util.QueryParams
 
 interface LocalEntryService {
 
-    suspend fun getEntries(pageId: String, queryParams: QueryParams): List<Entry>?
+    fun getEntries(
+        pageId: String,
+        searchQuery: String,
+        orderBy: String
+    ): PagingSource<Int, Entry>
 
-    suspend fun insertEntries(entries: List<Entry>): List<Entry>
+    suspend fun getEntry(entryId: String): Entry?
 
-    suspend fun insertEntry(entry: Entry): Entry
+    suspend fun insertEntries(entries: List<Entry>)
 
-    suspend fun updateEntries(entries: List<Entry>): List<Entry>
+    suspend fun insertEntry(entry: Entry)
 
-    suspend fun updateEntry(entry: Entry): Entry
+    suspend fun updateEntries(entries: List<Entry>)
+
+    suspend fun updateEntry(entry: Entry)
 
     suspend fun deleteEntry(entry: Entry)
 
