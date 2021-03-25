@@ -10,11 +10,15 @@ import androidx.navigation.fragment.findNavController
 import com.labs.devo.apps.myshop.R
 import com.labs.devo.apps.myshop.data.models.notebook.Notebook
 import com.labs.devo.apps.myshop.databinding.AddNotebookFragmentBinding
-import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment.NotebookConstants.EDIT_NOTEBOOK_OPERATION
+import com.labs.devo.apps.myshop.util.PreferencesManager
+import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity
+import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.EDIT_NOTEBOOK_OPERATION
+import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.NOTEBOOK
 import com.labs.devo.apps.myshop.view.util.DataState
 import com.labs.devo.apps.myshop.view.util.DataStateListener
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class AddEditNotebookFragment : Fragment(R.layout.add_notebook_fragment) {
@@ -29,17 +33,23 @@ class AddEditNotebookFragment : Fragment(R.layout.add_notebook_fragment) {
 
     private var notebook: Notebook? = null
 
+    private lateinit var selectedNotebookId: String
+
+    private lateinit var typedNotebookName: String
+
+    @Inject
+    lateinit var preferencesManager: PreferencesManager
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = AddNotebookFragmentBinding.bind(view)
 
         arguments?.apply {
-            notebook = getParcelable("notebook")
-            operation = getString(NotebookFragment.NotebookConstants.OPERATION).toString()
+            notebook = getParcelable(NOTEBOOK)
+            operation = getString(NotebookActivity.NotebookConstants.OPERATION).toString()
         }
         initView()
-
         observeEvents()
     }
 
@@ -47,55 +57,55 @@ class AddEditNotebookFragment : Fragment(R.layout.add_notebook_fragment) {
     private fun initView() {
         binding.apply {
             addEditNotebookBtn.setOnClickListener {
-                if (operation == NotebookFragment.NotebookConstants.ADD_NOTEBOOK_OPERATION) {
-                    val notebookName = notebookName.text.toString()
+                if (operation == NotebookActivity.NotebookConstants.ADD_NOTEBOOK_OPERATION) {
+                    typedNotebookName = notebookName.text.toString()
                     val notebook = Notebook(
-                        notebookName = notebookName
+                        notebookName = typedNotebookName
                     )
+                    addEditNotebookBtn.isEnabled = false
                     dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
                     viewModel.addNotebook(notebook)
                 } else {
                     dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
-                    val notebookName = notebookName.text.toString()
-                    val newNotebook = notebook!!.copy(
-                        notebookName = notebookName,
-                        modifiedAt = System.currentTimeMillis()
-                    )
-                    viewModel.updateNotebook(notebook!!, newNotebook)
+                    typedNotebookName = notebookName.text.toString()
+                    notebook?.let { n ->
+                        val newNotebook = n.copy(
+                            notebookName = typedNotebookName,
+                            modifiedAt = System.currentTimeMillis()
+                        )
+                        addEditNotebookBtn.isEnabled = false
+                        viewModel.updateNotebook(n, newNotebook)
+                    } ?: run {
+                        dataStateHandler.onDataStateChange(DataState.message<Nothing>(getString(R.string.retry_updating_notebook)))
+                        findNavController().navigateUp()
+                    }
+
                 }
+
             }
             if (operation == EDIT_NOTEBOOK_OPERATION) {
-                addEditNotebookBtn.text = "Update Notebook"
-                notebookName.setText(notebook!!.notebookName)
+                addEditNotebookBtn.text = getString(R.string.update_notebook)
+                notebook?.let { n ->
+                    notebookName.setText(n.notebookName)
+                } ?: run {
+                    dataStateHandler.onDataStateChange(DataState.message<Nothing>(getString(R.string.retry_updating_notebook)))
+                    findNavController().navigateUp()
+                }
             }
+            typedNotebookName = notebookName.text.toString()
         }
     }
 
 
     private fun observeEvents() {
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            preferencesManager.currentSelectedNotebook.collect { (notebookId, _) ->
+                selectedNotebookId = notebookId
+            }
+        }
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             viewModel.channelFlow.collect { event ->
-                when (event) {
-                    is AddEditNotebookViewModel.AddEditNotebookEvent.NotebookInserted -> {
-                        dataStateHandler.onDataStateChange(DataState.message<Nothing>(event.msg))
-                        findNavController().navigateUp()
-                    }
-                    is AddEditNotebookViewModel.AddEditNotebookEvent.ShowInvalidInputMessage -> {
-                        if (event.msg != null) {
-                            dataStateHandler.onDataStateChange(DataState.message<Nothing>(event.msg))
-                        } else {
-                            dataStateHandler.onDataStateChange(DataState.loading<Nothing>(false))
-                        }
-                    }
-                    is AddEditNotebookViewModel.AddEditNotebookEvent.NotebookUpdated -> {
-                        dataStateHandler.onDataStateChange(DataState.message<String>(event.msg))
-                        findNavController().navigateUp()
-                    }
-                    is AddEditNotebookViewModel.AddEditNotebookEvent.NotebookDeleted -> {
-                        dataStateHandler.onDataStateChange(DataState.message<String>(event.msg))
-                        findNavController().navigateUp()
-                    }
-                }
+                collectEvent(event)
             }
         }
     }
@@ -109,5 +119,40 @@ class AddEditNotebookFragment : Fragment(R.layout.add_notebook_fragment) {
             println("$context must implement DataStateListener")
         }
 
+    }
+
+
+    private suspend fun collectEvent(event: AddEditNotebookViewModel.AddEditNotebookEvent) {
+        when (event) {
+            is AddEditNotebookViewModel.AddEditNotebookEvent.NotebookInserted -> {
+                dataStateHandler.onDataStateChange(DataState.message<Nothing>(event.msg))
+                findNavController().navigateUp()
+            }
+            is AddEditNotebookViewModel.AddEditNotebookEvent.ShowInvalidInputMessage -> {
+                if (event.msg != null) {
+                    dataStateHandler.onDataStateChange(DataState.message<Nothing>(event.msg))
+                } else {
+                    dataStateHandler.onDataStateChange(DataState.loading<Nothing>(false))
+                }
+            }
+            is AddEditNotebookViewModel.AddEditNotebookEvent.NotebookUpdated -> {
+                if (selectedNotebookId == notebook?.notebookId) {
+                    preferencesManager.updateCurrentSelectedNotebook(
+                        Pair(
+                            notebook!!.notebookId,
+                            typedNotebookName
+                        )
+                    )
+                    findNavController().navigateUp()
+                }
+                dataStateHandler.onDataStateChange(DataState.message<String>(event.msg))
+                findNavController().navigateUp()
+            }
+            is AddEditNotebookViewModel.AddEditNotebookEvent.NotebookDeleted -> {
+                dataStateHandler.onDataStateChange(DataState.message<String>(event.msg))
+                findNavController().navigateUp()
+            }
+        }
+        binding.addEditNotebookBtn.isEnabled = true
     }
 }

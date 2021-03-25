@@ -18,4 +18,6 @@ object AppConstants {
 
     //TODO change to prod before going in prod.
     const val DEBUG = true // enable logging
+
+    const val EMPTY_STRING = ""
 }

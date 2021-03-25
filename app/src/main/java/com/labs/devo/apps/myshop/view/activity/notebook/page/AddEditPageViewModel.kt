@@ -2,8 +2,12 @@ package com.labs.devo.apps.myshop.view.activity.notebook.page
 
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.viewModelScope
-import com.labs.devo.apps.myshop.data.repo.notebook.abstraction.PageRepository
 import com.labs.devo.apps.myshop.data.models.notebook.Page
+import com.labs.devo.apps.myshop.data.repo.notebook.abstraction.PageRepository
+import com.labs.devo.apps.myshop.view.activity.notebook.page.AddEditPageViewModel.PageEventConstants.PAGE_ADDED
+import com.labs.devo.apps.myshop.view.activity.notebook.page.AddEditPageViewModel.PageEventConstants.PAGE_DELETED
+import com.labs.devo.apps.myshop.view.activity.notebook.page.AddEditPageViewModel.PageEventConstants.PAGE_NAME_NOT_UPDATED_ERR
+import com.labs.devo.apps.myshop.view.activity.notebook.page.AddEditPageViewModel.PageEventConstants.PAGE_UPDATED
 import com.labs.devo.apps.myshop.view.util.BaseViewModel
 import kotlinx.coroutines.launch
 
@@ -15,19 +19,19 @@ constructor(private val pageRepository: PageRepository) :
     fun addPage(page: Page) = viewModelScope.launch {
         val res = pageRepository.insertPage(page)
         res.data?.let {
-            channel.send(AddEditPageEvent.PageInserted("Page inserted"))
+            channel.send(AddEditPageEvent.PageInserted(PAGE_ADDED))
         }
             ?: channel.send(AddEditPageEvent.ShowInvalidInputMessage(res.message?.getContentIfNotHandled()))
     }
 
     fun updatePage(prevPage: Page, page: Page) = viewModelScope.launch {
         if (page.pageName == prevPage.pageName) {
-            channel.send(AddEditPageEvent.ShowInvalidInputMessage("Page's name is not changed"))
+            channel.send(AddEditPageEvent.ShowInvalidInputMessage(PAGE_NAME_NOT_UPDATED_ERR))
             return@launch
         }
         val data = pageRepository.updatePage(page)
         data.data?.let {
-            channel.send(AddEditPageEvent.PageUpdated("Page is updated"))
+            channel.send(AddEditPageEvent.PageUpdated(PAGE_UPDATED))
         }
             ?: channel.send(
                 AddEditPageEvent.ShowInvalidInputMessage(
@@ -39,7 +43,7 @@ constructor(private val pageRepository: PageRepository) :
     fun deletePage(page: Page) = viewModelScope.launch {
         val data = pageRepository.deletePage(page)
         data.data?.let {
-            channel.send(AddEditPageEvent.PageDeleted("Page is deleted"))
+            channel.send(AddEditPageEvent.PageDeleted(PAGE_DELETED))
         }
             ?: channel.send(
                 AddEditPageEvent.ShowInvalidInputMessage(
@@ -59,7 +63,12 @@ constructor(private val pageRepository: PageRepository) :
 
         data class PageDeleted(val msg: String) :
             AddEditPageEvent()
+    }
 
-
+    object PageEventConstants {
+        const val PAGE_DELETED = "Page Deleted"
+        const val PAGE_UPDATED = "Page Updated"
+        const val PAGE_ADDED = "Page added"
+        const val PAGE_NAME_NOT_UPDATED_ERR = "Page's name is not changed"
     }
 }

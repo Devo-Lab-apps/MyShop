@@ -27,6 +27,7 @@
                     android:id="@+id/select_notebook_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:enabled="false"
                     android:drawableEnd="@drawable/ic_baseline_keyboard_arrow_down_24"
                     android:text="No notebook selected" />
 

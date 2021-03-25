@@ -25,10 +25,14 @@ import com.labs.devo.apps.myshop.databinding.FragmentPageBinding
 import com.labs.devo.apps.myshop.util.PreferencesManager
 import com.labs.devo.apps.myshop.util.extensions.onQueryTextChanged
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity
-import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment.NotebookConstants.ADD_PAGE_OPERATION
-import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment.NotebookConstants.EDIT_PAGE_OPERATION
-import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment.NotebookConstants.NOTEBOOK_ID
-import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment.NotebookConstants.OPERATION
+import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.ADD_PAGE_OPERATION
+import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.EDIT_PAGE_OPERATION
+import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.NOTEBOOK_ID
+import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.OPERATION
+import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.PAGE
+import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.PAGES_NOT_IMPORTED_ERR
+import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.PAGE_ID
+import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.PAGE_NAME
 import com.labs.devo.apps.myshop.view.adapter.notebook.PageListAdapter
 import com.labs.devo.apps.myshop.view.util.DataState
 import com.labs.devo.apps.myshop.view.util.DataStateListener
@@ -46,6 +50,8 @@ class PageFragment : Fragment(R.layout.fragment_page), PageListAdapter.OnPageCli
     private val TAG = AppConstants.APP_PREFIX + javaClass.simpleName
 
     private lateinit var binding: FragmentPageBinding
+
+    private lateinit var searchView: SearchView
 
     private val viewModel: PageViewModel by viewModels()
 
@@ -73,9 +79,9 @@ class PageFragment : Fragment(R.layout.fragment_page), PageListAdapter.OnPageCli
         (activity as NotebookActivity).setSupportActionBar(binding.pageToolbar)
         setHasOptionsMenu(true)
         dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
-        binding.selectNotebookButton.isEnabled = false
         pageListAdapter = PageListAdapter(this, this)
         binding.apply {
+
             selectNotebookButton.setOnClickListener {
                 viewModel.onNotebookSelect()
             }
@@ -87,13 +93,6 @@ class PageFragment : Fragment(R.layout.fragment_page), PageListAdapter.OnPageCli
                     GenericLoadStateAdapter(pageListAdapter::retry)
                 )
                 itemAnimator?.changeDuration = 0
-            }
-
-
-            viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-                viewModel.pages.collectLatest { data ->
-                    pageListAdapter.submitData(data)
-                }
             }
 
             addPageBtn.setOnClickListener {
@@ -120,9 +119,20 @@ class PageFragment : Fragment(R.layout.fragment_page), PageListAdapter.OnPageCli
                 if (notebookId != FirebaseConstants.foreignNotebookKey || isForeignImported == ImportStatus.IMPORTED.ordinal) {
                     viewModel.setNotebookId(notebookId)
                 } else {
-                    dataStateHandler.onDataStateChange(DataState.message<Nothing>("Pages for foreign notebook are being imported. Please try to sync notebooks."))
+                    dataStateHandler.onDataStateChange(
+                        DataState.message<Nothing>(
+                            PAGES_NOT_IMPORTED_ERR
+                        )
+                    )
                 }
                 binding.selectNotebookButton.isEnabled = true
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            viewModel.pages.collectLatest { data ->
+                binding.pageRecyclerView.scrollToPosition(0)
+                pageListAdapter.submitData(data)
             }
         }
 
@@ -133,7 +143,7 @@ class PageFragment : Fragment(R.layout.fragment_page), PageListAdapter.OnPageCli
                         val error = (state.refresh as LoadState.Error).error
                         dataStateHandler.onDataStateChange(
                             DataState.message<Nothing>(
-                                error.message ?: "An error occurred"
+                                error.message ?: getString(R.string.unknown_error_occurred)
                             )
                         )
                     }
@@ -151,7 +161,7 @@ class PageFragment : Fragment(R.layout.fragment_page), PageListAdapter.OnPageCli
             viewModel.channelFlow.collect { event ->
                 when (event) {
                     is PageViewModel.PageEvent.NavigateToNotebookFragment -> {
-                        showNotebookFragment()
+                        showNotebookActivity()
                     }
                     is PageViewModel.PageEvent.ShowInvalidInputMessage -> {
                         if (event.msg != null) {
@@ -164,7 +174,7 @@ class PageFragment : Fragment(R.layout.fragment_page), PageListAdapter.OnPageCli
         }
     }
 
-    private fun showNotebookFragment() {
+    private fun showNotebookActivity() {
         val options = NavOptions.Builder()
         options.setEnterAnim(R.anim.open_notebook_fragment)
         options.setExitAnim(R.anim.exit_notebook_fragment)
@@ -177,7 +187,13 @@ class PageFragment : Fragment(R.layout.fragment_page), PageListAdapter.OnPageCli
         inflater.inflate(R.menu.menu_page_fragment, menu)
 
         val searchItem = menu.findItem(R.id.action_search_page)
-        val searchView = searchItem.actionView as SearchView
+        searchView = searchItem.actionView as SearchView
+
+        val query = viewModel.searchQuery.value
+        if (query != null && query.isNotEmpty()) {
+            searchItem.expandActionView()
+            searchView.setQuery(query, false)
+        }
 
         searchView.onQueryTextChanged {
             viewModel.setSearchQuery(it)
@@ -217,7 +233,7 @@ class PageFragment : Fragment(R.layout.fragment_page), PageListAdapter.OnPageCli
     override fun onPageSettingsClick(page: Page) {
         val args = bundleOf(
             OPERATION to EDIT_PAGE_OPERATION,
-            "page" to page
+            PAGE to page
         )
         findNavController().navigate(R.id.addEditPageFragment, args)
     }
@@ -225,8 +241,14 @@ class PageFragment : Fragment(R.layout.fragment_page), PageListAdapter.OnPageCli
 
     override fun onClick(page: Page) {
         val args = bundleOf(
-            "page" to page
+            PAGE_ID to page.pageId,
+            PAGE_NAME to page.pageName
         )
         findNavController().navigate(R.id.entryFragment, args)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        searchView.setOnQueryTextListener(null)
     }
 }
