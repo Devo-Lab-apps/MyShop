@@ -1,39 +1,41 @@
 package com.labs.devo.apps.myshop.view.activity.notebook.page
 
+import androidx.hilt.Assisted
 import androidx.hilt.lifecycle.ViewModelInject
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import com.labs.devo.apps.myshop.const.AppConstants
-import com.labs.devo.apps.myshop.data.models.notebook.Page
+import com.labs.devo.apps.myshop.const.AppConstants.EMPTY_STRING
 import com.labs.devo.apps.myshop.data.repo.notebook.abstraction.PageRepository
 import com.labs.devo.apps.myshop.util.PreferencesManager
-import com.labs.devo.apps.myshop.util.printLogD
 import com.labs.devo.apps.myshop.view.util.BaseViewModel
-import com.labs.devo.apps.myshop.view.util.DataState
-import com.labs.devo.apps.myshop.view.util.Event
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class PageViewModel @ViewModelInject constructor(
-    val pageRepository: PageRepository,
-    val preferencesManager: PreferencesManager
+    private val pageRepository: PageRepository,
+    val preferencesManager: PreferencesManager,
+    @Assisted private val state: SavedStateHandle
 ) : BaseViewModel<PageViewModel.PageEvent>() {
 
     private val TAG = AppConstants.APP_PREFIX + javaClass.simpleName
 
-    private val _searchQuery = MutableStateFlow("")
+    private val _searchQuery = state.getLiveData("pageSearchQuery", EMPTY_STRING)
+    val searchQuery: LiveData<String> = _searchQuery
 
-    private val _notebookId = MutableStateFlow("")
+    private val _notebookId = MutableStateFlow(EMPTY_STRING)
+    val notebookId: StateFlow<String> = _notebookId
 
-    private val _orderBy = MutableStateFlow("")
+    private val _orderBy = MutableStateFlow(EMPTY_STRING)
+    val orderBy: StateFlow<String> = _orderBy
 
     private var refreshStatus = false
 
     val pages = combine(
-        _notebookId, _searchQuery, _orderBy
+        _notebookId, _searchQuery.asFlow(), _orderBy
     ) { notebookId, searchQuery, orderBy ->
         Triple(notebookId, searchQuery, orderBy)
     }.flatMapLatest { (notebookId, searchQuery, orderBy) ->
@@ -56,31 +58,10 @@ class PageViewModel @ViewModelInject constructor(
     }
 
     fun syncPages() {
-//        val notebookId = _notebookId.value
-//        _notebookId.value = ""
+        val notebookId = _notebookId.value
+        _notebookId.value = EMPTY_STRING
         refreshStatus = true
-        _notebookId.value = _notebookId.value
-    }
-
-    private suspend fun handleGetPages(dataState: DataState<List<Page>>) {
-        dataState.data?.let { event ->
-            val pages = event.getContentIfNotHandled()
-            if (pages.isNullOrEmpty()) {
-                dataState.message = Event.messageEvent("No pages in this notebook.")
-            }
-            channel.send(
-                PageEvent.GetPagesEvent(
-                    pages ?: listOf(),
-                    dataState
-                )
-            )
-        }
-            ?: channel.send(
-                PageEvent.GetPagesEvent(
-                    listOf(),
-                    dataState
-                )
-            )
+        _notebookId.value = notebookId
     }
 
     fun setNotebookId(notebookId: String) {
@@ -98,9 +79,6 @@ class PageViewModel @ViewModelInject constructor(
 
     sealed class PageEvent {
         object NavigateToNotebookFragment : PageEvent()
-
-        data class GetPagesEvent(val pages: List<Page>, val dataState: DataState<List<Page>>) :
-            PageEvent()
 
         data class ShowInvalidInputMessage(val msg: String?) : PageEvent()
     }

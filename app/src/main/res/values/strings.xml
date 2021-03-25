@@ -4,4 +4,11 @@
     <string name="open_drawer_description">Open Drawer</string>
     <string name="close_drawer_description">Close drawer</string>
     <string name="unknown_error_occurred">An unknown error occurred</string>
+    <string name="update_entry">Update Entry</string>
+    <string name="enter_a_valid_number">Please enter a valid number</string>
+    <string name="retry_updating_entry">Please retry updating the entry.</string>
+    <string name="update_notebook">Update Notebook</string>
+    <string name="retry_updating_notebook">Please retry updating notebook</string>
+    <string name="cant_update_foreign_notebook">You can\'t modify foreign transactions.</string>
+    <string name="update_page">Update Page</string>
 </resources>

@@ -2,9 +2,10 @@ package com.labs.devo.apps.myshop.view.activity.notebook.notebook
 
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.viewModelScope
-import com.labs.devo.apps.myshop.data.repo.notebook.abstraction.NotebookRepository
 import com.labs.devo.apps.myshop.data.models.notebook.Notebook
-import com.labs.devo.apps.myshop.util.printLogD
+import com.labs.devo.apps.myshop.data.repo.notebook.abstraction.NotebookRepository
+import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookViewModel.NotebookOperationConstants.CANT_FETCH_NOTEBOOKS_ERR
+import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookViewModel.NotebookOperationConstants.NO_NOTEBOOKS_MSG
 import com.labs.devo.apps.myshop.view.util.BaseViewModel
 import com.labs.devo.apps.myshop.view.util.DataState
 import com.labs.devo.apps.myshop.view.util.Event
@@ -23,7 +24,7 @@ class NotebookViewModel @ViewModelInject constructor(private val notebookReposit
         } catch (ex: Exception) {
             channel.send(
                 NotebookEvent.ShowInvalidInputMessage(
-                    ex.message ?: "Can't fetch the notebooks. Please retry"
+                    ex.message ?: CANT_FETCH_NOTEBOOKS_ERR
                 )
             )
         }
@@ -33,8 +34,7 @@ class NotebookViewModel @ViewModelInject constructor(private val notebookReposit
         dataState.data?.let { event ->
             val notebooks = event.getContentIfNotHandled()
             if (notebooks.isNullOrEmpty()) {
-                dataState.message = Event.messageEvent("No notebooks in this account.")
-                printLogD("No account in this account.")
+                dataState.message = Event.messageEvent(NO_NOTEBOOKS_MSG)
             }
             channel.send(
                 NotebookEvent.GetNotebooks(
@@ -57,10 +57,18 @@ class NotebookViewModel @ViewModelInject constructor(private val notebookReposit
         } catch (ex: Exception) {
             channel.send(
                 NotebookEvent.ShowInvalidInputMessage(
-                    ex.message ?: "Can't fetch the notebooks. Please retry"
+                    ex.message ?: CANT_FETCH_NOTEBOOKS_ERR
                 )
             )
         }
+    }
+
+    fun addNotebook() = viewModelScope.launch {
+        channel.send(NotebookEvent.AddNotebookEvent)
+    }
+
+    fun editNotebook(notebook: Notebook) = viewModelScope.launch {
+        channel.send(NotebookEvent.EditNotebookEvent(notebook))
     }
 
 
@@ -73,7 +81,13 @@ class NotebookViewModel @ViewModelInject constructor(private val notebookReposit
             val dataState: DataState<List<Notebook>>
         ) : NotebookEvent()
 
-        object NotebookInserted : NotebookEvent()
+        object AddNotebookEvent : NotebookEvent()
+        data class EditNotebookEvent(val notebook: Notebook) : NotebookEvent()
 
+    }
+
+    object NotebookOperationConstants {
+        const val NO_NOTEBOOKS_MSG = "No notebooks in this account."
+        const val CANT_FETCH_NOTEBOOKS_ERR = "Can't fetch the notebooks. Please retry"
     }
 }

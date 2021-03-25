@@ -26,7 +26,7 @@ class NotebookListAdapter(
                 val pos = adapterPosition
                 if (pos != NO_POSITION) {
                     binding.notebookSettings.setOnClickListener {
-                        onNotebookSettingsClick.onClick(getItem(pos))
+                        onNotebookSettingsClick.onSettingsClick(getItem(pos))
                     }
                     binding.root.setOnClickListener {
                         onNotebookClick.onClick(getItem(pos))
@@ -37,7 +37,7 @@ class NotebookListAdapter(
     }
 
     interface OnNotebookSettingsClick {
-        fun onClick(notebook: Notebook)
+        fun onSettingsClick(notebook: Notebook)
     }
 
     interface OnNotebookClick {

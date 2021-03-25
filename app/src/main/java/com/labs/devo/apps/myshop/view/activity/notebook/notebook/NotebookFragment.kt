@@ -16,9 +16,9 @@ import com.labs.devo.apps.myshop.data.db.remote.models.notebook.NotebookMetadata
 import com.labs.devo.apps.myshop.data.models.notebook.Notebook
 import com.labs.devo.apps.myshop.databinding.FragmentNotebookBinding
 import com.labs.devo.apps.myshop.util.PreferencesManager
-import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment.NotebookConstants.ADD_NOTEBOOK_OPERATION
-import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment.NotebookConstants.EDIT_NOTEBOOK_OPERATION
-import com.labs.devo.apps.myshop.view.activity.notebook.notebook.NotebookFragment.NotebookConstants.OPERATION
+import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity
+import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.NOTEBOOK
+import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.OPERATION
 import com.labs.devo.apps.myshop.view.adapter.notebook.NotebookListAdapter
 import com.labs.devo.apps.myshop.view.util.DataState
 import com.labs.devo.apps.myshop.view.util.DataStateListener
@@ -28,7 +28,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class NotebookFragment : DialogFragment(R.layout.fragment_notebook) {
+class NotebookFragment : DialogFragment(R.layout.fragment_notebook),
+    NotebookListAdapter.OnNotebookClick, NotebookListAdapter.OnNotebookSettingsClick {
 
     private val TAG = AppConstants.APP_PREFIX + javaClass.simpleName
 
@@ -58,32 +59,7 @@ class NotebookFragment : DialogFragment(R.layout.fragment_notebook) {
      */
     private fun initView() {
         dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
-        notebookAdapter = NotebookListAdapter(
-            object : NotebookListAdapter.OnNotebookClick {
-                override fun onClick(notebook: Notebook) {
-                    dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
-                    lifecycleScope.launch {
-                        preferencesManager.updateCurrentSelectedNotebook(
-                            Pair(notebook.notebookId, notebook.notebookName)
-                        )
-                        findNavController().navigateUp()
-                    }
-                }
-            },
-            object : NotebookListAdapter.OnNotebookSettingsClick {
-                override fun onClick(notebook: Notebook) {
-                    if (notebook.notebookId == "foreign" || notebook.notebookName == "Foreign") {
-                        dataStateHandler.onDataStateChange(DataState.message<Nothing>("You can't edit foreign transactions."))
-                        return
-                    }
-                    val args = bundleOf(
-                        "notebook" to notebook,
-                        OPERATION to EDIT_NOTEBOOK_OPERATION
-                    )
-                    findNavController().navigate(R.id.addEditNotebookFragment, args)
-                }
-            }
-        )
+        notebookAdapter = NotebookListAdapter(this, this)
 
         notebookAdapter.submitList(mutableListOf())
 
@@ -95,17 +71,13 @@ class NotebookFragment : DialogFragment(R.layout.fragment_notebook) {
             }
 
             addEditNotebookBtn.setOnClickListener {
-                val args = bundleOf(
-                    OPERATION to ADD_NOTEBOOK_OPERATION
-                )
-                findNavController().navigate(R.id.addEditNotebookFragment, args)
+                viewModel.addNotebook()
             }
 
             syncNotebooks.setOnClickListener {
                 dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
                 viewModel.syncNotebooks()
             }
-
         }
 
 
@@ -117,31 +89,53 @@ class NotebookFragment : DialogFragment(R.layout.fragment_notebook) {
     private fun observeEvents() {
         lifecycleScope.launchWhenStarted {
             viewModel.channelFlow.collect { event ->
-                when (event) {
-                    is NotebookViewModel.NotebookEvent.GetNotebooks -> {
-                        val notebooks = event.notebooks
-                        dataStateHandler.onDataStateChange(event.dataState)
-                        val foreignNotebook =
-                            notebooks.firstOrNull { notebook -> notebook.notebookId == FirebaseConstants.foreignNotebookKey }
-                        if (foreignNotebook != null) {
-                            foreignNotebook.metadata[NotebookMetadataConstants.importStatus]?.let { s ->
-                                val status = s.toInt()
-                                preferencesManager.setForeignImported(status)
-                            }
-                        } else {
-                            //TODO handle it some way
+                collectEvent(event)
+            }
+        }
+    }
+
+    private suspend fun collectEvent(event: NotebookViewModel.NotebookEvent) {
+        when (event) {
+            is NotebookViewModel.NotebookEvent.GetNotebooks -> {
+                val notebooks = event.notebooks
+                dataStateHandler.onDataStateChange(event.dataState)
+                val foreignNotebook =
+                    notebooks.firstOrNull { notebook -> notebook.notebookId == FirebaseConstants.foreignNotebookKey }
+                if (foreignNotebook != null) {
+                    foreignNotebook.metadata[NotebookMetadataConstants.importStatus]?.let { s ->
+                        val status = s.toInt()
+                        preferencesManager.setForeignImported(status)
+                    }
+                } else {
+                    //TODO handle it some way
 //                            dataStateHandler.onDataStateChange(DataState.message<Nothing>("Some error occurred."))
 //                            // clog("foreign can't be null).
 //                            return@collect
-                        }
-                        notebookAdapter.submitList(notebooks.toMutableList())
-                    }
-                    is NotebookViewModel.NotebookEvent.ShowInvalidInputMessage -> {
-                        if (event.msg != null) {
-                            dataStateHandler.onDataStateChange(DataState.message<Nothing>(event.msg))
-                        }
-                    }
                 }
+                notebookAdapter.submitList(notebooks.toMutableList())
+            }
+            is NotebookViewModel.NotebookEvent.ShowInvalidInputMessage -> {
+                if (event.msg != null) {
+                    dataStateHandler.onDataStateChange(DataState.message<Nothing>(event.msg))
+                }
+            }
+            is NotebookViewModel.NotebookEvent.AddNotebookEvent -> {
+                val args = bundleOf(
+                    OPERATION to NotebookActivity.NotebookConstants.ADD_NOTEBOOK_OPERATION
+                )
+                findNavController().navigate(R.id.addEditNotebookFragment, args)
+            }
+            is NotebookViewModel.NotebookEvent.EditNotebookEvent -> {
+                val notebook = event.notebook
+                if (notebook.notebookId == FirebaseConstants.foreignNotebookKey || notebook.notebookName == FirebaseConstants.foreignNotebookName) {
+                    dataStateHandler.onDataStateChange(DataState.message<Nothing>(getString(R.string.cant_update_foreign_notebook)))
+                    return
+                }
+                val args = bundleOf(
+                    NOTEBOOK to notebook,
+                    OPERATION to NotebookActivity.NotebookConstants.EDIT_NOTEBOOK_OPERATION
+                )
+                findNavController().navigate(R.id.addEditNotebookFragment, args)
             }
         }
     }
@@ -157,16 +151,22 @@ class NotebookFragment : DialogFragment(R.layout.fragment_notebook) {
 
     }
 
-    object NotebookConstants {
-        const val OPERATION = "operation"
-        const val ADD_NOTEBOOK_OPERATION = "add_notebook"
-        const val EDIT_NOTEBOOK_OPERATION = "edit_notebook"
-        const val ADD_PAGE_OPERATION = "add_page"
-        const val EDIT_PAGE_OPERATION = "edit_page"
-        const val ADD_ENTRY_OPERATION = "add_entry"
-        const val EDIT_ENTRY_OPERATION = "edit_entry"
-        const val NOTEBOOK_ID = "notebook_id"
 
+    override fun onSettingsClick(notebook: Notebook) {
+        viewModel.editNotebook(notebook)
+    }
+
+    override fun onClick(notebook: Notebook) {
+        dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
+        viewLifecycleOwner.lifecycleScope.launch {
+            preferencesManager.updateCurrentSelectedNotebook(
+                Pair(
+                    notebook.notebookId,
+                    notebook.notebookName
+                )
+            )
+            findNavController().navigateUp()
+        }
     }
 
 }

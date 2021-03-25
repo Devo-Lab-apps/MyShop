@@ -2,36 +2,41 @@ package com.labs.devo.apps.myshop.view.activity.notebook.notebook
 
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.viewModelScope
-import com.labs.devo.apps.myshop.data.repo.notebook.abstraction.NotebookRepository
 import com.labs.devo.apps.myshop.data.models.notebook.Notebook
+import com.labs.devo.apps.myshop.data.repo.notebook.abstraction.NotebookRepository
+import com.labs.devo.apps.myshop.view.activity.notebook.notebook.AddEditNotebookViewModel.AddEditNotebookEvents.NOTEBOOK_DELETED
+import com.labs.devo.apps.myshop.view.activity.notebook.notebook.AddEditNotebookViewModel.AddEditNotebookEvents.NOTEBOOK_DIFFERENT_ERR
+import com.labs.devo.apps.myshop.view.activity.notebook.notebook.AddEditNotebookViewModel.AddEditNotebookEvents.NOTEBOOK_INSERTED
+import com.labs.devo.apps.myshop.view.activity.notebook.notebook.AddEditNotebookViewModel.AddEditNotebookEvents.NOTEBOOK_NAME_NOT_CHANGED_ERR
+import com.labs.devo.apps.myshop.view.activity.notebook.notebook.AddEditNotebookViewModel.AddEditNotebookEvents.NOTEBOOK_UPDATED
 import com.labs.devo.apps.myshop.view.util.BaseViewModel
 import kotlinx.coroutines.launch
 
 class AddEditNotebookViewModel @ViewModelInject
-constructor(val notebookRepository: NotebookRepository) :
+constructor(private val notebookRepository: NotebookRepository) :
     BaseViewModel<AddEditNotebookViewModel.AddEditNotebookEvent>() {
 
 
     fun addNotebook(notebook: Notebook) = viewModelScope.launch {
         val res = notebookRepository.insertNotebook(notebook)
         res.data?.let {
-            channel.send(AddEditNotebookEvent.NotebookInserted("Notebook inserted"))
+            channel.send(AddEditNotebookEvent.NotebookInserted(NOTEBOOK_INSERTED))
         }
             ?: channel.send(AddEditNotebookEvent.ShowInvalidInputMessage(res.message?.getContentIfNotHandled()))
     }
 
     fun updateNotebook(prevNotebook: Notebook, notebook: Notebook) = viewModelScope.launch {
         if (prevNotebook.notebookId != notebook.notebookId) {
-            channel.send(AddEditNotebookEvent.ShowInvalidInputMessage("Notebook being updated is different"))
+            channel.send(AddEditNotebookEvent.ShowInvalidInputMessage(NOTEBOOK_DIFFERENT_ERR))
             return@launch
         }
         if (notebook.notebookName == prevNotebook.notebookName) {
-            channel.send(AddEditNotebookEvent.ShowInvalidInputMessage("Notebook's name is not changed"))
+            channel.send(AddEditNotebookEvent.ShowInvalidInputMessage(NOTEBOOK_NAME_NOT_CHANGED_ERR))
             return@launch
         }
         val data = notebookRepository.updateNotebook(notebook)
         data.data?.let {
-            channel.send(AddEditNotebookEvent.NotebookUpdated("Notebook is updated"))
+            channel.send(AddEditNotebookEvent.NotebookUpdated(NOTEBOOK_UPDATED))
         }
             ?: channel.send(
                 AddEditNotebookEvent.ShowInvalidInputMessage(
@@ -43,7 +48,7 @@ constructor(val notebookRepository: NotebookRepository) :
     fun deleteNotebook(notebook: Notebook) = viewModelScope.launch {
         val data = notebookRepository.deleteNotebook(notebook)
         data.data?.let {
-            channel.send(AddEditNotebookEvent.NotebookDeleted("Notebook is deleted"))
+            channel.send(AddEditNotebookEvent.NotebookDeleted(NOTEBOOK_DELETED))
         }
             ?: channel.send(
                 AddEditNotebookEvent.ShowInvalidInputMessage(
@@ -65,5 +70,13 @@ constructor(val notebookRepository: NotebookRepository) :
             AddEditNotebookViewModel.AddEditNotebookEvent()
 
 
+    }
+
+    object AddEditNotebookEvents {
+        const val NOTEBOOK_INSERTED = "Notebook is added."
+        const val NOTEBOOK_UPDATED = "Notebook is updated."
+        const val NOTEBOOK_DIFFERENT_ERR = "Notebook being updated is different"
+        const val NOTEBOOK_NAME_NOT_CHANGED_ERR = "Notebook's name is not changed"
+        const val NOTEBOOK_DELETED = "Notebook is deleted"
     }
 }
