@@ -48,6 +48,9 @@
         <action
             android:id="@+id/action_entryFragment_to_addEditEntryFragment"
             app:destination="@id/addEditEntryFragment" />
+        <action
+            android:id="@+id/action_entryFragment_to_recurringEntryFragment"
+            app:destination="@id/recurringEntryFragment" />
     </fragment>
     <fragment
         android:id="@+id/addEditEntryFragment"
@@ -55,4 +58,9 @@
         android:label="AddEditEntryFragment"
         tools:layout="@layout/add_edit_entry_fragment"
         />
+    <fragment
+        android:id="@+id/recurringEntryFragment"
+        android:name="com.labs.devo.apps.myshop.view.activity.notebook.entry.RecurringEntryFragment"
+        android:label="fragment_recurring_entry"
+        tools:layout="@layout/fragment_recurring_entry" />
 </navigation>

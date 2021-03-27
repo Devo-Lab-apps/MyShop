@@ -155,6 +155,12 @@ class EntryFragment : Fragment(R.layout.fragment_entry), EntryListAdapter.OnEntr
                 )
                 findNavController().navigate(R.id.addEditEntryFragment, args)
             }
+            is EntryViewModel.EntryEvent.NavigateToRecurringEntryEvent -> {
+                val args = bundleOf(
+                    PAGE_ID to pageId
+                )
+                findNavController().navigate(R.id.recurringEntryFragment, args)
+            }
         }
     }
 
@@ -188,6 +194,10 @@ class EntryFragment : Fragment(R.layout.fragment_entry), EntryListAdapter.OnEntr
             R.id.action_sync_entries -> {
                 dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
                 viewModel.syncEntries()
+                true
+            }
+            R.id.open_recurring_entry -> {
+                viewModel.onRecurringEntry()
                 true
             }
             else -> super.onOptionsItemSelected(item)
