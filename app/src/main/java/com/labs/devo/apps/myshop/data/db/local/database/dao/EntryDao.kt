@@ -13,19 +13,19 @@ interface EntryDao {
         searchQuery: String,
         orderBy: String
     ): PagingSource<Int, Entry> = when (orderBy) {
-        Entry::entryTitle.name -> getPagesOrderByTitle(pageId, searchQuery)
-        else -> getPagesOrderByModifiedAt(pageId, searchQuery)
+        Entry::entryTitle.name -> getEntriesOrderByTitle(pageId, searchQuery)
+        else -> getEntriesOrderByModifiedAt(pageId, searchQuery)
     }
 
 
     @Query("SELECT * FROM Entry WHERE pageId = :pageId and (entryTitle LIKE :searchQuery or entryDescription LIKE :searchQuery) ORDER BY entryTitle ASC")
-    fun getPagesOrderByTitle(
+    fun getEntriesOrderByTitle(
         pageId: String,
         searchQuery: String
     ): PagingSource<Int, Entry>
 
     @Query("SELECT * FROM Entry WHERE pageId = :pageId and (entryTitle LIKE :searchQuery or entryDescription LIKE :searchQuery) ORDER BY modifiedAt ASC")
-    fun getPagesOrderByModifiedAt(
+    fun getEntriesOrderByModifiedAt(
         pageId: String,
         searchQuery: String,
     ): PagingSource<Int, Entry>

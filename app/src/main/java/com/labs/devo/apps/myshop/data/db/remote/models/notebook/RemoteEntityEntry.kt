@@ -4,5 +4,8 @@ data class RemoteEntityEntry(
     var entryId: String = "",
     val pageId: String = "",
     val entryTitle: String = "",
-    val amount: Double = 0.0
+    val description: String = "",
+    val amount: Double = 0.0,
+    val createdAt: Long = System.currentTimeMillis(),
+    val modifiedAt: Long = System.currentTimeMillis()
 )

@@ -7,10 +7,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.gson.Gson
 import com.labs.devo.apps.myshop.business.auth.abstraction.UserAuth
 import com.labs.devo.apps.myshop.business.auth.implementation.FirebaseUserAuth
-import com.labs.devo.apps.myshop.data.db.local.database.dao.EntryDao
-import com.labs.devo.apps.myshop.data.db.local.database.dao.NotebookDao
-import com.labs.devo.apps.myshop.data.db.local.database.dao.PageDao
-import com.labs.devo.apps.myshop.data.db.local.database.dao.RemoteKeyDao
+import com.labs.devo.apps.myshop.const.AppConstants.NOTEBOOK_DATABASE
+import com.labs.devo.apps.myshop.data.db.local.database.dao.*
 import com.labs.devo.apps.myshop.data.db.local.database.database.NotebookDatabase
 import dagger.Module
 import dagger.Provides
@@ -43,7 +41,7 @@ class AppModule {
     @Singleton
     fun providesNotebookDatabase(
         app: Application
-    ) = Room.databaseBuilder(app, NotebookDatabase::class.java, "notebook_database")
+    ) = Room.databaseBuilder(app, NotebookDatabase::class.java, NOTEBOOK_DATABASE)
         .fallbackToDestructiveMigration()
         .build()
 
@@ -59,6 +57,10 @@ class AppModule {
     @Provides
     @Singleton
     fun provideEntryDao(database: NotebookDatabase): EntryDao = database.entryDao()
+
+    @Provides
+    @Singleton
+    fun provideRecurringEntryDao(database: NotebookDatabase): RecurringEntryDao = database.recurringEntryDao()
 
     @Provides
     @Singleton

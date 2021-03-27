@@ -13,10 +13,10 @@ class RemoteEntryMapper : EntityMapper<RemoteEntityEntry, Entry> {
         return list
     }
 
-    fun pageListToEntityList(notebooks: List<Entry>): List<RemoteEntityEntry> {
+    fun pageListToEntityList(entries: List<Entry>): List<RemoteEntityEntry> {
         val entities: ArrayList<RemoteEntityEntry> = ArrayList()
-        for (notebook in notebooks) {
-            entities.add(mapToEntity(notebook))
+        for (entry in entries) {
+            entities.add(mapToEntity(entry))
         }
         return entities
     }
@@ -26,7 +26,10 @@ class RemoteEntryMapper : EntityMapper<RemoteEntityEntry, Entry> {
             entryId = entity.entryId,
             pageId = entity.pageId,
             entryTitle = entity.entryTitle,
-            entryAmount = entity.amount
+            entryAmount = entity.amount,
+            entryDescription = entity.description,
+            createdAt = entity.createdAt,
+            modifiedAt = entity.modifiedAt
         )
 
     override fun mapToEntity(model: Entry): RemoteEntityEntry =
@@ -34,6 +37,9 @@ class RemoteEntryMapper : EntityMapper<RemoteEntityEntry, Entry> {
             entryId = model.entryId,
             pageId = model.pageId,
             entryTitle = model.entryTitle,
-            amount = model.entryAmount
+            description = model.entryDescription,
+            amount = model.entryAmount,
+            createdAt = model.createdAt,
+            modifiedAt = model.modifiedAt
         )
 }

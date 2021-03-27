@@ -8,6 +8,7 @@ import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.account
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.entry
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.notebook
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.page
+import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.recurringEntry
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.user
 import kotlinx.coroutines.tasks.await
 
@@ -18,6 +19,7 @@ object FirebaseConstants {
     const val notebook = "notebook"
     const val page = "page"
     const val entry = "entry"
+    const val recurringEntry = "recurring_entry"
     const val foreignNotebookName = "Foreign"
     const val foreignNotebookKey = "foreign"
 }
@@ -27,7 +29,7 @@ object FirebaseHelper {
     //initialize db
     private val db = FirebaseFirestore.getInstance()
 
-    fun getUsersCollection(): CollectionReference {
+    private fun getUsersCollection(): CollectionReference {
         return db.collection(user)
     }
 
@@ -35,7 +37,7 @@ object FirebaseHelper {
         return getUsersCollection().document(userId)
     }
 
-    fun getAccountCollection(): CollectionReference {
+    private fun getAccountCollection(): CollectionReference {
         return db.collection(account)
     }
 
@@ -85,6 +87,18 @@ object FirebaseHelper {
 
     fun getEntryReference(pageId: String): DocumentReference {
         return getEntryCollection(pageId).document()
+    }
+
+    fun getRecurringEntryCollection(pageId: String): CollectionReference {
+        return getPageCollection().document(pageId).collection(recurringEntry)
+    }
+
+    fun getRecurringEntryReference(pageId: String, recurringRecurringEntryId: String): DocumentReference {
+        return getRecurringEntryCollection(pageId).document(recurringRecurringEntryId)
+    }
+
+    fun getRecurringEntryReference(pageId: String): DocumentReference {
+        return getRecurringEntryCollection(pageId).document()
     }
 
     suspend fun runWriteBatch(f: () -> Unit) {
