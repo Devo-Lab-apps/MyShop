@@ -3,6 +3,7 @@ package com.labs.devo.apps.myshop.di.module
 import com.labs.devo.apps.myshop.data.db.remote.mapper.notebook.RemoteEntryMapper
 import com.labs.devo.apps.myshop.data.db.remote.mapper.notebook.RemoteNotebookMapper
 import com.labs.devo.apps.myshop.data.db.remote.mapper.notebook.RemotePageMapper
+import com.labs.devo.apps.myshop.data.db.remote.mapper.notebook.RemoteRecurringEntryMapper
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -26,5 +27,9 @@ object ModelsModule {
     @Singleton
     fun provideRemoteEntryMapper(): RemoteEntryMapper = RemoteEntryMapper()
 
+    @Provides
+    @Singleton
+    fun provideRemoteRecurringEntryMapper(): RemoteRecurringEntryMapper =
+        RemoteRecurringEntryMapper()
 
 }

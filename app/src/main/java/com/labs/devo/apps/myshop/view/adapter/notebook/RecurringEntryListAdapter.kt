@@ -18,7 +18,7 @@ class RecurringEntryListAdapter :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(entry: RecurringEntry) {
             binding.apply {
-                recurringEntryName.text = entry.entryName
+                recurringEntryName.text = entry.name
             }
         }
     }
