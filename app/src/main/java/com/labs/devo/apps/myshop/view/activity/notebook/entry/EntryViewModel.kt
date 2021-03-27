@@ -96,11 +96,16 @@ class EntryViewModel
         channel.send(EntryEvent.EditEntryEvent(entry))
     }
 
+    fun onRecurringEntry() = viewModelScope.launch {
+        channel.send(EntryEvent.NavigateToRecurringEntryEvent)
+    }
+
 
     sealed class EntryEvent {
 
         data class ShowInvalidInputMessage(val msg: String?) : EntryEvent()
         object AddEntryEvent : EntryEvent()
+        object NavigateToRecurringEntryEvent : EntryEvent()
         data class EditEntryEvent(val entry: Entry) : EntryEvent()
 
     }

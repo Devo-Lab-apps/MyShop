@@ -19,11 +19,15 @@
             <item
                 android:id="@+id/action_sort_entry_by_date"
                 android:title="Sort by date" />
-
         </menu>
     </item>
 
     <item
         android:id="@+id/action_sync_entries"
         android:title="Sync Entries" />
+
+    <item
+        android:id="@+id/open_recurring_entry"
+        android:title="Open recurring"
+        />
 </menu>
