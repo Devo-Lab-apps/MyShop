@@ -11,4 +11,5 @@
     <string name="retry_updating_notebook">Please retry updating notebook</string>
     <string name="cant_update_foreign_notebook">You can\'t modify foreign transactions.</string>
     <string name="update_page">Update Page</string>
+    <string name="recurring">Is Recurring</string>
 </resources>

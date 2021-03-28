@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.labs.devo.apps.myshop.const.AppConstants
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import java.text.SimpleDateFormat
 import java.util.*
@@ -24,8 +25,14 @@ data class Entry(
     val modifiedAt: Long = System.currentTimeMillis()
 ) : Parcelable {
     @Ignore
+    @IgnoredOnParcel
     val entryCreatedAt: String =
-        SimpleDateFormat(AppConstants.DATE_FORMAT, Locale.US).format(Date(createdAt))
+        SimpleDateFormat(AppConstants.DATE_FORMAT, Locale.US).format(Date(modifiedAt))
+}
+
+object EntryMetadata {
+    const val RECURRING_ENTRY_FREQUENCY = "recurring_entry_frequency"
+    const val RECURRING_ENTRY_TIME = "recurring_entry_time"
 }
 //isRepeatingEntry
 //metadata

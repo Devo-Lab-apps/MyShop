@@ -2,8 +2,12 @@ package com.labs.devo.apps.myshop.view.activity.notebook.entry
 
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.viewModelScope
+import com.labs.devo.apps.myshop.business.helper.FirebaseHelper
 import com.labs.devo.apps.myshop.data.models.notebook.Entry
+import com.labs.devo.apps.myshop.data.models.notebook.EntryMetadata
+import com.labs.devo.apps.myshop.data.models.notebook.RecurringEntry
 import com.labs.devo.apps.myshop.data.repo.notebook.abstraction.EntryRepository
+import com.labs.devo.apps.myshop.data.repo.notebook.abstraction.RecurringEntryRepository
 import com.labs.devo.apps.myshop.view.activity.notebook.entry.AddEditEntryViewModel.AddEntryModelConstants.DIFFERENT_ENTRY_UPDATE
 import com.labs.devo.apps.myshop.view.activity.notebook.entry.AddEditEntryViewModel.AddEntryModelConstants.ENTRY_DELETED
 import com.labs.devo.apps.myshop.view.activity.notebook.entry.AddEditEntryViewModel.AddEntryModelConstants.ENTRY_INSERTED_MSG
@@ -12,16 +16,45 @@ import com.labs.devo.apps.myshop.view.activity.notebook.entry.AddEditEntryViewMo
 import com.labs.devo.apps.myshop.view.util.BaseViewModel
 import kotlinx.coroutines.launch
 
-class AddEditEntryViewModel @ViewModelInject constructor(private val entryRepository: EntryRepository) :
+class AddEditEntryViewModel @ViewModelInject constructor(
+    private val entryRepository: EntryRepository,
+    private val recurringEntryRepository: RecurringEntryRepository
+) :
     BaseViewModel<AddEditEntryViewModel.AddEditEntryEvent>() {
 
 
     fun addEntry(entry: Entry) = viewModelScope.launch {
-        val res = entryRepository.insertEntry(entry)
-        res.data?.let {
-            channel.send(AddEditEntryEvent.EntryInserted(ENTRY_INSERTED_MSG))
+        if (entry.isRepeating) {
+            val data = recurringEntry(entry)
+            val res = recurringEntryRepository.insertRecurringEntry(data)
+            res.data?.let {
+                channel.send(AddEditEntryEvent.EntryInserted(ENTRY_INSERTED_MSG))
+            }
+                ?: channel.send(AddEditEntryEvent.ShowInvalidInputMessage(res.message?.getContentIfNotHandled()))
+        } else {
+            val res = entryRepository.insertEntry(entry)
+            res.data?.let {
+                channel.send(AddEditEntryEvent.EntryInserted(ENTRY_INSERTED_MSG))
+            }
+                ?: channel.send(AddEditEntryEvent.ShowInvalidInputMessage(res.message?.getContentIfNotHandled()))
         }
-            ?: channel.send(AddEditEntryEvent.ShowInvalidInputMessage(res.message?.getContentIfNotHandled()))
+
+
+    }
+
+    private fun recurringEntry(entry: Entry): RecurringEntry {
+        val id = FirebaseHelper.getRecurringEntryReference(entry.pageId).id
+        val metadata = entry.entryMetadata
+        return RecurringEntry(
+            pageId = entry.pageId,
+            recurringEntryId = id,
+            name = entry.entryTitle,
+            description = entry.entryDescription,
+            frequency = metadata[EntryMetadata.RECURRING_ENTRY_FREQUENCY]!!,
+            recurringTime = metadata[EntryMetadata.RECURRING_ENTRY_TIME]!!,
+            createdAt = entry.createdAt,
+            modifiedAt = entry.modifiedAt
+        )
     }
 
     fun updateEntry(prevEntry: Entry, entry: Entry) = viewModelScope.launch {

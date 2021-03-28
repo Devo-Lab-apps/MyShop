@@ -19,12 +19,13 @@ class RecurringEntryRepositoryImpl
     override suspend fun getRecurringEntries(pageId: String): DataState<List<RecurringEntry>> {
         return try {
             PermissionsHelper.checkPermissions(Permissions.GET_RECURRING_ENTRY)
-            var recurringEntries = localRecurringEntryService.getRecurringEntries(pageId)
-            if (recurringEntries.isNullOrEmpty()) {
+//            var recurringEntries = localRecurringEntryService.getRecurringEntries(pageId)
+//            if (recurringEntries.isNullOrEmpty()) {
+            //TODO change this
                 val remoteRecurringEntries = remoteRecurringEntryService.getRecurringEntries(pageId)
                 localRecurringEntryService.insertRecurringEntries(remoteRecurringEntries)
-                recurringEntries = remoteRecurringEntries
-            }
+                val recurringEntries = remoteRecurringEntries
+//            }
             DataState.data(recurringEntries)
         } catch (ex: Exception) {
             DataState.message(

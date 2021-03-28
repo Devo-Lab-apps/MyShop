@@ -18,13 +18,13 @@ interface EntryDao {
     }
 
 
-    @Query("SELECT * FROM Entry WHERE pageId = :pageId and (entryTitle LIKE :searchQuery or entryDescription LIKE :searchQuery) ORDER BY entryTitle ASC")
+    @Query("SELECT * FROM Entry WHERE pageId = :pageId and (entryTitle LIKE :searchQuery or entryDescription LIKE :searchQuery) and isRepeating = 0 ORDER BY entryTitle ASC")
     fun getEntriesOrderByTitle(
         pageId: String,
         searchQuery: String
     ): PagingSource<Int, Entry>
 
-    @Query("SELECT * FROM Entry WHERE pageId = :pageId and (entryTitle LIKE :searchQuery or entryDescription LIKE :searchQuery) ORDER BY modifiedAt ASC")
+    @Query("SELECT * FROM Entry WHERE pageId = :pageId and (entryTitle LIKE :searchQuery or entryDescription LIKE :searchQuery) and isRepeating = 0 ORDER BY modifiedAt ASC")
     fun getEntriesOrderByModifiedAt(
         pageId: String,
         searchQuery: String,
