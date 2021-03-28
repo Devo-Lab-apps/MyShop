@@ -9,13 +9,15 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.labs.devo.apps.myshop.R
 import com.labs.devo.apps.myshop.databinding.FragmentRecurringEntryBinding
+import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.PAGE_ID
 import com.labs.devo.apps.myshop.view.adapter.notebook.RecurringEntryListAdapter
 import com.labs.devo.apps.myshop.view.util.DataState
 import com.labs.devo.apps.myshop.view.util.DataStateListener
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 
-
+@AndroidEntryPoint
 class RecurringEntryFragment : Fragment(R.layout.fragment_recurring_entry) {
 
     private lateinit var binding: FragmentRecurringEntryBinding
@@ -43,6 +45,8 @@ class RecurringEntryFragment : Fragment(R.layout.fragment_recurring_entry) {
     }
 
     private fun initView() {
+        (activity as NotebookActivity).setSupportActionBar(binding.recurringEntryToolbar)
+        setHasOptionsMenu(true)
         entryAdapter = RecurringEntryListAdapter()
         binding.apply {
             recurringEntries.apply {
@@ -54,6 +58,7 @@ class RecurringEntryFragment : Fragment(R.layout.fragment_recurring_entry) {
     }
 
     private fun observeEvents() {
+        dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             viewModel.channelFlow.collect { event ->
                 collectEvent(event)
@@ -65,6 +70,7 @@ class RecurringEntryFragment : Fragment(R.layout.fragment_recurring_entry) {
         when (event) {
             is RecurringEntryViewModel.RecurringEntryEvent.GetRecurringEntriesEvent -> {
                 entryAdapter.submitList(event.entries)
+                dataStateHandler.onDataStateChange(DataState.loading<Nothing>(false))
             }
             is RecurringEntryViewModel.RecurringEntryEvent.ShowInvalidInputMessage -> {
                 dataStateHandler.onDataStateChange(
@@ -83,6 +89,5 @@ class RecurringEntryFragment : Fragment(R.layout.fragment_recurring_entry) {
         } catch (e: ClassCastException) {
             println("$context must implement DataStateListener")
         }
-
     }
 }

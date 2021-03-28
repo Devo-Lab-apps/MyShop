@@ -5,6 +5,8 @@ data class RemoteEntityRecurringEntry(
     var recurringEntryId: String = "",
     val name: String = "",
     val description: String = "",
+    val frequency: String = "Daily",
+    val recurringTime: String = "",
     val createdAt: Long = System.currentTimeMillis(),
     val modifiedAt: Long = System.currentTimeMillis(),
 )

@@ -27,6 +27,8 @@ class RemoteRecurringEntryMapper : EntityMapper<RemoteEntityRecurringEntry, Recu
             pageId = entity.pageId,
             name = entity.name,
             description = entity.description,
+            frequency = entity.frequency,
+            recurringTime = entity.recurringTime,
             createdAt = entity.createdAt,
             modifiedAt = entity.modifiedAt
         )
@@ -37,6 +39,8 @@ class RemoteRecurringEntryMapper : EntityMapper<RemoteEntityRecurringEntry, Recu
             pageId = model.pageId,
             name = model.name,
             description = model.description,
+            frequency = model.frequency,
+            recurringTime = model.recurringTime,
             createdAt = model.createdAt,
             modifiedAt = model.modifiedAt
         )

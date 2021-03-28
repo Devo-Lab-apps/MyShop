@@ -9,6 +9,7 @@ import com.labs.devo.apps.myshop.data.db.remote.models.notebook.RemoteEntityRecu
 import com.labs.devo.apps.myshop.data.models.notebook.RecurringEntry
 import com.labs.devo.apps.myshop.util.exceptions.NoRecurringEntryException
 import com.labs.devo.apps.myshop.util.exceptions.PageNotFoundException
+import com.labs.devo.apps.myshop.util.exceptions.RecurringEntryLimitExceededException
 import com.labs.devo.apps.myshop.util.exceptions.RecurringEntryNotFoundException
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -30,6 +31,11 @@ class RemoteRecurringEntryServiceFirebaseImpl
         if (recurringEntries.isNullOrEmpty()) {
             throw NoRecurringEntryException()
         }
+        val firstEntry = recurringEntries.first()
+        val existingEntries = get(firstEntry.pageId)
+        if (existingEntries.size > 1) {
+            throw RecurringEntryLimitExceededException()
+        }
         val insertedEntries = mutableListOf<RecurringEntry>()
         FirebaseHelper.runTransaction { transaction ->
             recurringEntries.forEach { recurringRecurringEntry ->
@@ -48,6 +54,10 @@ class RemoteRecurringEntryServiceFirebaseImpl
 
     override suspend fun insertRecurringEntry(recurringEntry: RecurringEntry): RecurringEntry {
         var insertedRecurringEntry = recurringEntry.copy()
+        val existingEntries = get(recurringEntry.pageId)
+        if (existingEntries.size > 1) {
+            throw RecurringEntryLimitExceededException()
+        }
         FirebaseHelper.runTransaction { transaction ->
             insertedRecurringEntry =
                 insertInDb(recurringEntry.pageId, recurringEntry, transaction)

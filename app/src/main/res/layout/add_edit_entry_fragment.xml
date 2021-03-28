@@ -64,20 +64,86 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/entry_amount_tv" />
 
+        <CheckBox
+            android:id="@+id/isRecurring"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:layout_margin="4dp"
+            android:text="@string/recurring"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/entry_amount"
+            app:useMaterialThemeColors="true" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/recurringForm"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:visibility="gone"
+
+            app:layout_constraintTop_toBottomOf="@+id/isRecurring"
+            tools:layout_editor_absoluteX="24dp">
+
+            <!--    //isRepeatingEntry-->
+            <!--    //metadata-->
+            <!--    // -timeOfRepeat,-->
+            <!--    // -frequencyOfRepetition,-->
+            <!--    // -notificationId,-->
+            <!--    // -isPaid-->
+            <!--    // -repeatEndsAt-->
+            <!--    // -automaticallyCreateEntryEveryday-->
+
+            <Spinner
+                android:id="@+id/repeating_entry_frequency"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:hint="Frequency"
+                android:inputType="none"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <Button
+                android:id="@+id/recurringTime"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Time of repeat"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/repeating_entry_frequency" />
+
+            <!--            <com.google.android.material.textfield.TextInputLayout-->
+            <!--                android:id="@+id/repeating_entry_frequency"-->
+            <!--                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"-->
+            <!--                android:layout_width="match_parent"-->
+            <!--                android:layout_height="wrap_content"-->
+            <!--                android:hint="Frequency"-->
+            <!--                app:layout_constraintEnd_toEndOf="parent"-->
+            <!--                app:layout_constraintStart_toStartOf="parent"-->
+            <!--                app:layout_constraintTop_toTopOf="parent">-->
+
+
+            <!--            </com.google.android.material.textfield.TextInputLayout>-->
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
         <Button
             android:id="@+id/add_edit_entry_btn"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
             android:background="@drawable/primary_btn_bg"
             android:fontFamily="@font/open_sans_semibold"
             android:text="Add Entry"
+            android:layout_marginTop="12dp"
             android:textAllCaps="false"
             android:textColor="@android:color/background_light"
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/entry_amount" />
+            app:layout_constraintTop_toBottomOf="@+id/recurringForm" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
