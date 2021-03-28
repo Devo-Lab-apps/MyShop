@@ -5,9 +5,7 @@ import com.labs.devo.apps.myshop.data.models.notebook.RecurringEntry
 
 interface LocalRecurringEntryService {
     suspend fun getRecurringEntries(
-        pageId: String,
-        searchQuery: String,
-        orderBy: String
+        pageId: String
     ): List<RecurringEntry>
 
     suspend fun getRecurringEntry(recurringEntryId: String): RecurringEntry?
