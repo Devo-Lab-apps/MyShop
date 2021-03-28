@@ -10,17 +10,10 @@ import javax.inject.Inject
 class LocalRecurringEntryServiceImpl
 @Inject constructor(private val dao: RecurringEntryDao) : LocalRecurringEntryService {
     override suspend fun getRecurringEntries(
-        pageId: String,
-        searchQuery: String,
-        orderBy: String
+        pageId: String
     ): List<RecurringEntry> {
-        var o = orderBy
-        if (orderBy.isEmpty()) {
-            o = Entry::entryTitle.name
-        }
-        val s = "%$searchQuery%"
         return AsyncHelper.runAsync {
-            dao.getRecurringEntries(pageId, s, o)
+            dao.getRecurringEntries(pageId)
         }
     }
 

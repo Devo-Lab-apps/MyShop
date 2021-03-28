@@ -7,26 +7,9 @@ import com.labs.devo.apps.myshop.data.models.notebook.RecurringEntry
 @Dao
 interface RecurringEntryDao {
 
+    @Query("SELECT * FROM RecurringEntry WHERE pageId = :pageId ORDER BY name ASC")
     fun getRecurringEntries(
-        pageId: String,
-        searchQuery: String,
-        orderBy: String
-    ): List<RecurringEntry> = when (orderBy) {
-        Entry::entryTitle.name -> getRecurringEntriesOrderByTitle(pageId, searchQuery)
-        else -> getRecurringEntriesOrderByModifiedAt(pageId, searchQuery)
-    }
-
-
-    @Query("SELECT * FROM RecurringEntry WHERE pageId = :pageId and (name LIKE :searchQuery or description LIKE :searchQuery) ORDER BY name ASC")
-    fun getRecurringEntriesOrderByTitle(
-        pageId: String,
-        searchQuery: String
-    ): List<RecurringEntry>
-
-    @Query("SELECT * FROM RecurringEntry WHERE pageId = :pageId and (name LIKE :searchQuery or description LIKE :searchQuery) ORDER BY modifiedAt ASC")
-    fun getRecurringEntriesOrderByModifiedAt(
-        pageId: String,
-        searchQuery: String,
+        pageId: String
     ): List<RecurringEntry>
 
     @Query("SELECT * FROM RecurringEntry WHERE recurringEntryId = :recurringEntryId")

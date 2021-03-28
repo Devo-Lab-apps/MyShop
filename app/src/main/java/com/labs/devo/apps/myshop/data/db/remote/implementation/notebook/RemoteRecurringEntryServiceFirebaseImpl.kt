@@ -20,12 +20,10 @@ class RemoteRecurringEntryServiceFirebaseImpl
     private val TAG = AppConstants.APP_PREFIX + javaClass.simpleName
 
     override suspend fun getRecurringEntries(
-        pageId: String,
-        query: String,
-        startAfter: String?
+        pageId: String
     ): List<RecurringEntry> {
         checkIfPageExists(pageId)
-        return get(pageId, query, startAfter)
+        return get(pageId)
     }
 
     override suspend fun insertRecurringEntries(recurringEntries: List<RecurringEntry>): List<RecurringEntry> {
@@ -157,8 +155,7 @@ class RemoteRecurringEntryServiceFirebaseImpl
         return recurringRecurringEntry
     }
 
-    private suspend fun get(pageId: String, query: String, sf: String?): List<RecurringEntry> {
-//        val startAfter = sf ?: ""
+    private suspend fun get(pageId: String): List<RecurringEntry> {
         val ss = FirebaseHelper.getRecurringEntryCollection(pageId).get().await()
         return ss?.documents?.map { ds ->
             val obj = ds.toObject(RemoteEntityRecurringEntry::class.java)!!
