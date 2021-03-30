@@ -64,6 +64,7 @@ class NotebookActivity : AppCompatActivity(), DataStateListener {
         const val EDIT_ENTRY_OPERATION = "edit_entry"
         const val NOTEBOOK_ID = "notebook_id"
         const val PAGE_ID = "page_id"
+        const val RECURRING_ENTRY_ID = "recurring_entry_id"
         const val PAGE_NAME = "page_name"
         const val NOTEBOOK = "notebook"
         const val PAGE = "page"

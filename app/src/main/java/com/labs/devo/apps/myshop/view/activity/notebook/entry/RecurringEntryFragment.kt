@@ -3,14 +3,17 @@ package com.labs.devo.apps.myshop.view.activity.notebook.entry
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.labs.devo.apps.myshop.R
 import com.labs.devo.apps.myshop.databinding.FragmentRecurringEntryBinding
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.PAGE_ID
+import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.RECURRING_ENTRY_ID
 import com.labs.devo.apps.myshop.view.adapter.notebook.RecurringEntryListAdapter
 import com.labs.devo.apps.myshop.view.util.DataState
 import com.labs.devo.apps.myshop.view.util.DataStateListener
@@ -18,7 +21,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 
 @AndroidEntryPoint
-class RecurringEntryFragment : Fragment(R.layout.fragment_recurring_entry) {
+class RecurringEntryFragment : Fragment(R.layout.fragment_recurring_entry),
+    RecurringEntryListAdapter.OnRecurringEntryClick {
 
     private lateinit var binding: FragmentRecurringEntryBinding
 
@@ -47,7 +51,7 @@ class RecurringEntryFragment : Fragment(R.layout.fragment_recurring_entry) {
     private fun initView() {
         (activity as NotebookActivity).setSupportActionBar(binding.recurringEntryToolbar)
         setHasOptionsMenu(true)
-        entryAdapter = RecurringEntryListAdapter()
+        entryAdapter = RecurringEntryListAdapter(this)
         binding.apply {
             recurringEntries.apply {
                 setHasFixedSize(true)
@@ -79,6 +83,12 @@ class RecurringEntryFragment : Fragment(R.layout.fragment_recurring_entry) {
                     )
                 )
             }
+            is RecurringEntryViewModel.RecurringEntryEvent.NavigateToMicroEntryFragment -> {
+                val args = bundleOf(
+                    RECURRING_ENTRY_ID to event.id
+                )
+                findNavController().navigate(R.id.microEntryFragment, args)
+            }
         }
     }
 
@@ -89,5 +99,9 @@ class RecurringEntryFragment : Fragment(R.layout.fragment_recurring_entry) {
         } catch (e: ClassCastException) {
             println("$context must implement DataStateListener")
         }
+    }
+
+    override fun onClick(recurringEntryId: String) {
+        viewModel.onRecurringEntryClick(recurringEntryId)
     }
 }
