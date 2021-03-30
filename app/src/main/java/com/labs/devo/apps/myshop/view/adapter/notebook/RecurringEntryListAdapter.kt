@@ -9,7 +9,7 @@ import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.data.models.notebook.RecurringEntry
 import com.labs.devo.apps.myshop.databinding.RecurringEntryItemBinding
 
-class RecurringEntryListAdapter :
+class RecurringEntryListAdapter(val onRecurringEntryClick: OnRecurringEntryClick) :
     ListAdapter<RecurringEntry, RecurringEntryListAdapter.RecurringEntryViewHolder>(DiffCallback()) {
 
     private val TAG = AppConstants.APP_PREFIX + javaClass.simpleName
@@ -20,7 +20,15 @@ class RecurringEntryListAdapter :
             binding.apply {
                 recurringEntryName.text = entry.name
             }
+
+            binding.root.setOnClickListener {
+                onRecurringEntryClick.onClick(entry.recurringEntryId)
+            }
         }
+    }
+
+    interface OnRecurringEntryClick {
+        fun onClick(recurringEntryId: String)
     }
 
 
