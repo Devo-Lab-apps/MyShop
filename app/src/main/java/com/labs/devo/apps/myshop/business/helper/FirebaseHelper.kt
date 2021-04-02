@@ -6,6 +6,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Transaction
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.account
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.entry
+import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.microEntry
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.notebook
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.page
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.recurringEntry
@@ -20,6 +21,7 @@ object FirebaseConstants {
     const val page = "page"
     const val entry = "entry"
     const val recurringEntry = "recurring_entry"
+    const val microEntry = "micro_entry"
     const val foreignNotebookName = "Foreign"
     const val foreignNotebookKey = "foreign"
 }
@@ -99,6 +101,18 @@ object FirebaseHelper {
 
     fun getRecurringEntryReference(pageId: String): DocumentReference {
         return getRecurringEntryCollection(pageId).document()
+    }
+
+    fun getMicroEntryCollection(pageId: String, recurringEntryId: String): CollectionReference {
+        return getRecurringEntryReference(pageId, recurringEntryId).collection(microEntry)
+    }
+
+    fun getMicroEntryReference(pageId: String, recurringEntryId: String, amount: String): DocumentReference {
+        return getMicroEntryCollection(pageId, recurringEntryId).document(amount)
+    }
+
+    fun getMicroEntryReference(pageId: String, recurringEntryId: String): DocumentReference {
+        return getMicroEntryCollection(pageId, recurringEntryId).document()
     }
 
     suspend fun runWriteBatch(f: () -> Unit) {

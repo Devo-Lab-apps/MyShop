@@ -13,7 +13,7 @@ class RemoteRecurringEntryMapper : EntityMapper<RemoteEntityRecurringEntry, Recu
         return list
     }
 
-    fun pageListToEntityList(entries: List<RecurringEntry>): List<RemoteEntityRecurringEntry> {
+    fun recurringEntryListToEntityList(entries: List<RecurringEntry>): List<RemoteEntityRecurringEntry> {
         val entities: ArrayList<RemoteEntityRecurringEntry> = ArrayList()
         for (entry in entries) {
             entities.add(mapToEntity(entry))

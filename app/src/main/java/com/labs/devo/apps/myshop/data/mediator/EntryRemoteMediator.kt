@@ -10,7 +10,6 @@ import com.labs.devo.apps.myshop.data.db.local.database.RemoteKey
 import com.labs.devo.apps.myshop.data.db.local.database.database.NotebookDatabase
 import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemoteEntryService
 import com.labs.devo.apps.myshop.data.models.notebook.Entry
-import com.labs.devo.apps.myshop.util.printLogD
 
 //TODO change this for page also
 const val entryLoadKey = "page:"
@@ -50,8 +49,7 @@ class EntryRemoteMediator(
                             return MediatorResult.Success(endOfPaginationReached = true)
                         }
                         rk.nextKey
-                    }
-                    else {
+                    } else {
                         null
                     }
                 }

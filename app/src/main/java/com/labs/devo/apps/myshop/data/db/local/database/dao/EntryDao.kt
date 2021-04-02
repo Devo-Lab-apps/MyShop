@@ -11,23 +11,26 @@ interface EntryDao {
     fun getEntries(
         pageId: String,
         searchQuery: String,
-        orderBy: String
+        orderBy: String,
+        isRepeating: Boolean
     ): PagingSource<Int, Entry> = when (orderBy) {
-        Entry::entryTitle.name -> getEntriesOrderByTitle(pageId, searchQuery)
-        else -> getEntriesOrderByModifiedAt(pageId, searchQuery)
+        Entry::entryTitle.name -> getEntriesOrderByTitle(pageId, searchQuery, isRepeating)
+        else -> getEntriesOrderByModifiedAt(pageId, searchQuery, isRepeating)
     }
 
 
-    @Query("SELECT * FROM Entry WHERE pageId = :pageId and (entryTitle LIKE :searchQuery or entryDescription LIKE :searchQuery) and isRepeating = 0 ORDER BY entryTitle ASC")
+    @Query("SELECT * FROM Entry WHERE pageId = :pageId and (entryTitle LIKE :searchQuery or entryDescription LIKE :searchQuery) and isRepeating = :isRepeating ORDER BY entryTitle ASC")
     fun getEntriesOrderByTitle(
         pageId: String,
-        searchQuery: String
+        searchQuery: String,
+        isRepeating: Boolean
     ): PagingSource<Int, Entry>
 
-    @Query("SELECT * FROM Entry WHERE pageId = :pageId and (entryTitle LIKE :searchQuery or entryDescription LIKE :searchQuery) and isRepeating = 0 ORDER BY modifiedAt ASC")
+    @Query("SELECT * FROM Entry WHERE pageId = :pageId and (entryTitle LIKE :searchQuery or entryDescription LIKE :searchQuery) and isRepeating = :isRepeating ORDER BY modifiedAt ASC")
     fun getEntriesOrderByModifiedAt(
         pageId: String,
         searchQuery: String,
+        isRepeating: Boolean
     ): PagingSource<Int, Entry>
 
 

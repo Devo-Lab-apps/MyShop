@@ -45,7 +45,8 @@ class EntryViewModel
                 pageId,
                 searchQuery,
                 orderBy,
-                refreshStatus
+                refreshStatus,
+                false
             )
             refreshStatus = false
             data

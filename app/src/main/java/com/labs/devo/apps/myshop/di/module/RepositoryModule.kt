@@ -7,22 +7,13 @@ import com.labs.devo.apps.myshop.data.db.local.abstraction.notebook.LocalRecurri
 import com.labs.devo.apps.myshop.data.db.local.database.database.NotebookDatabase
 import com.labs.devo.apps.myshop.data.db.remote.abstraction.account.AccountService
 import com.labs.devo.apps.myshop.data.db.remote.abstraction.account.UserService
-import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemoteEntryService
-import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemoteNotebookService
-import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemotePageService
-import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemoteRecurringEntryService
+import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.*
 import com.labs.devo.apps.myshop.data.repo.account.abstraction.AccountRepository
 import com.labs.devo.apps.myshop.data.repo.account.abstraction.UserRepository
 import com.labs.devo.apps.myshop.data.repo.account.implementation.AccountRepositoryImpl
 import com.labs.devo.apps.myshop.data.repo.account.implementation.UserRepositoryImpl
-import com.labs.devo.apps.myshop.data.repo.notebook.abstraction.EntryRepository
-import com.labs.devo.apps.myshop.data.repo.notebook.abstraction.NotebookRepository
-import com.labs.devo.apps.myshop.data.repo.notebook.abstraction.PageRepository
-import com.labs.devo.apps.myshop.data.repo.notebook.abstraction.RecurringEntryRepository
-import com.labs.devo.apps.myshop.data.repo.notebook.implementation.EntryRepositoryImpl
-import com.labs.devo.apps.myshop.data.repo.notebook.implementation.NotebookRepositoryImpl
-import com.labs.devo.apps.myshop.data.repo.notebook.implementation.PageRepositoryImpl
-import com.labs.devo.apps.myshop.data.repo.notebook.implementation.RecurringEntryRepositoryImpl
+import com.labs.devo.apps.myshop.data.repo.notebook.abstraction.*
+import com.labs.devo.apps.myshop.data.repo.notebook.implementation.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -78,5 +69,14 @@ object RepositoryModule {
         remoteRecurringEntryService: RemoteRecurringEntryService
     ): RecurringEntryRepository =
         RecurringEntryRepositoryImpl(localRecurringEntryService, remoteRecurringEntryService)
+
+    @Provides
+    @Singleton
+    fun provideMicroEntryRepository(
+        localEntryService: LocalEntryService,
+        remoteMicroEntryService: RemoteMicroEntryService,
+        notebookDatabase: NotebookDatabase
+    ): MicroEntryRepository =
+        MicroEntryRepositoryImpl(localEntryService, notebookDatabase, remoteMicroEntryService)
 
 }
