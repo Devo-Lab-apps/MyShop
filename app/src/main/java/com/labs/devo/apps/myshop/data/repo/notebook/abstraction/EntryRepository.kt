@@ -11,7 +11,8 @@ interface EntryRepository {
         pageId: String,
         searchQuery: String,
         orderBy: String,
-        forceRefresh: Boolean
+        forceRefresh: Boolean,
+        isRepeating: Boolean
     ): Flow<PagingData<Entry>>
 
     suspend fun getEntry(entryId: String): DataState<Entry>

@@ -18,14 +18,15 @@ class LocalEntryServiceImpl
     override fun getEntries(
         pageId: String,
         searchQuery: String,
-        orderBy: String
+        orderBy: String,
+        isRepeating: Boolean
     ): PagingSource<Int, Entry> {
         var o = orderBy
         if (orderBy.isEmpty()) {
             o = Entry::entryTitle.name
         }
         val s = "%$searchQuery%"
-        return dao.getEntries(pageId, s, o)
+        return dao.getEntries(pageId, s, o, isRepeating)
     }
 
     override suspend fun getEntry(entryId: String): Entry? {

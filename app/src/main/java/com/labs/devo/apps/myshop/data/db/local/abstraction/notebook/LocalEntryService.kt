@@ -8,7 +8,8 @@ interface LocalEntryService {
     fun getEntries(
         pageId: String,
         searchQuery: String,
-        orderBy: String
+        orderBy: String,
+        isRepeating: Boolean
     ): PagingSource<Int, Entry>
 
     suspend fun getEntry(entryId: String): Entry?

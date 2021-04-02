@@ -14,20 +14,11 @@ import com.labs.devo.apps.myshop.data.db.local.implementation.notebook.LocalPage
 import com.labs.devo.apps.myshop.data.db.local.implementation.notebook.LocalRecurringEntryServiceImpl
 import com.labs.devo.apps.myshop.data.db.remote.abstraction.account.AccountService
 import com.labs.devo.apps.myshop.data.db.remote.abstraction.account.UserService
-import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemoteEntryService
-import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemoteNotebookService
-import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemotePageService
-import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemoteRecurringEntryService
+import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.*
 import com.labs.devo.apps.myshop.data.db.remote.implementation.account.AccountServiceFirestoreImpl
 import com.labs.devo.apps.myshop.data.db.remote.implementation.account.UserServiceFirestoreImpl
-import com.labs.devo.apps.myshop.data.db.remote.implementation.notebook.RemoteEntryServiceFirebaseImpl
-import com.labs.devo.apps.myshop.data.db.remote.implementation.notebook.RemoteNotebookServiceFirebaseImpl
-import com.labs.devo.apps.myshop.data.db.remote.implementation.notebook.RemotePageServiceFirebaseImpl
-import com.labs.devo.apps.myshop.data.db.remote.implementation.notebook.RemoteRecurringEntryServiceFirebaseImpl
-import com.labs.devo.apps.myshop.data.db.remote.mapper.notebook.RemoteEntryMapper
-import com.labs.devo.apps.myshop.data.db.remote.mapper.notebook.RemoteNotebookMapper
-import com.labs.devo.apps.myshop.data.db.remote.mapper.notebook.RemotePageMapper
-import com.labs.devo.apps.myshop.data.db.remote.mapper.notebook.RemoteRecurringEntryMapper
+import com.labs.devo.apps.myshop.data.db.remote.implementation.notebook.*
+import com.labs.devo.apps.myshop.data.db.remote.mapper.notebook.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -102,5 +93,13 @@ object ServiceModule {
         entryDao: RecurringEntryDao,
     ): LocalRecurringEntryService =
         LocalRecurringEntryServiceImpl(entryDao)
+
+    @Provides
+    @Singleton
+    fun provideMicroRemoteEntryService(
+        remoteMicroEntryMapper: RemoteMicroEntryMapper
+    ): RemoteMicroEntryService =
+        RemoteMicroEntryServiceFirebaseImpl(remoteMicroEntryMapper)
+
 
 }
