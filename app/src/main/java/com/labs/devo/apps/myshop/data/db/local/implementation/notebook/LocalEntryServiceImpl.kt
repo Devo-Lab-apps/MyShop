@@ -29,6 +29,20 @@ class LocalEntryServiceImpl
         return dao.getEntries(pageId, s, o, isRepeating)
     }
 
+    override fun getEntriesLikeEntryId(
+        entryId: String,
+        searchQuery: String,
+        orderBy: String,
+        isRepeating: Boolean
+    ): PagingSource<Int, Entry> {
+        var o = orderBy
+        if (orderBy.isEmpty()) {
+            o = Entry::modifiedAt.name
+        }
+        val s = "%$searchQuery%"
+        return dao.getEntriesLikeEntryId("$entryId%", s, o, isRepeating)
+    }
+
     override suspend fun getEntry(entryId: String): Entry? {
         return AsyncHelper.runAsync {
             dao.getEntry(entryId)
@@ -80,6 +94,12 @@ class LocalEntryServiceImpl
     override suspend fun deleteEntries(pageId: String) {
         return AsyncHelper.runAsync {
             dao.deleteEntries(pageId)
+        }
+    }
+
+    override suspend fun deleteEntriesLikeEntryId(entryId: String) {
+        return AsyncHelper.runAsync {
+            dao.deleteEntriesLikeEntryId("$entryId%")
         }
     }
 }

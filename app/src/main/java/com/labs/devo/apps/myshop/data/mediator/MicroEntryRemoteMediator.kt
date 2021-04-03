@@ -24,7 +24,7 @@ class MicroEntryRemoteMediator @Inject constructor(
     private val networkService: RemoteMicroEntryService
 ) : RemoteMediator<Int, Entry>() {
 
-    val entryService = database.entryDao()
+    private val entryService = database.entryDao()
     private val remoteKeyDao = database.remoteKeyDao()
 
     override suspend fun load(loadType: LoadType, state: PagingState<Int, Entry>): MediatorResult {
@@ -52,12 +52,13 @@ class MicroEntryRemoteMediator @Inject constructor(
                 networkService.getMicroEntries(pageId, recurringEntry.recurringEntryId)
             val entries = convertMicroEntriesToEntries(recurringEntry, remoteEntries)
 
-            val endReached = remoteEntries.isNotEmpty()
+            //TODO check what to do here.
+            val endReached = true
 
             database.withTransaction {
                 if (loadType == LoadType.REFRESH) {
                     remoteKeyDao.deleteByQuery(remoteKey)
-                    entryService.deleteEntries(entries)
+                    entryService.deleteEntriesLikeEntryId("$pageId$$${recurringEntry.recurringEntryId}%")
                 }
 
                 remoteKeyDao.insertOrReplace(RemoteKey(remoteKey, endReached.toString()))
@@ -80,6 +81,10 @@ class MicroEntryRemoteMediator @Inject constructor(
 
 }
 
+fun getPartialEntryIdForMicroEntry(pageId: String, recurringEntryId: String): String {
+    return "$pageId$$$recurringEntryId$$"
+}
+
 
 fun convertMicroEntriesToEntries(
     recurringEntry: RecurringEntry,
@@ -92,7 +97,7 @@ fun convertMicroEntriesToEntries(
             list.add(
                 Entry(
                     r.pageId,
-                    recurringEntry.recurringEntryId + "$$" + c.key,
+                    recurringEntry.pageId + "$$" + recurringEntry.recurringEntryId + "$$" + c.key,
                     recurringEntry.name,
                     recurringEntry.description,
                     r.amount,
@@ -117,7 +122,7 @@ fun convertMicroEntryToEntry(
         list.add(
             Entry(
                 recurringEntry.pageId,
-                recurringEntry.recurringEntryId + "$$" + c.key,
+                recurringEntry.pageId + "$$" + recurringEntry.recurringEntryId + "$$" + c.key,
                 recurringEntry.name,
                 recurringEntry.description,
                 remoteEntry.amount,

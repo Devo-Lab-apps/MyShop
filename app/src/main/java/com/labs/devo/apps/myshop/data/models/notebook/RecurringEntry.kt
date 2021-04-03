@@ -1,9 +1,10 @@
 package com.labs.devo.apps.myshop.data.models.notebook
 
+import android.os.Parcelable
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-
+@kotlinx.parcelize.Parcelize
 @Entity(tableName = "RecurringEntry")
 data class RecurringEntry(
     val pageId: String = "",
@@ -16,4 +17,4 @@ data class RecurringEntry(
     val createdAt: Long = System.currentTimeMillis(),
     val modifiedAt: Long = System.currentTimeMillis(),
 
-)
+    ) : Parcelable

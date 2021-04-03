@@ -24,8 +24,8 @@ class RecurringEntryViewModel
         )
     }
 
-    fun onRecurringEntryClick(recurringEntryId: String) = viewModelScope.launch {
-        channel.send(RecurringEntryEvent.NavigateToMicroEntryFragment(recurringEntryId))
+    fun onRecurringEntryClick(recurringEntry: RecurringEntry) = viewModelScope.launch {
+        channel.send(RecurringEntryEvent.NavigateToMicroEntryFragment(recurringEntry))
     }
 
 
@@ -35,6 +35,6 @@ class RecurringEntryViewModel
 
         data class ShowInvalidInputMessage(val msg: String?) : RecurringEntryEvent()
 
-        data class NavigateToMicroEntryFragment(val id: String) : RecurringEntryEvent()
+        data class NavigateToMicroEntryFragment(val entry: RecurringEntry) : RecurringEntryEvent()
     }
 }

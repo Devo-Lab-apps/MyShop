@@ -72,5 +72,15 @@
         android:name="com.labs.devo.apps.myshop.view.activity.notebook.entry.MicroEntryFragment"
         android:label="MicroEntryFragment"
         tools:layout="@layout/fragment_micro_entry"
+        >
+        <action
+            android:id="@+id/action_microEntryFragment_to_addEditMicroEntryFragment"
+            app:destination="@id/addEditMicroEntryFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/addEditMicroEntryFragment"
+        android:name="com.labs.devo.apps.myshop.view.activity.notebook.entry.AddEditMicroEntryFragment"
+        android:label="AddEditMicroEntryFragment"
+        tools:layout="@layout/add_edit_micro_entry_fragment"
         />
 </navigation>

@@ -12,6 +12,13 @@ interface LocalEntryService {
         isRepeating: Boolean
     ): PagingSource<Int, Entry>
 
+    fun getEntriesLikeEntryId(
+        entryId: String,
+        searchQuery: String,
+        orderBy: String,
+        isRepeating: Boolean
+    ): PagingSource<Int, Entry>
+
     suspend fun getEntry(entryId: String): Entry?
 
     suspend fun insertEntries(entries: List<Entry>)
@@ -25,6 +32,8 @@ interface LocalEntryService {
     suspend fun deleteEntry(entry: Entry)
 
     suspend fun deleteEntries(entries: List<Entry>)
+
+    suspend fun deleteEntriesLikeEntryId(entryId: String)
 
     suspend fun deleteEntries(pageId: String)
 
