@@ -69,6 +69,7 @@ class NotebookActivity : AppCompatActivity(), DataStateListener {
         const val NOTEBOOK = "notebook"
         const val PAGE = "page"
         const val ENTRY = "entry"
+        const val RECURRING_ENTRY = "recurring_entry"
         const val PAGES_NOT_IMPORTED_ERR =
             "Pages for this account are not imported yet. Please sync notebooks if pages are already imported."
     }

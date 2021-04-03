@@ -26,8 +26,37 @@ interface EntryDao {
         isRepeating: Boolean
     ): PagingSource<Int, Entry>
 
-    @Query("SELECT * FROM Entry WHERE pageId = :pageId and (entryTitle LIKE :searchQuery or entryDescription LIKE :searchQuery) and isRepeating = :isRepeating ORDER BY modifiedAt ASC")
+    @Query("SELECT * FROM Entry WHERE pageId = :pageId and (entryTitle LIKE :searchQuery or entryDescription LIKE :searchQuery) and isRepeating = :isRepeating ORDER BY modifiedAt DESC")
     fun getEntriesOrderByModifiedAt(
+        pageId: String,
+        searchQuery: String,
+        isRepeating: Boolean
+    ): PagingSource<Int, Entry>
+
+    fun getEntriesLikeEntryId(
+        entryId: String,
+        searchQuery: String,
+        orderBy: String,
+        isRepeating: Boolean
+    ): PagingSource<Int, Entry> = when (orderBy) {
+        Entry::entryTitle.name -> getEntriesOrderByTitleLikeEntryId(
+            entryId,
+            searchQuery,
+            isRepeating
+        )
+        else -> getEntriesOrderByModifiedAtLikeEntryId(entryId, searchQuery, isRepeating)
+    }
+
+
+    @Query("SELECT * FROM Entry WHERE entryId LIKE :pageId and (entryTitle LIKE :searchQuery or entryDescription LIKE :searchQuery) and isRepeating = :isRepeating ORDER BY entryTitle ASC")
+    fun getEntriesOrderByTitleLikeEntryId(
+        pageId: String,
+        searchQuery: String,
+        isRepeating: Boolean
+    ): PagingSource<Int, Entry>
+
+    @Query("SELECT * FROM Entry WHERE entryId LIKE :pageId and (entryTitle LIKE :searchQuery or entryDescription LIKE :searchQuery) and isRepeating = :isRepeating ORDER BY modifiedAt DESC")
+    fun getEntriesOrderByModifiedAtLikeEntryId(
         pageId: String,
         searchQuery: String,
         isRepeating: Boolean
@@ -57,6 +86,9 @@ interface EntryDao {
 
     @Delete
     suspend fun deleteEntries(entries: List<Entry>)
+
+    @Query("DELETE FROM entry where entryId LIKE :entryId")
+    suspend fun deleteEntriesLikeEntryId(entryId: String)
 
     @Query("DELETE FROM Entry where pageId = :pageId")
     suspend fun deleteEntries(pageId: String)

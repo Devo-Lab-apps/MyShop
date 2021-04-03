@@ -136,9 +136,11 @@ class EntryFragment : Fragment(R.layout.fragment_entry), EntryListAdapter.OnEntr
     private fun collectEvent(event: EntryViewModel.EntryEvent) {
         when (event) {
             is EntryViewModel.EntryEvent.ShowInvalidInputMessage -> {
-                if (event.msg != null) {
-                    dataStateHandler.onDataStateChange(DataState.message<Nothing>(event.msg))
-                }
+                dataStateHandler.onDataStateChange(
+                    DataState.message<Nothing>(
+                        event.msg ?: getString(R.string.unknown_error_occurred)
+                    )
+                )
             }
             is EntryViewModel.EntryEvent.AddEntryEvent -> {
                 val args = bundleOf(

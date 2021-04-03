@@ -22,13 +22,13 @@ class RecurringEntryListAdapter(val onRecurringEntryClick: OnRecurringEntryClick
             }
 
             binding.root.setOnClickListener {
-                onRecurringEntryClick.onClick(entry.recurringEntryId)
+                onRecurringEntryClick.onClick(entry)
             }
         }
     }
 
     interface OnRecurringEntryClick {
-        fun onClick(recurringEntryId: String)
+        fun onClick(recurringEntry: RecurringEntry)
     }
 
 

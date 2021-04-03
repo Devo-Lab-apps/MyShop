@@ -29,8 +29,7 @@ class MicroEntryRepositoryImpl @Inject constructor(
         recurringEntry: RecurringEntry,
         searchQuery: String,
         orderBy: String,
-        forceRefresh: Boolean,
-        database: NotebookDatabase
+        forceRefresh: Boolean
     ): Flow<PagingData<Entry>> = Pager(
         config = PagingConfig(pageSize = 20, maxSize = 100),
         remoteMediator = MicroEntryRemoteMediator(
@@ -42,7 +41,14 @@ class MicroEntryRepositoryImpl @Inject constructor(
             notebookDatabase,
             remoteEntryService
         ),
-        pagingSourceFactory = { localEntryService.getEntries(pageId, searchQuery, orderBy, true) }
+        pagingSourceFactory = {
+            localEntryService.getEntriesLikeEntryId(
+                pageId + "$$" + recurringEntry.recurringEntryId,
+                searchQuery,
+                orderBy,
+                true
+            )
+        }
     ).flow
 
 //    override suspend fun getEntry(microEntryId: String): DataState<Entry> {
@@ -149,7 +155,7 @@ class MicroEntryRepositoryImpl @Inject constructor(
     ): DataState<Entry> {
         return try {
             checkPermissions(Permissions.CREATE_ENTRY)
-            val createdAt = entry.entryId.split("$$")[1].toLong()
+            val createdAt = entry.entryId.split("$$")[2].toLong()
             val updatedMicroEntry =
                 remoteEntryService.updateMicroEntry(
                     createdAt,
@@ -171,7 +177,7 @@ class MicroEntryRepositoryImpl @Inject constructor(
     ): DataState<Entry> {
         return try {
             checkPermissions(Permissions.DELETE_ENTRY)
-            val createdAt = entry.entryId.split("$$")[1].toLong()
+            val createdAt = entry.entryId.split("$$")[2].toLong()
             remoteEntryService.deleteMicroEntry(
                 createdAt,
                 convertEntryToMicroEntry(recurringEntry, entry)
@@ -185,7 +191,10 @@ class MicroEntryRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun deleteMicroEntries(recurringEntry: RecurringEntry, entries: List<Entry>): DataState<List<Entry>> {
+    override suspend fun deleteMicroEntries(
+        recurringEntry: RecurringEntry,
+        entries: List<Entry>
+    ): DataState<List<Entry>> {
         return try {
             checkPermissions(Permissions.DELETE_ENTRY)
             remoteEntryService.deleteMicroEntries(

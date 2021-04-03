@@ -15,8 +15,7 @@ interface MicroEntryRepository {
         recurringEntry: RecurringEntry,
         searchQuery: String,
         orderBy: String,
-        forceRefresh: Boolean,
-        database: NotebookDatabase
+        forceRefresh: Boolean
     ): Flow<PagingData<Entry>>
 
 //    suspend fun getEntry(entryId: String): DataState<Entry>

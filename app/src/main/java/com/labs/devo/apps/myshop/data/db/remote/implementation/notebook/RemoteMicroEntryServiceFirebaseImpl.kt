@@ -1,6 +1,5 @@
 package com.labs.devo.apps.myshop.data.db.remote.implementation.notebook
 
-import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.Transaction
 import com.labs.devo.apps.myshop.business.helper.FirebaseHelper
 import com.labs.devo.apps.myshop.const.AppConstants
@@ -118,26 +117,30 @@ class RemoteMicroEntryServiceFirebaseImpl @Inject constructor(
         microEntry: MicroEntry,
         transaction: Transaction
     ): MicroEntry {
-        return if (checkIdMicroEntryExists(microEntry, transaction)) {
+        val ref1 = FirebaseHelper.getMicroEntryReference(
+            microEntry.pageId,
+            microEntry.recurringEntryId,
+            microEntry.amount.toString().replace(".", "")
+        )
+        val ds = transaction.get(ref1)
+        return if (ds.exists()) {
+            val existingMicroEntry = ds.toObject(RemoteEntityMicroEntry::class.java)!!
             val ref = FirebaseHelper.getMicroEntryReference(
                 microEntry.pageId,
                 microEntry.recurringEntryId,
-                microEntry.amount.toString()
+                microEntry.amount.toString().replace(".", "")
             )
             val createdAt = "${System.currentTimeMillis()}"
             val modifiedAt = System.currentTimeMillis()
-            val data: MutableMap<String, Any> = mutableMapOf()
-            data[MicroEntry::createdAt.name] =
-                FieldValue.arrayUnion(createdAt)
-            data[MicroEntry::count.name] = FieldValue.increment(1)
-            transaction.update(ref, data)
-            microEntry.createdAt[createdAt] = modifiedAt
-            microEntry
+            existingMicroEntry.count += 1
+            existingMicroEntry.createdAt[createdAt] = modifiedAt
+            transaction.set(ref, existingMicroEntry)
+            mapper.mapFromEntity(existingMicroEntry)
         } else {
             val ref = FirebaseHelper.getMicroEntryReference(
                 microEntry.pageId,
                 microEntry.recurringEntryId,
-                microEntry.amount.toString()
+                microEntry.amount.toString().replace(".", "")
             )
             if (microEntry.createdAt.isEmpty()) {
                 val createdAt = "${System.currentTimeMillis()}"
@@ -153,7 +156,7 @@ class RemoteMicroEntryServiceFirebaseImpl @Inject constructor(
         val ref = FirebaseHelper.getMicroEntryReference(
             microEntry.pageId,
             microEntry.recurringEntryId,
-            microEntry.amount.toString()
+            microEntry.amount.toString().replace(".", "")
         )
         val ds = transaction.get(ref)
         return ds.exists()
