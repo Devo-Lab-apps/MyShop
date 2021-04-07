@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.MaterialDatePicker
@@ -46,7 +47,6 @@ class MicroEntryFragment : Fragment(R.layout.fragment_micro_entry),
 
     private lateinit var recurringEntry: RecurringEntry
 
-    private lateinit var searchView: SearchView
 
     private lateinit var microEntryAdapter: MicroEntryAdapter
 
@@ -98,6 +98,27 @@ class MicroEntryFragment : Fragment(R.layout.fragment_micro_entry),
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             viewModel.entries.collectLatest {
                 microEntryAdapter.submitData(it)
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            microEntryAdapter.loadStateFlow.collectLatest { state ->
+                when (state.refresh) {
+                    is LoadState.Error -> {
+                        val error = (state.refresh as LoadState.Error).error
+                        dataStateHandler.onDataStateChange(
+                            DataState.message<Nothing>(
+                                error.message ?: getString(R.string.unknown_error_occurred)
+                            )
+                        )
+                    }
+                    is LoadState.Loading -> {
+                        dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
+                    }
+                    else -> {
+                        dataStateHandler.onDataStateChange(DataState.loading<Nothing>(false))
+                    }
+                }
             }
         }
     }

@@ -193,25 +193,25 @@ class RemoteMicroEntryServiceFirebaseImpl @Inject constructor(
         microEntry: MicroEntry,
         transaction: Transaction
     ): MicroEntry {
-        return if (checkIdMicroEntryExists(microEntry, transaction)) {
-            val ref = FirebaseHelper.getMicroEntryReference(
-                microEntry.pageId,
-                microEntry.recurringEntryId,
-                microEntry.amount.toString()
-            )
-            val ds = transaction.get(ref)
-            if (!ds.exists()) throw MicroEntryNotFoundException()
-            val existingMicroEntry = ds.toObject(RemoteEntityMicroEntry::class.java)!!
-            if (createdAt.toString() !in existingMicroEntry.createdAt) {
-                throw EntryNotFoundException()
-            } else {
-                existingMicroEntry.createdAt.remove(createdAt.toString())
-                microEntry.createdAt.remove(createdAt.toString())
-            }
-            microEntry
+
+        val ref = FirebaseHelper.getMicroEntryReference(
+            microEntry.pageId,
+            microEntry.recurringEntryId,
+            microEntry.amount.toString().replace(".", "")
+        )
+        val ds = transaction.get(ref)
+        if (!ds.exists()) throw MicroEntryNotFoundException()
+        val existingMicroEntry = ds.toObject(RemoteEntityMicroEntry::class.java)!!
+        if (createdAt.toString() !in existingMicroEntry.createdAt) {
+            throw EntryNotFoundException()
         } else {
-            throw MicroEntryNotFoundException()
+            existingMicroEntry.createdAt.remove(createdAt.toString())
+            val data = mutableMapOf<String, Any>()
+            data[MicroEntry::createdAt.name] = existingMicroEntry.createdAt
+            transaction.update(ref, data)
+            microEntry.createdAt.remove(createdAt.toString())
         }
+        return microEntry
     }
 
     private suspend fun get(pageId: String, recurringEntryId: String): List<MicroEntry> {
