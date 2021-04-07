@@ -14,7 +14,7 @@ interface LocalEntryService {
 
     fun getEntriesLikeEntryId(
         entryId: String,
-        searchQuery: String,
+        dateRange: Pair<Long, Long>,
         orderBy: String,
         isRepeating: Boolean
     ): PagingSource<Int, Entry>

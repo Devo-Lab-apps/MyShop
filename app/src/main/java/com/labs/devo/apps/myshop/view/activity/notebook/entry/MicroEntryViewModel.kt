@@ -2,11 +2,8 @@ package com.labs.devo.apps.myshop.view.activity.notebook.entry
 
 import androidx.hilt.Assisted
 import androidx.hilt.lifecycle.ViewModelInject
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.data.models.notebook.Entry
@@ -24,40 +21,36 @@ class MicroEntryViewModel
 ) :
     BaseViewModel<MicroEntryViewModel.MicroEntryEvent>() {
 
-    private val _searchQuery = state.getLiveData("entrySearchQuery", AppConstants.EMPTY_STRING)
-    val searchQuery: LiveData<String> = _searchQuery
-
-    private val _pageId = MutableStateFlow(AppConstants.EMPTY_STRING)
-    val pageId: StateFlow<String> = _pageId
+    private val _dateRange = MutableStateFlow(Pair(0L, Long.MAX_VALUE))
+    val dateRange: StateFlow<Pair<Long, Long>> = _dateRange
 
     private val _orderBy = MutableStateFlow(AppConstants.EMPTY_STRING)
     val orderBy: StateFlow<String> = _orderBy
 
+    private val _recurringEntry = MutableStateFlow(RecurringEntry())
+    val recurringEntry: StateFlow<RecurringEntry> = _recurringEntry
+
     private var refreshStatus = false
 
-    private lateinit var recurringEntry: RecurringEntry
-
-    fun getMicroEntries(recurringEntry: RecurringEntry): Flow<PagingData<Entry>> {
-        return combine(
-            _searchQuery.asFlow(), _orderBy
-        ) { _searchQuery, _orderBy ->
-            Pair(_searchQuery, _orderBy)
-        }.flatMapLatest { (searchQuery, orderBy) ->
-            if (recurringEntry.pageId.isEmpty()) {
-                emptyFlow()
-            } else {
-                val data = microEntryRepository.getMicroEntries(
-                    recurringEntry.pageId,
-                    recurringEntry,
-                    searchQuery,
-                    orderBy,
-                    refreshStatus
-                )
-                refreshStatus = false
-                data
-            }
-        }.cachedIn(viewModelScope)
-    }
+    val entries = combine(
+        _recurringEntry, _dateRange, _orderBy
+    ) { _recurringEntry, _searchQuery, _orderBy ->
+        Triple(_recurringEntry, _searchQuery, _orderBy)
+    }.flatMapLatest { (recurringEntry, searchQuery, orderBy) ->
+        if (recurringEntry.recurringEntryId.isEmpty()) {
+            emptyFlow()
+        } else {
+            val data = microEntryRepository.getMicroEntries(
+                recurringEntry.pageId,
+                recurringEntry,
+                searchQuery,
+                orderBy,
+                refreshStatus
+            )
+            refreshStatus = false
+            data
+        }
+    }.cachedIn(viewModelScope)
 
 
     private suspend fun handleGetEntries(dataState: DataState<List<Entry>>) {
@@ -76,19 +69,15 @@ class MicroEntryViewModel
 //            ?: channel.send(EntryEvent.ShowInvalidInputMessage(dataState.message?.getContentIfNotHandled()))
     }
 
+    fun setRecurringEntry(e: RecurringEntry) {
+        _recurringEntry.value = e
+    }
+
     fun syncMicroEntries() {
-        val pageId = _pageId.value
-        _pageId.value = AppConstants.EMPTY_STRING
+        val recurringEntryTemp = _recurringEntry.value
+        _recurringEntry.value = RecurringEntry()
         refreshStatus = true
-        _pageId.value = pageId
-    }
-
-    fun setPageId(pageId: String) {
-        _pageId.value = pageId
-    }
-
-    fun setSearchQuery(query: String) {
-        _searchQuery.value = query
+        _recurringEntry.value = recurringEntryTemp
     }
 
     fun setOrderBy(col: String) {
@@ -101,6 +90,10 @@ class MicroEntryViewModel
 
     fun onEntryClick(entry: Entry) = viewModelScope.launch {
         channel.send(MicroEntryEvent.EditMicroEntryEvent(entry))
+    }
+
+    fun selectDate(start: Long, end: Long) {
+        _dateRange.value = Pair(start, end)
     }
 
     sealed class MicroEntryEvent {

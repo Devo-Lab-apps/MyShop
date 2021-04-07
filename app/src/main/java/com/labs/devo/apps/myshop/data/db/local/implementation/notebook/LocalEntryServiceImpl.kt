@@ -31,7 +31,7 @@ class LocalEntryServiceImpl
 
     override fun getEntriesLikeEntryId(
         entryId: String,
-        searchQuery: String,
+        dateRange: Pair<Long, Long>,
         orderBy: String,
         isRepeating: Boolean
     ): PagingSource<Int, Entry> {
@@ -39,8 +39,7 @@ class LocalEntryServiceImpl
         if (orderBy.isEmpty()) {
             o = Entry::modifiedAt.name
         }
-        val s = "%$searchQuery%"
-        return dao.getEntriesLikeEntryId("$entryId%", s, o, isRepeating)
+        return dao.getEntriesLikeEntryId("$entryId%", dateRange, o, isRepeating)
     }
 
     override suspend fun getEntry(entryId: String): Entry? {

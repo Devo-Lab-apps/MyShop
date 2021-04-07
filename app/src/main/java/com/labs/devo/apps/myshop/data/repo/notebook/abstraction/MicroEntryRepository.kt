@@ -13,7 +13,7 @@ interface MicroEntryRepository {
     suspend fun getMicroEntries(
         pageId: String,
         recurringEntry: RecurringEntry,
-        searchQuery: String,
+        dateRange: Pair<Long, Long>,
         orderBy: String,
         forceRefresh: Boolean
     ): Flow<PagingData<Entry>>
