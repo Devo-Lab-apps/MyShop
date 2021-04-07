@@ -13,6 +13,8 @@ import com.labs.devo.apps.myshop.data.models.notebook.Entry
 import com.labs.devo.apps.myshop.data.models.notebook.RecurringEntry
 import com.labs.devo.apps.myshop.databinding.AddEditMicroEntryFragmentBinding
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity
+import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.ADD_ENTRY_OPERATION
+import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.EDIT_ENTRY_OPERATION
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.ENTRY
 import com.labs.devo.apps.myshop.view.util.DataState
 import com.labs.devo.apps.myshop.view.util.DataStateListener
@@ -56,17 +58,28 @@ class AddEditMicroEntryFragment : Fragment(R.layout.add_edit_micro_entry_fragmen
                 addEditMicroEntryBtn.isEnabled = false
                 if (operation == NotebookActivity.NotebookConstants.ADD_ENTRY_OPERATION) {
                     addOperation()
-                } else {
+                } else if (operation == EDIT_ENTRY_OPERATION) {
                     editOperation()
                 }
             }
 
-            if (operation == NotebookActivity.NotebookConstants.EDIT_ENTRY_OPERATION) {
+            if (operation == EDIT_ENTRY_OPERATION) {
                 addEditMicroEntryBtn.text = getString(R.string.update_micro_entry)
                 microEntryAmount.setText(entry?.entryAmount?.toString() ?: "0.0")
-            } else {
+                deleteMicroEntryBtn.visibility = View.VISIBLE
+                deleteMicroEntryBtn.setOnClickListener {
+                    deleteOperation()
+                }
+            } else if (operation == ADD_ENTRY_OPERATION){
                 addEditMicroEntryBtn.visibility = View.VISIBLE
             }
+        }
+    }
+
+    private fun deleteOperation() {
+        binding.apply {
+            dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
+            viewModel.deleteEntry(repeatingEntry, entry!!)
         }
     }
 
