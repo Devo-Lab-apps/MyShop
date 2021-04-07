@@ -35,30 +35,38 @@ interface EntryDao {
 
     fun getEntriesLikeEntryId(
         entryId: String,
-        searchQuery: String,
+        dateRange: Pair<Long, Long>,
         orderBy: String,
         isRepeating: Boolean
     ): PagingSource<Int, Entry> = when (orderBy) {
         Entry::entryTitle.name -> getEntriesOrderByTitleLikeEntryId(
             entryId,
-            searchQuery,
+            dateRange.first,
+            dateRange.second,
             isRepeating
         )
-        else -> getEntriesOrderByModifiedAtLikeEntryId(entryId, searchQuery, isRepeating)
+        else -> getEntriesOrderByModifiedAtLikeEntryId(
+            entryId,
+            dateRange.first,
+            dateRange.second,
+            isRepeating
+        )
     }
 
 
-    @Query("SELECT * FROM Entry WHERE entryId LIKE :pageId and (entryTitle LIKE :searchQuery or entryDescription LIKE :searchQuery) and isRepeating = :isRepeating ORDER BY entryTitle ASC")
+    @Query("SELECT * FROM Entry WHERE entryId LIKE :pageId and createdAt >= :start and createdAt <= :end and isRepeating = :isRepeating ORDER BY entryTitle ASC")
     fun getEntriesOrderByTitleLikeEntryId(
         pageId: String,
-        searchQuery: String,
+        start: Long,
+        end: Long,
         isRepeating: Boolean
     ): PagingSource<Int, Entry>
 
-    @Query("SELECT * FROM Entry WHERE entryId LIKE :pageId and (entryTitle LIKE :searchQuery or entryDescription LIKE :searchQuery) and isRepeating = :isRepeating ORDER BY modifiedAt DESC")
+    @Query("SELECT * FROM Entry WHERE entryId LIKE :pageId and createdAt >= :start and createdAt <= :end and isRepeating = :isRepeating ORDER BY modifiedAt DESC")
     fun getEntriesOrderByModifiedAtLikeEntryId(
         pageId: String,
-        searchQuery: String,
+        start: Long,
+        end: Long,
         isRepeating: Boolean
     ): PagingSource<Int, Entry>
 

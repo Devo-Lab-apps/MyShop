@@ -27,7 +27,7 @@ class MicroEntryRepositoryImpl @Inject constructor(
     override suspend fun getMicroEntries(
         pageId: String,
         recurringEntry: RecurringEntry,
-        searchQuery: String,
+        dateRange: Pair<Long, Long>,
         orderBy: String,
         forceRefresh: Boolean
     ): Flow<PagingData<Entry>> = Pager(
@@ -35,7 +35,7 @@ class MicroEntryRepositoryImpl @Inject constructor(
         remoteMediator = MicroEntryRemoteMediator(
             pageId,
             recurringEntry,
-            searchQuery,
+            dateRange,
             orderBy,
             forceRefresh,
             notebookDatabase,
@@ -44,7 +44,7 @@ class MicroEntryRepositoryImpl @Inject constructor(
         pagingSourceFactory = {
             localEntryService.getEntriesLikeEntryId(
                 pageId + "$$" + recurringEntry.recurringEntryId,
-                searchQuery,
+                dateRange,
                 orderBy,
                 true
             )
@@ -117,9 +117,13 @@ class MicroEntryRepositoryImpl @Inject constructor(
             checkPermissions(Permissions.CREATE_ENTRY)
             val insertedMicroEntry =
                 remoteEntryService.insertMicroEntry(convertEntryToMicroEntry(recurringEntry, entry))
-            val insertedEntry = convertMicroEntryToEntry(recurringEntry, insertedMicroEntry)
-            localEntryService.insertEntry(insertedEntry[0])
-            DataState.data(insertedEntry[0])
+            //Entry created right now
+            val insertedEntry =
+                convertMicroEntryToEntry(recurringEntry, insertedMicroEntry).sortedByDescending {
+                    it.createdAt
+                }[0]
+            localEntryService.insertEntry(insertedEntry)
+            DataState.data(insertedEntry)
         } catch (ex: Exception) {
             DataState.message(
                 ex.message ?: "An unknown error occurred. Please retry later."
@@ -161,7 +165,10 @@ class MicroEntryRepositoryImpl @Inject constructor(
                     createdAt,
                     convertEntryToMicroEntry(recurringEntry, entry)
                 )
-            val updatedEntry = convertMicroEntryToEntry(recurringEntry, updatedMicroEntry)[0]
+            val updatedEntry = convertMicroEntryToEntry(
+                recurringEntry,
+                updatedMicroEntry
+            ).sortedByDescending { it.createdAt }[0]
             localEntryService.updateEntry(updatedEntry)
             DataState.data(updatedEntry)
         } catch (ex: Exception) {

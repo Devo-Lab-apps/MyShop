@@ -17,7 +17,7 @@ const val recurringLoadKey = "recurring"
 class MicroEntryRemoteMediator @Inject constructor(
     private val pageId: String,
     private val recurringEntry: RecurringEntry,
-    private val searchQuery: String,
+    private val dateRange: Pair<Long, Long>,
     private val orderBy: String,
     private val forceRefresh: Boolean,
     private val database: NotebookDatabase,
