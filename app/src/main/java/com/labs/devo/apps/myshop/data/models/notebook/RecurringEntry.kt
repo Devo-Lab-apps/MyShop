@@ -14,6 +14,7 @@ data class RecurringEntry(
     val description: String = "",
     val frequency: String = "Daily",
     val recurringTime: String = "",
+    val amount: Double = 0.0,
     val createdAt: Long = System.currentTimeMillis(),
     val modifiedAt: Long = System.currentTimeMillis(),
 

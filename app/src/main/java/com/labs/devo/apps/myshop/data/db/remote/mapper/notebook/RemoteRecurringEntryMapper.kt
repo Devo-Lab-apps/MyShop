@@ -30,7 +30,8 @@ class RemoteRecurringEntryMapper : EntityMapper<RemoteEntityRecurringEntry, Recu
             frequency = entity.frequency,
             recurringTime = entity.recurringTime,
             createdAt = entity.createdAt,
-            modifiedAt = entity.modifiedAt
+            modifiedAt = entity.modifiedAt,
+            amount = entity.amount
         )
 
     override fun mapToEntity(model: RecurringEntry): RemoteEntityRecurringEntry =
@@ -42,6 +43,7 @@ class RemoteRecurringEntryMapper : EntityMapper<RemoteEntityRecurringEntry, Recu
             frequency = model.frequency,
             recurringTime = model.recurringTime,
             createdAt = model.createdAt,
-            modifiedAt = model.modifiedAt
+            modifiedAt = model.modifiedAt,
+            amount = model.amount
         )
 }

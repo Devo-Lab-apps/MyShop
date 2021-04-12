@@ -17,11 +17,13 @@ import com.labs.devo.apps.myshop.databinding.ActivityMainBinding
 import com.labs.devo.apps.myshop.util.printLogD
 import com.labs.devo.apps.myshop.view.activity.auth.AuthenticationActivity
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity
+import com.labs.devo.apps.myshop.view.util.NotificationWorker
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import java.util.*
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -112,6 +114,7 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         when (item.itemId) {
             R.id.notebooks_nav -> openNotebookActivity()
             R.id.logout_user -> logoutUser()
+            R.id.cancel_notification -> NotificationWorker.cancelAllWork(this)
         }
         return true
     }

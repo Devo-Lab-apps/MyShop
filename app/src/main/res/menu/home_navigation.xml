@@ -6,9 +6,11 @@
             <item android:title="Notebooks"
                 android:id="@+id/notebooks_nav"
                 android:icon="@drawable/ic_baseline_folder_24" />
-            <item android:title="Shared"
+            <item android:title="Send Sample notification"
+                android:id="@+id/shared"
                 android:icon="@drawable/ic_baseline_people_24" />
-            <item android:title="Starred"
+            <item android:title="Cancel notification"
+                android:id="@+id/cancel_notification"
                 android:icon="@drawable/ic_baseline_star_24" />
             <item android:title="Recent"
                 android:icon="@drawable/ic_baseline_access_time_24" />

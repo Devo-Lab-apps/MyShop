@@ -53,7 +53,8 @@ class AddEditEntryViewModel @ViewModelInject constructor(
             frequency = metadata[EntryMetadata.RECURRING_ENTRY_FREQUENCY]!!,
             recurringTime = metadata[EntryMetadata.RECURRING_ENTRY_TIME]!!,
             createdAt = entry.createdAt,
-            modifiedAt = entry.modifiedAt
+            modifiedAt = entry.modifiedAt,
+            amount = entry.entryAmount
         )
     }
 
