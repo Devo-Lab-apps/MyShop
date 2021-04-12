@@ -7,7 +7,7 @@ import com.labs.devo.apps.myshop.const.AppConstants.TAG
 
 var isUnitTest = false
 
-fun printLogD(className: String?, vararg message: Any) {
+fun printLogD(className: String?, vararg message: Any?) {
     if (DEBUG && !isUnitTest) {
         for (msg in message)
             Log.d(TAG, "$className: $msg")
