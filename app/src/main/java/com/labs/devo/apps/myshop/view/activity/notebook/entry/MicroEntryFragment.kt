@@ -8,7 +8,6 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
-import androidx.appcompat.widget.SearchView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -69,7 +68,7 @@ class MicroEntryFragment : Fragment(R.layout.fragment_micro_entry),
         (activity as NotebookActivity).setSupportActionBar(binding.microEntryToolbar)
         setHasOptionsMenu(true)
 
-        microEntryAdapter = MicroEntryAdapter(this)
+        microEntryAdapter = MicroEntryAdapter(this, recurringEntry)
 
         binding.apply {
             microEntryRecyclerView.apply {
