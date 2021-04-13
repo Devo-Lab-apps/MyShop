@@ -34,7 +34,6 @@ class PageRepositoryImpl @Inject constructor(
         remoteMediator = PageRemoteMediator(
             notebookId,
             searchQuery,
-            orderBy,
             forceRefresh,
             notebookDatabase,
             remotePageService

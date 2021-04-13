@@ -35,8 +35,6 @@ class MicroEntryRepositoryImpl @Inject constructor(
         remoteMediator = MicroEntryRemoteMediator(
             pageId,
             recurringEntry,
-            dateRange,
-            orderBy,
             forceRefresh,
             notebookDatabase,
             remoteEntryService

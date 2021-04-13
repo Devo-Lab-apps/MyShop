@@ -10,6 +10,7 @@ import com.labs.devo.apps.myshop.data.db.local.database.RemoteKey
 import com.labs.devo.apps.myshop.data.db.local.database.database.NotebookDatabase
 import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemoteEntryService
 import com.labs.devo.apps.myshop.data.models.notebook.Entry
+import com.labs.devo.apps.myshop.view.util.AsyncHelper
 
 //TODO change this for page also
 const val entryLoadKey = "page:"
@@ -18,7 +19,6 @@ const val entryLoadKey = "page:"
 class EntryRemoteMediator(
     private val pageId: String,
     private val searchQuery: String,
-    private val orderBy: String,
     private val forceRefresh: Boolean,
     private val database: NotebookDatabase,
     private val networkService: RemoteEntryService
@@ -36,7 +36,10 @@ class EntryRemoteMediator(
         state: PagingState<Int, Entry>
     ): MediatorResult {
         try {
-            val remoteKey = "$entryLoadKey$pageId"
+            var remoteKey = "$entryLoadKey$pageId"
+            if (searchQuery.isNotBlank()) {
+                remoteKey += ":$searchQuery"
+            }
             val loadKey: String? = when (loadType) {
                 LoadType.REFRESH -> null
                 LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
@@ -79,6 +82,16 @@ class EntryRemoteMediator(
     }
 
     override suspend fun initialize(): InitializeAction {
+        if (searchQuery.isNotBlank()) {
+            val remoteKey = "$entryLoadKey$pageId:$searchQuery"
+            val lastModifiedEntry =
+                AsyncHelper.runAsync { entryDao.getLastModifiedDate(pageId, remoteKey, false) }
+            lastModifiedEntry?.let {
+                if (System.currentTimeMillis() - it.modifiedAt > 86400 * 1000) {
+                    return InitializeAction.LAUNCH_INITIAL_REFRESH
+                }
+            }
+        }
         return if (forceRefresh) {
             InitializeAction.LAUNCH_INITIAL_REFRESH
         } else {

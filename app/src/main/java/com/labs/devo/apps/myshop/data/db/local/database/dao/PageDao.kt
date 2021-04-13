@@ -53,4 +53,7 @@ interface PageDao {
     @Query("DELETE FROM Page where creatorNotebookId = :notebookId")
     suspend fun deletePages(notebookId: String)
 
+    @Query("SELECT * FROM page where creatorNotebookId = :notebookId and pageId LIKE :searchQuery order by modifiedAt LIMIT 1")
+    fun getLastModifiedDate(notebookId: String, searchQuery: String): Page?
+
 }
