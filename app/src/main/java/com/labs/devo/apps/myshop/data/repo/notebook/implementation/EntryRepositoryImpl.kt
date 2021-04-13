@@ -35,7 +35,6 @@ class EntryRepositoryImpl
         remoteMediator = EntryRemoteMediator(
             pageId,
             searchQuery,
-            orderBy,
             forceRefresh,
             notebookDatabase,
             remoteEntryService
