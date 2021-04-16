@@ -3,11 +3,13 @@ package com.labs.devo.apps.myshop.view.activity.notebook.entry
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.viewModelScope
 import com.labs.devo.apps.myshop.business.helper.FirebaseHelper
+import com.labs.devo.apps.myshop.business.helper.UserManager
 import com.labs.devo.apps.myshop.data.models.notebook.Entry
 import com.labs.devo.apps.myshop.data.models.notebook.EntryMetadata
 import com.labs.devo.apps.myshop.data.models.notebook.RecurringEntry
 import com.labs.devo.apps.myshop.data.repo.notebook.abstraction.EntryRepository
 import com.labs.devo.apps.myshop.data.repo.notebook.abstraction.RecurringEntryRepository
+import com.labs.devo.apps.myshop.util.exceptions.UserNotInitializedException
 import com.labs.devo.apps.myshop.view.activity.notebook.entry.AddEditEntryViewModel.AddEntryModelConstants.DIFFERENT_ENTRY_UPDATE
 import com.labs.devo.apps.myshop.view.activity.notebook.entry.AddEditEntryViewModel.AddEntryModelConstants.ENTRY_DELETED
 import com.labs.devo.apps.myshop.view.activity.notebook.entry.AddEditEntryViewModel.AddEntryModelConstants.ENTRY_INSERTED_MSG
@@ -43,7 +45,8 @@ class AddEditEntryViewModel @ViewModelInject constructor(
     }
 
     private fun recurringEntry(entry: Entry): RecurringEntry {
-        val id = FirebaseHelper.getRecurringEntryReference(entry.pageId).id
+        val user = UserManager.user ?: throw UserNotInitializedException()
+        val id = FirebaseHelper.getRecurringEntryReference(user.accountId, entry.pageId).id
         val metadata = entry.entryMetadata
         return RecurringEntry(
             pageId = entry.pageId,

@@ -94,12 +94,4 @@ object ServiceModule {
     ): LocalRecurringEntryService =
         LocalRecurringEntryServiceImpl(entryDao)
 
-    @Provides
-    @Singleton
-    fun provideMicroRemoteEntryService(
-        remoteMicroEntryMapper: RemoteMicroEntryMapper
-    ): RemoteMicroEntryService =
-        RemoteMicroEntryServiceFirebaseImpl(remoteMicroEntryMapper)
-
-
 }

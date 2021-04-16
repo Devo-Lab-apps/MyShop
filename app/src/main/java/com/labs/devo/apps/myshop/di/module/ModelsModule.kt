@@ -29,9 +29,4 @@ object ModelsModule {
     fun provideRemoteRecurringEntryMapper(): RemoteRecurringEntryMapper =
         RemoteRecurringEntryMapper()
 
-    @Provides
-    @Singleton
-    fun provideRemoteMicroEntryMapper(): RemoteMicroEntryMapper =
-        RemoteMicroEntryMapper()
-
 }

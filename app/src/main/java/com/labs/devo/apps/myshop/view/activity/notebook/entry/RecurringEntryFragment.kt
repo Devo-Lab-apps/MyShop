@@ -3,11 +3,9 @@ package com.labs.devo.apps.myshop.view.activity.notebook.entry
 import android.content.Context
 import android.os.Bundle
 import android.view.View
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.labs.devo.apps.myshop.R
 import com.labs.devo.apps.myshop.RECURRING_ENTRY_CHANNEL
@@ -20,7 +18,6 @@ import com.labs.devo.apps.myshop.databinding.FragmentRecurringEntryBinding
 import com.labs.devo.apps.myshop.util.printLogD
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.PAGE_ID
-import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.RECURRING_ENTRY
 import com.labs.devo.apps.myshop.view.adapter.notebook.RecurringEntryListAdapter
 import com.labs.devo.apps.myshop.view.util.DataState
 import com.labs.devo.apps.myshop.view.util.DataStateListener
@@ -126,12 +123,6 @@ class RecurringEntryFragment : Fragment(R.layout.fragment_recurring_entry),
                     )
                 )
             }
-            is RecurringEntryViewModel.RecurringEntryEvent.NavigateToMicroEntryFragment -> {
-                val args = bundleOf(
-                    RECURRING_ENTRY to event.entry
-                )
-                findNavController().navigate(R.id.microEntryFragment, args)
-            }
         }
     }
 
@@ -145,6 +136,7 @@ class RecurringEntryFragment : Fragment(R.layout.fragment_recurring_entry),
     }
 
     override fun onClick(recurringEntry: RecurringEntry) {
-        viewModel.onRecurringEntryClick(recurringEntry)
+
     }
+
 }

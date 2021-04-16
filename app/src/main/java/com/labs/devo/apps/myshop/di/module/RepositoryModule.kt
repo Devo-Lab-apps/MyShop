@@ -70,13 +70,4 @@ object RepositoryModule {
     ): RecurringEntryRepository =
         RecurringEntryRepositoryImpl(localRecurringEntryService, remoteRecurringEntryService)
 
-    @Provides
-    @Singleton
-    fun provideMicroEntryRepository(
-        localEntryService: LocalEntryService,
-        remoteMicroEntryService: RemoteMicroEntryService,
-        notebookDatabase: NotebookDatabase
-    ): MicroEntryRepository =
-        MicroEntryRepositoryImpl(localEntryService, notebookDatabase, remoteMicroEntryService)
-
 }

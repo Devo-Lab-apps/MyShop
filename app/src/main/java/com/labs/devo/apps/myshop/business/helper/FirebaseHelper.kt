@@ -91,16 +91,16 @@ object FirebaseHelper {
         return getEntryCollection(pageId).document()
     }
 
-    fun getRecurringEntryCollection(pageId: String): CollectionReference {
-        return getPageCollection().document(pageId).collection(recurringEntry)
+    fun getRecurringEntryCollection(accountId: String, pageId: String): CollectionReference {
+        return getAccountCollection().document(accountId).collection(recurringEntry)
     }
 
-    fun getRecurringEntryReference(pageId: String, recurringRecurringEntryId: String): DocumentReference {
-        return getRecurringEntryCollection(pageId).document(recurringRecurringEntryId)
+    fun getRecurringEntryReference(accountId: String, pageId: String, recurringRecurringEntryId: String): DocumentReference {
+        return getRecurringEntryCollection(accountId, pageId).document(recurringRecurringEntryId)
     }
 
-    fun getRecurringEntryReference(pageId: String): DocumentReference {
-        return getRecurringEntryCollection(pageId).document()
+    fun getRecurringEntryReference(accountId: String, pageId: String): DocumentReference {
+        return getRecurringEntryCollection(accountId, pageId).document()
     }
 
     fun getMicroEntryCollection(pageId: String, recurringEntryId: String): CollectionReference {
