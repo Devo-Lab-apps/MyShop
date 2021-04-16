@@ -2,15 +2,13 @@ package com.labs.devo.apps.myshop.data.db.remote.implementation.notebook
 
 import com.google.firebase.firestore.Transaction
 import com.labs.devo.apps.myshop.business.helper.FirebaseHelper
+import com.labs.devo.apps.myshop.business.helper.UserManager
 import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemoteRecurringEntryService
 import com.labs.devo.apps.myshop.data.db.remote.mapper.notebook.RemoteRecurringEntryMapper
 import com.labs.devo.apps.myshop.data.db.remote.models.notebook.RemoteEntityRecurringEntry
 import com.labs.devo.apps.myshop.data.models.notebook.RecurringEntry
-import com.labs.devo.apps.myshop.util.exceptions.NoRecurringEntryException
-import com.labs.devo.apps.myshop.util.exceptions.PageNotFoundException
-import com.labs.devo.apps.myshop.util.exceptions.RecurringEntryLimitExceededException
-import com.labs.devo.apps.myshop.util.exceptions.RecurringEntryNotFoundException
+import com.labs.devo.apps.myshop.util.exceptions.*
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -118,8 +116,9 @@ class RemoteRecurringEntryServiceFirebaseImpl
         recurringEntry: RecurringEntry,
         transaction: Transaction
     ): RecurringEntry {
-        val id = FirebaseHelper.getRecurringEntryReference(pageId).id
-        val ref = FirebaseHelper.getRecurringEntryReference(pageId, id)
+        val user = UserManager.user ?: throw UserNotInitializedException()
+        val id = FirebaseHelper.getRecurringEntryReference(user.accountId, pageId).id
+        val ref = FirebaseHelper.getRecurringEntryReference(user.accountId, pageId, id)
         val data = mapper.mapToEntity(recurringEntry)
         data.recurringEntryId = id
         recurringEntry.recurringEntryId = id
@@ -133,7 +132,9 @@ class RemoteRecurringEntryServiceFirebaseImpl
         recurringEntry: RecurringEntry,
         transaction: Transaction
     ): RecurringEntry {
+        val user = UserManager.user ?: throw UserNotInitializedException()
         val ref = FirebaseHelper.getRecurringEntryReference(
+            user.accountId,
             pageId,
             recurringEntry.recurringEntryId
         )
@@ -152,7 +153,9 @@ class RemoteRecurringEntryServiceFirebaseImpl
         recurringRecurringEntry: RecurringEntry,
         transaction: Transaction
     ): RecurringEntry {
+        val user = UserManager.user ?: throw UserNotInitializedException()
         val ref = FirebaseHelper.getRecurringEntryReference(
+            user.accountId,
             pageId,
             recurringRecurringEntry.recurringEntryId
         )
@@ -166,7 +169,9 @@ class RemoteRecurringEntryServiceFirebaseImpl
     }
 
     private suspend fun get(pageId: String): List<RecurringEntry> {
-        val ss = FirebaseHelper.getRecurringEntryCollection(pageId).get().await()
+        val user = UserManager.user ?: throw UserNotInitializedException()
+        val ss = FirebaseHelper.getRecurringEntryCollection(user.accountId, pageId)
+            .whereEqualTo(RecurringEntry::pageId.name, pageId).get().await()
         return ss?.documents?.map { ds ->
             val obj = ds.toObject(RemoteEntityRecurringEntry::class.java)!!
             mapper.mapFromEntity(obj)
@@ -185,7 +190,8 @@ class RemoteRecurringEntryServiceFirebaseImpl
         pageId: String,
         recurringRecurringEntryId: String
     ) {
-        val ref = FirebaseHelper.getRecurringEntryReference(pageId, recurringRecurringEntryId)
+        val user = UserManager.user ?: throw UserNotInitializedException()
+        val ref = FirebaseHelper.getRecurringEntryReference(user.accountId, pageId, recurringRecurringEntryId)
         val obj = transaction.get(ref)
         if (!obj.exists()) {
             throw RecurringEntryNotFoundException()

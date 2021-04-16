@@ -1,6 +1,5 @@
 package com.labs.devo.apps.myshop.view.activity.notebook.entry
 
-import android.app.TimePickerDialog
 import android.content.Context
 import android.os.Bundle
 import android.view.View
@@ -10,6 +9,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.timepicker.MaterialTimePicker
+import com.google.android.material.timepicker.TimeFormat
 import com.labs.devo.apps.myshop.R
 import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.data.models.notebook.Entry
@@ -25,7 +26,6 @@ import com.labs.devo.apps.myshop.view.util.DataState
 import com.labs.devo.apps.myshop.view.util.DataStateListener
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
-import java.util.*
 
 
 @AndroidEntryPoint
@@ -107,23 +107,21 @@ class AddEditEntryFragment : Fragment(R.layout.add_edit_entry_fragment) {
     }
 
     private fun pickTime() {
-        val calendar = Calendar.getInstance()
-        val hour: Int = calendar.get(Calendar.HOUR_OF_DAY)
-        val minute: Int = calendar.get(Calendar.MINUTE)
-        val mTimePicker = TimePickerDialog(
-            requireContext(),
-            { _, selectedHour, selectedMinute ->
-                val h = if (selectedHour < 10) "0$selectedHour" else "$selectedHour"
-                val m = if (selectedMinute < 10) "0$selectedMinute" else "$selectedMinute"
-                selectedRepeatingTime = "$h:$m"
-            },
-            hour,
-            minute,
-            true
-        )
-
-        mTimePicker.setTitle("Select Time")
-        mTimePicker.show()
+        val picker =
+            MaterialTimePicker.Builder()
+                .setTimeFormat(TimeFormat.CLOCK_24H)
+                .setHour(12)
+                .setMinute(10)
+                .setTitleText("Select Recurring time of day")
+                .build()
+        picker.addOnPositiveButtonClickListener {
+            val selectedHour = picker.hour
+            val selectedMinute = picker.minute
+            val hour = if (selectedHour < 10) "0$selectedHour" else "$selectedHour"
+            val minute = if (selectedMinute < 10) "0$selectedMinute" else "$selectedMinute"
+            selectedRepeatingTime = "$hour:$minute"
+        }
+        picker.show(requireActivity().supportFragmentManager, "Sample Tag")
     }
 
     private fun editOperation() {
