@@ -2,6 +2,9 @@ package com.labs.devo.apps.myshop.view.activity.notebook.notebook
 
 import android.content.Context
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
@@ -58,6 +61,8 @@ class NotebookFragment : DialogFragment(R.layout.fragment_notebook),
      * Init the view to be displayed.
      */
     private fun initView() {
+        (activity as NotebookActivity).setSupportActionBar(binding.notebookToolbar)
+        setHasOptionsMenu(true)
         dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
         notebookAdapter = NotebookListAdapter(this, this)
 
@@ -74,10 +79,6 @@ class NotebookFragment : DialogFragment(R.layout.fragment_notebook),
                 viewModel.addNotebook()
             }
 
-            syncNotebooks.setOnClickListener {
-                dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
-                viewModel.syncNotebooks()
-            }
         }
 
 
@@ -149,6 +150,21 @@ class NotebookFragment : DialogFragment(R.layout.fragment_notebook),
             println("$context must implement DataStateListener")
         }
 
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.menu_noteboook, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_sync_notebook -> {
+                dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
+                viewModel.syncNotebooks()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
 

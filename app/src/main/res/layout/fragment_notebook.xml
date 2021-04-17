@@ -5,60 +5,42 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        tools:context=".ui.activites.notebook.page.PageFragment">
+        android:layout_height="match_parent">
 
-        <TextView
-            android:id="@+id/add_notebook_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="24dp"
-            android:text="Your notebooks"
-            android:textColor="@color/black"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <ImageButton
-            android:id="@+id/sync_notebooks"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:src="@drawable/ic_baseline_refresh_24"
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/notebook_toolbar"
+            android:layout_width="0dp"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/colorPrimary"
+            android:elevation="4dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:title="Notebooks" />
+
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/notebooks_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="72dp"
-            android:layout_marginBottom="48dp"
+            android:layout_marginTop="56dp"
             app:layout_constraintBottom_toTopOf="@id/add_edit_notebook_btn"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/add_notebook_tv"
             tools:itemCount="4"
             tools:listitem="@layout/notebook_item_view" />
 
-        <Button
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/add_edit_notebook_btn"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/primary_btn_bg"
-            android:fontFamily="@font/open_sans_semibold"
-            android:text="Add notebook"
-            android:textAllCaps="false"
-            android:textColor="@android:color/background_light"
-            android:textSize="16sp"
+            android:layout_margin="16dp"
+            android:contentDescription="Add notebook"
+            android:src="@drawable/ic_baseline_add_24"
+            app:backgroundTint="@color/purple_500"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-
+            app:tint="@color/white" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

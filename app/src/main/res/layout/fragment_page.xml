@@ -27,8 +27,8 @@
                     android:id="@+id/select_notebook_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:enabled="false"
                     android:drawableEnd="@drawable/ic_baseline_keyboard_arrow_down_24"
+                    android:enabled="false"
                     android:text="No notebook selected" />
 
             </RelativeLayout>
@@ -49,9 +49,12 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_margin="16dp"
+            android:contentDescription="Add Page"
             android:src="@drawable/ic_baseline_add_24"
+            app:backgroundTint="@color/purple_500"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:tint="@color/white" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

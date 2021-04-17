@@ -6,8 +6,11 @@ import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.labs.devo.apps.myshop.const.AppConstants
+import com.labs.devo.apps.myshop.const.AppConstants.DATE_FORMAT
 import com.labs.devo.apps.myshop.data.models.notebook.Page
 import com.labs.devo.apps.myshop.databinding.PageItemViewBinding
+import java.text.SimpleDateFormat
+import java.util.*
 
 class PageListAdapter(
     val onPageClick: OnPageClick,
@@ -28,6 +31,7 @@ class PageListAdapter(
                     binding.pageSettings.setOnClickListener {
                         onPageSettingsSettingsClick.onPageSettingsClick(p)
                     }
+                    pageModifiedAt.text = SimpleDateFormat(DATE_FORMAT, Locale.ENGLISH).format(Date(p.modifiedAt))
                     binding.root.setOnClickListener {
                         onPageClick.onClick(p)
                     }
