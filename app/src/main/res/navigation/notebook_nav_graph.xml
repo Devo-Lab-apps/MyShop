@@ -11,9 +11,6 @@
         android:label="NotebookFragment"
         tools:layout="@layout/fragment_notebook">
         <action
-            android:id="@+id/action_notebookFragment_to_addNotebookFragment"
-            app:destination="@id/addEditNotebookFragment" />
-        <action
             android:id="@+id/action_notebookFragment_to_addEditPageFragment"
             app:destination="@id/addEditPageFragment" />
     </fragment>
@@ -28,6 +25,9 @@
         <action
             android:id="@+id/action_pageFragment_to_entryFragment"
             app:destination="@id/entryFragment" />
+        <action
+            android:id="@+id/action_pageFragment_to_addEditNotebookFragment"
+            app:destination="@id/addEditNotebookFragment" />
     </fragment>
     <fragment
         android:id="@+id/addEditNotebookFragment"
