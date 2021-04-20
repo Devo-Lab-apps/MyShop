@@ -13,7 +13,6 @@ import com.labs.devo.apps.myshop.databinding.AddNotebookFragmentBinding
 import com.labs.devo.apps.myshop.util.PreferencesManager
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.EDIT_NOTEBOOK_OPERATION
-import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.NOTEBOOK
 import com.labs.devo.apps.myshop.view.util.DataState
 import com.labs.devo.apps.myshop.view.util.DataStateListener
 import dagger.hilt.android.AndroidEntryPoint
@@ -29,10 +28,6 @@ class AddEditNotebookFragment : Fragment(R.layout.add_notebook_fragment) {
 
     private lateinit var dataStateHandler: DataStateListener
 
-    private lateinit var operation: String
-
-    private var notebook: Notebook? = null
-
     private lateinit var selectedNotebookId: String
 
     private lateinit var typedNotebookName: String
@@ -45,10 +40,6 @@ class AddEditNotebookFragment : Fragment(R.layout.add_notebook_fragment) {
         super.onViewCreated(view, savedInstanceState)
         binding = AddNotebookFragmentBinding.bind(view)
 
-        arguments?.apply {
-            notebook = getParcelable(NOTEBOOK)
-            operation = getString(NotebookActivity.NotebookConstants.OPERATION).toString()
-        }
         initView()
         observeEvents()
     }
@@ -57,7 +48,7 @@ class AddEditNotebookFragment : Fragment(R.layout.add_notebook_fragment) {
     private fun initView() {
         binding.apply {
             addEditNotebookBtn.setOnClickListener {
-                if (operation == NotebookActivity.NotebookConstants.ADD_NOTEBOOK_OPERATION) {
+                if (viewModel.operation == NotebookActivity.NotebookConstants.ADD_NOTEBOOK_OPERATION) {
                     typedNotebookName = notebookName.text.toString()
                     val notebook = Notebook(
                         notebookName = typedNotebookName
@@ -68,7 +59,7 @@ class AddEditNotebookFragment : Fragment(R.layout.add_notebook_fragment) {
                 } else {
                     dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
                     typedNotebookName = notebookName.text.toString()
-                    notebook?.let { n ->
+                    viewModel.notebook?.let { n ->
                         val newNotebook = n.copy(
                             notebookName = typedNotebookName,
                             modifiedAt = System.currentTimeMillis()
@@ -83,9 +74,9 @@ class AddEditNotebookFragment : Fragment(R.layout.add_notebook_fragment) {
                 }
 
             }
-            if (operation == EDIT_NOTEBOOK_OPERATION) {
+            if (viewModel.operation == EDIT_NOTEBOOK_OPERATION) {
                 addEditNotebookBtn.text = getString(R.string.update_notebook)
-                notebook?.let { n ->
+                viewModel.notebook?.let { n ->
                     notebookName.setText(n.notebookName)
                 } ?: run {
                     dataStateHandler.onDataStateChange(DataState.message<Nothing>(getString(R.string.retry_updating_notebook)))
@@ -136,10 +127,10 @@ class AddEditNotebookFragment : Fragment(R.layout.add_notebook_fragment) {
                 }
             }
             is AddEditNotebookViewModel.AddEditNotebookEvent.NotebookUpdated -> {
-                if (selectedNotebookId == notebook?.notebookId) {
+                if (selectedNotebookId == viewModel.notebook?.notebookId) {
                     preferencesManager.updateCurrentSelectedNotebook(
                         Pair(
-                            notebook!!.notebookId,
+                            viewModel.notebook!!.notebookId,
                             typedNotebookName
                         )
                     )

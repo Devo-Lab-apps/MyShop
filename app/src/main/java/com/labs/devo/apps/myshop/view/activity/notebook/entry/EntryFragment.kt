@@ -7,7 +7,6 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.widget.SearchView
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -24,10 +23,6 @@ import com.labs.devo.apps.myshop.util.extensions.onQueryTextChanged
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.ADD_ENTRY_OPERATION
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.EDIT_ENTRY_OPERATION
-import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.ENTRY
-import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.OPERATION
-import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.PAGE_ID
-import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.PAGE_NAME
 import com.labs.devo.apps.myshop.view.adapter.entry.EntryListAdapter
 import com.labs.devo.apps.myshop.view.util.DataState
 import com.labs.devo.apps.myshop.view.util.DataStateListener
@@ -49,10 +44,6 @@ class EntryFragment : Fragment(R.layout.fragment_entry), EntryListAdapter.OnEntr
 
     private lateinit var entryListAdapter: EntryListAdapter
 
-    private lateinit var pageId: String
-
-    private lateinit var pageName: String
-
     private lateinit var dataStateHandler: DataStateListener
 
     @Inject
@@ -61,11 +52,6 @@ class EntryFragment : Fragment(R.layout.fragment_entry), EntryListAdapter.OnEntr
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentEntryBinding.bind(view)
-
-        arguments?.apply {
-            pageId = getString(PAGE_ID)!!
-            pageName = getString(PAGE_NAME)!!
-        }
 
         initView()
         observeEvents()
@@ -94,7 +80,10 @@ class EntryFragment : Fragment(R.layout.fragment_entry), EntryListAdapter.OnEntr
             addEntry.setOnClickListener {
                 viewModel.addEntry()
             }
-            entryToolbar.title = pageName
+            entryToolbar.title = viewModel.pageName
+            entryToolbar.setNavigationOnClickListener {
+                requireActivity().onBackPressed()
+            }
         }
     }
 
@@ -106,7 +95,7 @@ class EntryFragment : Fragment(R.layout.fragment_entry), EntryListAdapter.OnEntr
             }
         }
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            viewModel.setPageId(pageId)
+            viewModel.setPageId(viewModel.argPageId)
             entryListAdapter.loadStateFlow.collectLatest { state ->
                 when (state.refresh) {
                     is LoadState.Error -> {
@@ -143,25 +132,21 @@ class EntryFragment : Fragment(R.layout.fragment_entry), EntryListAdapter.OnEntr
                 )
             }
             is EntryViewModel.EntryEvent.AddEntryEvent -> {
-                val args = bundleOf(
-                    OPERATION to ADD_ENTRY_OPERATION,
-                    PAGE_ID to pageId
+                val action = EntryFragmentDirections.actionEntryFragmentToAddEditEntryFragment(
+                    ADD_ENTRY_OPERATION, viewModel.argPageId, null
                 )
-                findNavController().navigate(R.id.addEditEntryFragment, args)
+                findNavController().navigate(action)
             }
             is EntryViewModel.EntryEvent.EditEntryEvent -> {
-                val args = bundleOf(
-                    OPERATION to EDIT_ENTRY_OPERATION,
-                    PAGE_ID to pageId,
-                    ENTRY to event.entry
+                val action = EntryFragmentDirections.actionEntryFragmentToAddEditEntryFragment(
+                    EDIT_ENTRY_OPERATION, viewModel.argPageId, event.entry
                 )
-                findNavController().navigate(R.id.addEditEntryFragment, args)
+                findNavController().navigate(action)
             }
             is EntryViewModel.EntryEvent.NavigateToRecurringEntryEvent -> {
-                val args = bundleOf(
-                    PAGE_ID to pageId
-                )
-                findNavController().navigate(R.id.recurringEntryFragment, args)
+                val action =
+                    EntryFragmentDirections.actionEntryFragmentToRecurringEntryFragment(viewModel.argPageId)
+                findNavController().navigate(action)
             }
         }
     }

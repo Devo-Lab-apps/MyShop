@@ -16,9 +16,6 @@ import com.labs.devo.apps.myshop.databinding.AddEditPageFragmentBinding
 import com.labs.devo.apps.myshop.util.exceptions.UserNotInitializedException
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.ADD_PAGE_OPERATION
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.EDIT_PAGE_OPERATION
-import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.NOTEBOOK_ID
-import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.OPERATION
-import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.PAGE
 import com.labs.devo.apps.myshop.view.activity.notebook.page.AddEditPageViewModel
 import com.labs.devo.apps.myshop.view.util.DataState
 import com.labs.devo.apps.myshop.view.util.DataStateListener
@@ -36,21 +33,9 @@ class AddEditPageFragment : Fragment(R.layout.add_edit_page_fragment) {
 
     private lateinit var dataStateHandler: DataStateListener
 
-    private lateinit var operation: String
-
-    private var page: Page? = null
-
-    private var notebookId: String? = null
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = AddEditPageFragmentBinding.bind(view)
-        arguments?.apply {
-            page = getParcelable(PAGE)
-            operation = getString(OPERATION).toString()
-            notebookId = getString(NOTEBOOK_ID).toString()
-        }
-
 
         initView()
 
@@ -61,7 +46,7 @@ class AddEditPageFragment : Fragment(R.layout.add_edit_page_fragment) {
         binding.apply {
             addEditPageBtn.setOnClickListener {
                 addEditPageBtn.isEnabled = false
-                if (operation == ADD_PAGE_OPERATION) {
+                if (viewModel.operation == ADD_PAGE_OPERATION) {
                     val pageName = pageName.text.toString()
                     val pageId = pageId.text.toString()
                     addPage(pageName, pageId)
@@ -71,14 +56,14 @@ class AddEditPageFragment : Fragment(R.layout.add_edit_page_fragment) {
                     updatePage(pageName)
                 }
             }
-            if (operation == EDIT_PAGE_OPERATION) {
+            if (viewModel.operation == EDIT_PAGE_OPERATION) {
                 addEditPageBtn.text = getString(R.string.update_page)
                 //disable editing pageId.
                 pageIdTv.visibility = View.GONE
                 pageId.visibility = View.GONE
                 pageId.isEnabled = false
-                page?.let {
-                    pageName.setText(page!!.pageName)
+                viewModel.page?.let {
+                    pageName.setText(viewModel.page!!.pageName)
                 } ?: run {
                     sendMessage(getString(R.string.unknown_error_occurred))
                 }
@@ -88,7 +73,7 @@ class AddEditPageFragment : Fragment(R.layout.add_edit_page_fragment) {
 
     private fun addPage(pageName: String, pageId: String) {
         UserManager.user?.let { user ->
-            if (notebookId == null) {
+            if (viewModel.notebookId == null) {
                 dataStateHandler.onDataStateChange(
                     DataState.message<Nothing>(
                         UserNotInitializedException().msg
@@ -97,7 +82,7 @@ class AddEditPageFragment : Fragment(R.layout.add_edit_page_fragment) {
                 findNavController().navigateUp()
                 return
             }
-            notebookId?.let { nid ->
+            viewModel.notebookId?.let { nid ->
                 val page = Page(
                     creatorUserId = user.email,
                     consumerUserId = pageId,
@@ -128,7 +113,7 @@ class AddEditPageFragment : Fragment(R.layout.add_edit_page_fragment) {
     }
 
     private fun updatePage(pageName: String) {
-        page?.let { p ->
+        viewModel.page?.let { p ->
             val newPage = p.copy(
                 pageName = pageName,
                 modifiedAt = System.currentTimeMillis()

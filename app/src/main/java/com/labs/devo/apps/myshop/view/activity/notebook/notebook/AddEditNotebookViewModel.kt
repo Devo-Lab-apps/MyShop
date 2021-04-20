@@ -1,9 +1,13 @@
 package com.labs.devo.apps.myshop.view.activity.notebook.notebook
 
+import androidx.hilt.Assisted
 import androidx.hilt.lifecycle.ViewModelInject
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.labs.devo.apps.myshop.data.models.notebook.Notebook
 import com.labs.devo.apps.myshop.data.repo.notebook.abstraction.NotebookRepository
+import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.NOTEBOOK
+import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.OPERATION
 import com.labs.devo.apps.myshop.view.activity.notebook.notebook.AddEditNotebookViewModel.AddEditNotebookEvents.NOTEBOOK_DELETED
 import com.labs.devo.apps.myshop.view.activity.notebook.notebook.AddEditNotebookViewModel.AddEditNotebookEvents.NOTEBOOK_DIFFERENT_ERR
 import com.labs.devo.apps.myshop.view.activity.notebook.notebook.AddEditNotebookViewModel.AddEditNotebookEvents.NOTEBOOK_INSERTED
@@ -13,9 +17,15 @@ import com.labs.devo.apps.myshop.view.util.BaseViewModel
 import kotlinx.coroutines.launch
 
 class AddEditNotebookViewModel @ViewModelInject
-constructor(private val notebookRepository: NotebookRepository) :
+constructor(
+    private val notebookRepository: NotebookRepository,
+    @Assisted val state: SavedStateHandle
+) :
     BaseViewModel<AddEditNotebookViewModel.AddEditNotebookEvent>() {
 
+    val notebook = state.get<Notebook>(NOTEBOOK)
+
+    val operation = state.get<String>(OPERATION)
 
     fun addNotebook(notebook: Notebook) = viewModelScope.launch {
         val res = notebookRepository.insertNotebook(notebook)

@@ -1,9 +1,14 @@
 package com.labs.devo.apps.myshop.view.activity.notebook.page
 
+import androidx.hilt.Assisted
 import androidx.hilt.lifecycle.ViewModelInject
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.labs.devo.apps.myshop.data.models.notebook.Page
 import com.labs.devo.apps.myshop.data.repo.notebook.abstraction.PageRepository
+import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.NOTEBOOK_ID
+import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.OPERATION
+import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.PAGE
 import com.labs.devo.apps.myshop.view.activity.notebook.page.AddEditPageViewModel.PageEventConstants.PAGE_ADDED
 import com.labs.devo.apps.myshop.view.activity.notebook.page.AddEditPageViewModel.PageEventConstants.PAGE_DELETED
 import com.labs.devo.apps.myshop.view.activity.notebook.page.AddEditPageViewModel.PageEventConstants.PAGE_NAME_NOT_UPDATED_ERR
@@ -12,8 +17,17 @@ import com.labs.devo.apps.myshop.view.util.BaseViewModel
 import kotlinx.coroutines.launch
 
 class AddEditPageViewModel @ViewModelInject
-constructor(private val pageRepository: PageRepository) :
+constructor(
+    private val pageRepository: PageRepository,
+    @Assisted val state: SavedStateHandle
+) :
     BaseViewModel<AddEditPageViewModel.AddEditPageEvent>() {
+
+    val operation = state.get<String>(OPERATION)
+
+    val page = state.get<Page>(PAGE)
+
+    val notebookId = state.get<String>(NOTEBOOK_ID)
 
 
     fun addPage(page: Page) = viewModelScope.launch {

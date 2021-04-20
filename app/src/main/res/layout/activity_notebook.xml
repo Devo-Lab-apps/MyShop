@@ -9,7 +9,7 @@
         tools:context=".view.activity.notebook.NotebookActivity">
 
         <androidx.fragment.app.FragmentContainerView
-            android:id="@+id/fragment"
+            android:id="@+id/notebook_host_fragment"
             android:name="androidx.navigation.fragment.NavHostFragment"
             android:layout_width="0dp"
             android:layout_height="0dp"
