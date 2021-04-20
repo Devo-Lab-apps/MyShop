@@ -10,6 +10,8 @@ import androidx.paging.cachedIn
 import com.labs.devo.apps.myshop.const.AppConstants.EMPTY_STRING
 import com.labs.devo.apps.myshop.data.models.notebook.Entry
 import com.labs.devo.apps.myshop.data.repo.notebook.abstraction.EntryRepository
+import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.PAGE_ID
+import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.PAGE_NAME
 import com.labs.devo.apps.myshop.view.util.BaseViewModel
 import com.labs.devo.apps.myshop.view.util.DataState
 import kotlinx.coroutines.flow.*
@@ -21,6 +23,8 @@ class EntryViewModel
     @Assisted private val state: SavedStateHandle
 ) : BaseViewModel<EntryViewModel.EntryEvent>() {
 
+    val argPageId = state.get<String>(PAGE_ID)!!
+    val pageName = state.get<String>(PAGE_NAME)!!
 
     private val _searchQuery = state.getLiveData("entrySearchQuery", EMPTY_STRING)
     val searchQuery: LiveData<String> = _searchQuery
@@ -38,19 +42,15 @@ class EntryViewModel
     ) { _pageId, _searchQuery, _orderBy ->
         Triple(_pageId, _searchQuery, _orderBy)
     }.flatMapLatest { (pageId, searchQuery, orderBy) ->
-        if (pageId.isEmpty()) {
-            emptyFlow()
-        } else {
-            val data = entryRepository.getEntries(
-                pageId,
-                searchQuery,
-                orderBy,
-                refreshStatus,
-                false
-            )
-            refreshStatus = false
-            data
-        }
+        val data = entryRepository.getEntries(
+            pageId,
+            searchQuery,
+            orderBy,
+            refreshStatus,
+            false
+        )
+        refreshStatus = false
+        data
     }.cachedIn(viewModelScope)
 
 

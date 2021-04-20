@@ -55,6 +55,7 @@ class RecurringEntryFragment : Fragment(R.layout.fragment_recurring_entry),
 
     private fun initView() {
         (activity as NotebookActivity).setSupportActionBar(binding.recurringEntryToolbar)
+
         setHasOptionsMenu(true)
         entryAdapter = RecurringEntryListAdapter(this)
         binding.apply {
@@ -62,6 +63,9 @@ class RecurringEntryFragment : Fragment(R.layout.fragment_recurring_entry),
                 setHasFixedSize(true)
                 adapter = entryAdapter
                 layoutManager = LinearLayoutManager(requireContext())
+            }
+            recurringEntryToolbar.setNavigationOnClickListener {
+                requireActivity().onBackPressed()
             }
         }
     }

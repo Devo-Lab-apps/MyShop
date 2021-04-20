@@ -11,7 +11,6 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -175,12 +174,8 @@ class PageFragment : Fragment(R.layout.fragment_page), PageListAdapter.OnPageCli
     }
 
     private fun showNotebookActivity() {
-        val options = NavOptions.Builder()
-        options.setEnterAnim(R.anim.open_notebook_fragment)
-        options.setExitAnim(R.anim.exit_notebook_fragment)
-        options.setPopEnterAnim(R.anim.pop_enter_notebook_fragment)
-        options.setPopExitAnim(R.anim.pop_exit_notebook_fragment)
-        findNavController().navigate(R.id.notebookFragment, null, options.build())
+        val action = PageFragmentDirections.actionPageFragmentToNotebookFragment()
+        findNavController().navigate(action)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -231,20 +226,14 @@ class PageFragment : Fragment(R.layout.fragment_page), PageListAdapter.OnPageCli
     }
 
     override fun onPageSettingsClick(page: Page) {
-        val args = bundleOf(
-            OPERATION to EDIT_PAGE_OPERATION,
-            PAGE to page
-        )
-        findNavController().navigate(R.id.addEditPageFragment, args)
+        val action = PageFragmentDirections.actionPageFragmentToAddEditPageFragment(EDIT_PAGE_OPERATION, page)
+        findNavController().navigate(action)
     }
 
 
     override fun onClick(page: Page) {
-        val args = bundleOf(
-            PAGE_ID to page.pageId,
-            PAGE_NAME to page.pageName
-        )
-        findNavController().navigate(R.id.entryFragment, args)
+        val action = PageFragmentDirections.actionPageFragmentToEntryFragment(page.pageId, page.pageName)
+        findNavController().navigate(action)
     }
 
     override fun onDestroyView() {

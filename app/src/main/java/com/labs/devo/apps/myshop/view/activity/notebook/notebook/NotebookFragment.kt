@@ -6,7 +6,6 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
-import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -20,8 +19,7 @@ import com.labs.devo.apps.myshop.data.models.notebook.Notebook
 import com.labs.devo.apps.myshop.databinding.FragmentNotebookBinding
 import com.labs.devo.apps.myshop.util.PreferencesManager
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity
-import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.NOTEBOOK
-import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.OPERATION
+import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.ADD_NOTEBOOK_OPERATION
 import com.labs.devo.apps.myshop.view.adapter.notebook.NotebookListAdapter
 import com.labs.devo.apps.myshop.view.util.DataState
 import com.labs.devo.apps.myshop.view.util.DataStateListener
@@ -121,10 +119,11 @@ class NotebookFragment : DialogFragment(R.layout.fragment_notebook),
                 }
             }
             is NotebookViewModel.NotebookEvent.AddNotebookEvent -> {
-                val args = bundleOf(
-                    OPERATION to NotebookActivity.NotebookConstants.ADD_NOTEBOOK_OPERATION
-                )
-                findNavController().navigate(R.id.addEditNotebookFragment, args)
+                val action =
+                    NotebookFragmentDirections.actionNotebookFragmentToAddEditNotebookFragment(
+                        ADD_NOTEBOOK_OPERATION, null
+                    )
+                findNavController().navigate(action)
             }
             is NotebookViewModel.NotebookEvent.EditNotebookEvent -> {
                 val notebook = event.notebook
@@ -132,11 +131,11 @@ class NotebookFragment : DialogFragment(R.layout.fragment_notebook),
                     dataStateHandler.onDataStateChange(DataState.message<Nothing>(getString(R.string.cant_update_foreign_notebook)))
                     return
                 }
-                val args = bundleOf(
-                    NOTEBOOK to notebook,
-                    OPERATION to NotebookActivity.NotebookConstants.EDIT_NOTEBOOK_OPERATION
-                )
-                findNavController().navigate(R.id.addEditNotebookFragment, args)
+                val action =
+                    NotebookFragmentDirections.actionNotebookFragmentToAddEditNotebookFragment(
+                        ADD_NOTEBOOK_OPERATION, notebook
+                    )
+                findNavController().navigate(action)
             }
         }
     }
