@@ -130,6 +130,10 @@ class PageRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun deletePages() {
+        localPageService.deletePages()
+    }
+
     override suspend fun syncPages(notebookId: String): DataState<List<Page>> {
         return try {
             localPageService.deletePages(notebookId)

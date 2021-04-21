@@ -23,5 +23,7 @@ interface RecurringEntryRepository {
 
     suspend fun deleteRecurringEntries(entries: List<RecurringEntry>): DataState<List<RecurringEntry>>
 
+    suspend fun deleteRecurringEntries()
+
     suspend fun syncRecurringEntries(pageId: String): DataState<List<RecurringEntry>>
 }

@@ -28,6 +28,8 @@ interface PageRepository {
 
     suspend fun deletePages(pages: List<Page>): DataState<List<Page>>
 
+    suspend fun deletePages()
+
     suspend fun syncPages(notebookId: String): DataState<List<Page>>
 
 }

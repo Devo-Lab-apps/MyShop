@@ -22,6 +22,8 @@ interface LocalRecurringEntryService {
 
     suspend fun deleteRecurringEntries(entries: List<RecurringEntry>)
 
+    suspend fun deleteRecurringEntries()
+
     suspend fun deleteRecurringEntries(pageId: String)
 
     suspend fun getLastFetchedRecurringEntry(pageId: String): RecurringEntry?

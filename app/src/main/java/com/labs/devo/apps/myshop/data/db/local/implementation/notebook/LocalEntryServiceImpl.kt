@@ -101,4 +101,10 @@ class LocalEntryServiceImpl
             dao.deleteEntriesLikeEntryId("$entryId%")
         }
     }
+
+    override suspend fun deleteEntries() {
+        AsyncHelper.runAsync {
+            dao.deleteAll()
+        }
+    }
 }

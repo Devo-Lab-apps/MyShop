@@ -137,6 +137,10 @@ class NotebookRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun deleteNotebooks() {
+        localNotebookService.deleteNotebooks()
+    }
+
     override suspend fun syncNotebooks(): DataState<List<Notebook>> {
         return try {
             localNotebookService.deleteNotebooks()

@@ -19,10 +19,8 @@ import com.labs.devo.apps.myshop.view.activity.auth.AuthenticationActivity
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity
 import com.labs.devo.apps.myshop.view.util.NotificationWorker
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 import java.util.*
 import javax.inject.Inject
 
@@ -131,10 +129,15 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
      */
     private fun logoutUser() {
         binding.homeProgressBar.visibility = View.VISIBLE
-
-        auth.signOut()
-        startActivity(Intent(this@HomeActivity, AuthenticationActivity::class.java))
-        finish()
+        binding.homeDrawerLayout.closeDrawers()
+        CoroutineScope(Dispatchers.IO).launch {
+            viewModel.deleteAllLocalData()
+            auth.signOut()
+            withContext(Dispatchers.Main) {
+                startActivity(Intent(this@HomeActivity, AuthenticationActivity::class.java))
+                finish()
+            }
+        }
     }
 
     override fun onDestroy() {

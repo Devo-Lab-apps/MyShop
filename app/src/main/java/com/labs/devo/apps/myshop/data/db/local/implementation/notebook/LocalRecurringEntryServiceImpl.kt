@@ -60,6 +60,12 @@ class LocalRecurringEntryServiceImpl
         }
     }
 
+    override suspend fun deleteRecurringEntries() {
+        AsyncHelper.runAsync {
+            dao.deleteAll()
+        }
+    }
+
     override suspend fun deleteRecurringEntries(pageId: String) {
         return AsyncHelper.runAsync {
             dao.deleteRecurringEntries(pageId)

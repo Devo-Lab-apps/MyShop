@@ -29,5 +29,7 @@ interface EntryRepository {
 
     suspend fun deleteEntries(entries: List<Entry>): DataState<List<Entry>>
 
+    suspend fun deleteEntries()
+
     suspend fun syncEntries(pageId: String): DataState<List<Entry>>
 }

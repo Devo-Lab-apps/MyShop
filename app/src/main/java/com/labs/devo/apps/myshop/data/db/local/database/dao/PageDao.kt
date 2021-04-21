@@ -47,6 +47,9 @@ interface PageDao {
     @Delete
     suspend fun deletePage(page: Page)
 
+    @Query("DELETE FROM PAGE")
+    suspend fun deleteAll()
+
     @Delete
     suspend fun deletePages(pages: List<Page>)
 
