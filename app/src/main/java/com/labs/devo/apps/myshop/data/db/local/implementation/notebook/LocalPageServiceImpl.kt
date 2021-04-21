@@ -72,4 +72,9 @@ class LocalPageServiceImpl
         }
     }
 
+    override suspend fun deletePages() {
+        AsyncHelper.runAsync {
+            dao.deleteAll()
+        }
+    }
 }

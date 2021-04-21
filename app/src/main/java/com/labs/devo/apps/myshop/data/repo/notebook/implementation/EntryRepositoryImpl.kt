@@ -39,7 +39,14 @@ class EntryRepositoryImpl
             notebookDatabase,
             remoteEntryService
         ),
-        pagingSourceFactory = { localEntryService.getEntries(pageId, searchQuery, orderBy, isRepeating) }
+        pagingSourceFactory = {
+            localEntryService.getEntries(
+                pageId,
+                searchQuery,
+                orderBy,
+                isRepeating
+            )
+        }
     ).flow
 
     override suspend fun getEntry(entryId: String): DataState<Entry> {
@@ -158,6 +165,10 @@ class EntryRepositoryImpl
                 ex.message ?: "An unknown error occurred. Please retry later."
             )
         }
+    }
+
+    override suspend fun deleteEntries() {
+        localEntryService.deleteEntries()
     }
 
     override suspend fun syncEntries(pageId: String): DataState<List<Entry>> {

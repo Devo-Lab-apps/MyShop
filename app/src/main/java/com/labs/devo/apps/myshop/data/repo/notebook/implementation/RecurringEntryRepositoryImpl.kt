@@ -135,6 +135,10 @@ class RecurringEntryRepositoryImpl
         }
     }
 
+    override suspend fun deleteRecurringEntries() {
+        localRecurringEntryService.deleteRecurringEntries()
+    }
+
     override suspend fun syncRecurringEntries(pageId: String): DataState<List<RecurringEntry>> {
         return try {
             localRecurringEntryService.deleteRecurringEntries(pageId)

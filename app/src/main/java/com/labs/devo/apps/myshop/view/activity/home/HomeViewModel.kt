@@ -7,15 +7,23 @@ import com.labs.devo.apps.myshop.data.repo.account.abstraction.UserRepository
 import com.labs.devo.apps.myshop.business.helper.UserManager
 import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.data.models.account.User
+import com.labs.devo.apps.myshop.data.repo.notebook.abstraction.EntryRepository
+import com.labs.devo.apps.myshop.data.repo.notebook.abstraction.NotebookRepository
+import com.labs.devo.apps.myshop.data.repo.notebook.abstraction.PageRepository
+import com.labs.devo.apps.myshop.data.repo.notebook.abstraction.RecurringEntryRepository
 import com.labs.devo.apps.myshop.util.AppData
 import com.labs.devo.apps.myshop.view.util.BaseViewModel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class HomeViewModel @ViewModelInject constructor(
-    val userRepository: UserRepository,
-    val accountRepository: AccountRepository
-) : BaseViewModel<HomeViewModel.HomeViewModelEvent>() {
+    private val userRepository: UserRepository,
+    private val notebookRepository: NotebookRepository,
+    private val pageRepository: PageRepository,
+    private val entryRepository: EntryRepository,
+    private val recurringEntryRepository: RecurringEntryRepository,
+
+    ) : BaseViewModel<HomeViewModel.HomeViewModelEvent>() {
 
     private val TAG = AppConstants.APP_PREFIX + javaClass.simpleName
 
@@ -35,10 +43,17 @@ class HomeViewModel @ViewModelInject constructor(
         }
     }
 
+    suspend fun deleteAllLocalData() = viewModelScope.launch {
+        entryRepository.deleteEntries()
+        recurringEntryRepository.deleteRecurringEntries()
+        pageRepository.deletePages()
+        notebookRepository.deleteNotebooks()
+    }
+
 
     sealed class HomeViewModelEvent {
 
-        class UserChanged(val user: User) : HomeViewModelEvent()
+        object DataCleared: HomeViewModelEvent()
 
         object LogoutUser : HomeViewModelEvent()
 

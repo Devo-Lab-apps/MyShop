@@ -37,4 +37,6 @@ interface LocalEntryService {
 
     suspend fun deleteEntries(pageId: String)
 
+    suspend fun deleteEntries()
+
 }
