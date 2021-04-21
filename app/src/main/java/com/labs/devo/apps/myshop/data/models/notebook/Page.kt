@@ -17,8 +17,10 @@ data class Page(
     val pageName: String = "",
 
     val createdAt: Long = System.currentTimeMillis(),
-    val modifiedAt: Long = System.currentTimeMillis()
-): Parcelable
+    val modifiedAt: Long = System.currentTimeMillis(),
+    val fetchedAt: Long = System.currentTimeMillis()
+
+) : Parcelable
 //creatorUserName, creatorAccountId, consumerAccountId, pageContactNumber, pageDisplayImage, isSubscriber
 //metadata
-    // -cycleDuration, foreignPageName
+// -cycleDuration, foreignPageName

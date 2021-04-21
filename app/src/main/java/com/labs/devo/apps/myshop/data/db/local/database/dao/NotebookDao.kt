@@ -33,4 +33,7 @@ interface NotebookDao {
     @Query("DELETE FROM NOTEBOOK")
     suspend fun deleteNotebooks()
 
+    @Query("SELECT * FROM Notebook ORDER BY fetchedAt DESC limit 1")
+    suspend fun getLastFetchedNotebook(): Notebook?
+
 }

@@ -22,4 +22,6 @@ interface LocalNotebookService {
 
     suspend fun deleteNotebooks()
 
+    suspend fun getLastFetchedNotebook(): Notebook?
+
 }

@@ -64,4 +64,10 @@ constructor(
         }
     }
 
+    override suspend fun getLastFetchedNotebook(): Notebook? {
+        return AsyncHelper.runAsync {
+            dao.getLastFetchedNotebook()
+        }
+    }
+
 }
