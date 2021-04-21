@@ -10,4 +10,5 @@ data class RemoteEntityRecurringEntry(
     val amount: Double = 0.0,
     val createdAt: Long = System.currentTimeMillis(),
     val modifiedAt: Long = System.currentTimeMillis(),
+    val fetchedAt: Long = System.currentTimeMillis()
 )

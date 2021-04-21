@@ -53,8 +53,8 @@ interface EntryDao {
         )
     }
 
-    @Query("SELECT * FROM entry where pageId = :pageId and entryId LIKE :searchQuery and isRepeating = :isRepeating LIMIT 1")
-    fun getLastModifiedDate(
+    @Query("SELECT * FROM entry where pageId = :pageId and entryId LIKE :searchQuery and isRepeating = :isRepeating ORDER BY fetchedAt LIMIT 1")
+    fun getLastFetchedEntry(
         pageId: String,
         searchQuery: String,
         isRepeating: Boolean

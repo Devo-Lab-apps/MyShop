@@ -24,4 +24,6 @@ object AppConstants {
     const val EMPTY_STRING = ""
 
     const val NOTEBOOK_DATABASE = "notebook_database"
+
+    const val ONE_DAY_MILLIS = 86400 * 1000
 }

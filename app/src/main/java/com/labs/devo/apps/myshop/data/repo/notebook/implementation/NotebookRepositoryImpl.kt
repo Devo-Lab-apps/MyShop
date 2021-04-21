@@ -1,6 +1,7 @@
 package com.labs.devo.apps.myshop.data.repo.notebook.implementation
 
 import com.labs.devo.apps.myshop.business.helper.PermissionsHelper.checkPermissions
+import com.labs.devo.apps.myshop.const.AppConstants.ONE_DAY_MILLIS
 import com.labs.devo.apps.myshop.const.Permissions
 import com.labs.devo.apps.myshop.data.db.local.abstraction.notebook.LocalNotebookService
 import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemoteNotebookService
@@ -29,6 +30,12 @@ class NotebookRepositoryImpl @Inject constructor(
                 notebooks = remoteNotebooks
             }
             emit(DataState.data(notebooks))
+            val lastFetchedNotebook = localNotebookService.getLastFetchedNotebook()
+            lastFetchedNotebook?.let { notebook ->
+                if (notebook.fetchedAt < System.currentTimeMillis() - ONE_DAY_MILLIS) emit(
+                    syncNotebooks()
+                )
+            }
         } catch (ex: Exception) {
             emit(
                 DataState.message<List<Notebook>>(

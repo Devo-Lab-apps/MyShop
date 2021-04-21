@@ -40,4 +40,7 @@ interface RecurringEntryDao {
 
     @Query("DELETE FROM RecurringEntry")
     suspend fun deleteAll()
+
+    @Query("SELECT * FROM RecurringEntry WHERE pageId = :pageId ORDER by fetchedAt DESC limit 1")
+    suspend fun getLastFetchedRecurringEntry(pageId: String): RecurringEntry?
 }

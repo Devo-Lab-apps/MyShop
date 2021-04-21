@@ -22,7 +22,8 @@ data class Entry(
     val isRepeating: Boolean = false,
     val entryMetadata: Map<String, String> = mutableMapOf(),
     val createdAt: Long = System.currentTimeMillis(),
-    val modifiedAt: Long = System.currentTimeMillis()
+    val modifiedAt: Long = System.currentTimeMillis(),
+    val fetchedAt: Long = System.currentTimeMillis()
 ) : Parcelable {
     @Ignore
     @IgnoredOnParcel

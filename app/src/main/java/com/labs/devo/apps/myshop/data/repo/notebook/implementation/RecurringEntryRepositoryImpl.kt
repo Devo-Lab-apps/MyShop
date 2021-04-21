@@ -1,6 +1,7 @@
 package com.labs.devo.apps.myshop.data.repo.notebook.implementation
 
 import com.labs.devo.apps.myshop.business.helper.PermissionsHelper
+import com.labs.devo.apps.myshop.const.AppConstants.ONE_DAY_MILLIS
 import com.labs.devo.apps.myshop.const.Permissions
 import com.labs.devo.apps.myshop.data.db.local.abstraction.notebook.LocalRecurringEntryService
 import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemoteRecurringEntryService
@@ -19,6 +20,12 @@ class RecurringEntryRepositoryImpl
     override suspend fun getRecurringEntries(pageId: String): DataState<List<RecurringEntry>> {
         return try {
             PermissionsHelper.checkPermissions(Permissions.GET_RECURRING_ENTRY)
+            val lastFetchedRecurringEntry =
+                localRecurringEntryService.getLastFetchedRecurringEntry(pageId)
+            lastFetchedRecurringEntry?.let { re ->
+                if (re.fetchedAt < System.currentTimeMillis() - ONE_DAY_MILLIS)
+                    return syncRecurringEntries(pageId)
+            }
             var recurringEntries = localRecurringEntryService.getRecurringEntries(pageId)
             if (recurringEntries.isNullOrEmpty()) {
                 val remoteRecurringEntries = remoteRecurringEntryService.getRecurringEntries(pageId)

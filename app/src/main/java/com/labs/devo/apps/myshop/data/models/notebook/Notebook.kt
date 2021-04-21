@@ -23,7 +23,9 @@ data class Notebook(
 
     val accountId: String = "",
 
-    val metadata: Map<String, String> = mapOf()
+    val metadata: Map<String, String> = mapOf(),
+
+    val fetchedAt: Long = System.currentTimeMillis()
 
 ) : Parcelable
 // metadata

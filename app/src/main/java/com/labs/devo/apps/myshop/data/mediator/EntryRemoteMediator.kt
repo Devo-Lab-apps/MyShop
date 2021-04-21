@@ -6,6 +6,7 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
 import com.labs.devo.apps.myshop.const.AppConstants
+import com.labs.devo.apps.myshop.const.AppConstants.ONE_DAY_MILLIS
 import com.labs.devo.apps.myshop.data.db.local.database.RemoteKey
 import com.labs.devo.apps.myshop.data.db.local.database.database.NotebookDatabase
 import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemoteEntryService
@@ -82,14 +83,15 @@ class EntryRemoteMediator(
     }
 
     override suspend fun initialize(): InitializeAction {
+        var remoteKey = "$entryLoadKey$pageId"
         if (searchQuery.isNotBlank()) {
-            val remoteKey = "$entryLoadKey$pageId:$searchQuery"
-            val lastModifiedEntry =
-                AsyncHelper.runAsync { entryDao.getLastModifiedDate(pageId, remoteKey, false) }
-            lastModifiedEntry?.let {
-                if (System.currentTimeMillis() - it.modifiedAt > 86400 * 1000) {
-                    return InitializeAction.LAUNCH_INITIAL_REFRESH
-                }
+            remoteKey += ":$searchQuery"
+        }
+        val lastModifiedEntry =
+            AsyncHelper.runAsync { entryDao.getLastFetchedEntry(pageId, remoteKey, false) }
+        lastModifiedEntry?.let {
+            if (System.currentTimeMillis() - it.modifiedAt > ONE_DAY_MILLIS) {
+                return InitializeAction.LAUNCH_INITIAL_REFRESH
             }
         }
         return if (forceRefresh) {

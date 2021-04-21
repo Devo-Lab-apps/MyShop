@@ -65,4 +65,10 @@ class LocalRecurringEntryServiceImpl
             dao.deleteRecurringEntries(pageId)
         }
     }
+
+    override suspend fun getLastFetchedRecurringEntry(pageId: String): RecurringEntry? {
+        return AsyncHelper.runAsync {
+            dao.getLastFetchedRecurringEntry(pageId)
+        }
+    }
 }
