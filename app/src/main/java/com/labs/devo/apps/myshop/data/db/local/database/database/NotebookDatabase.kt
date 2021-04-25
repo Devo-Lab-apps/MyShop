@@ -5,7 +5,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.labs.devo.apps.myshop.data.db.local.database.RemoteKey
 import com.labs.devo.apps.myshop.data.db.local.database.dao.*
-import com.labs.devo.apps.myshop.data.db.local.database.util.Converters
+import com.labs.devo.apps.myshop.data.db.local.database.util.NotebookDatabaseConverter
 import com.labs.devo.apps.myshop.data.models.notebook.Entry
 import com.labs.devo.apps.myshop.data.models.notebook.Notebook
 import com.labs.devo.apps.myshop.data.models.notebook.Page
@@ -17,7 +17,7 @@ import com.labs.devo.apps.myshop.data.models.notebook.RecurringEntry
     version = 1,
     exportSchema = false
 )
-@TypeConverters(Converters::class)
+@TypeConverters(NotebookDatabaseConverter::class)
 abstract class NotebookDatabase : RoomDatabase() {
 
     abstract fun pageDao(): PageDao

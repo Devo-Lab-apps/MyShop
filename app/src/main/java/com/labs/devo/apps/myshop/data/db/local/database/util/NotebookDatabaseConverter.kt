@@ -7,7 +7,7 @@ import java.lang.reflect.Type
 import javax.inject.Singleton
 
 @Singleton
-object Converters {
+object NotebookDatabaseConverter {
     @TypeConverter
     @JvmStatic
     fun fromString(value: String): List<String> {

@@ -9,11 +9,14 @@ import com.labs.devo.apps.myshop.business.auth.abstraction.UserAuth
 import com.labs.devo.apps.myshop.business.auth.implementation.FirebaseUserAuth
 import com.labs.devo.apps.myshop.const.AppConstants.NOTEBOOK_DATABASE
 import com.labs.devo.apps.myshop.data.db.local.database.dao.*
+import com.labs.devo.apps.myshop.data.db.local.database.database.AppDatabase
 import com.labs.devo.apps.myshop.data.db.local.database.database.NotebookDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import javax.inject.Singleton
 
 
@@ -41,10 +44,27 @@ class AppModule {
     @Singleton
     fun providesNotebookDatabase(
         app: Application
-    ) = Room.databaseBuilder(app, NotebookDatabase::class.java, NOTEBOOK_DATABASE)
+    ): NotebookDatabase = Room.databaseBuilder(app, NotebookDatabase::class.java, NOTEBOOK_DATABASE)
         .fallbackToDestructiveMigration()
         .build()
 
+    @Provides
+    @Singleton
+    fun providesAppDatabase(
+        app: Application,
+        callback: AppDatabase.Callback
+    ): AppDatabase = Room.databaseBuilder(app, AppDatabase::class.java, NOTEBOOK_DATABASE)
+        .fallbackToDestructiveMigration()
+        .addCallback(callback)
+        .build()
+
+    @Provides
+    @Singleton
+    fun provideRateLimitDao(appDatabase: AppDatabase): RateDao = appDatabase.rateDao()
+
+    @Provides
+    @Singleton
+    fun provideApplicationScope() = CoroutineScope(SupervisorJob())
 
     @Provides
     @Singleton
@@ -60,7 +80,8 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun provideRecurringEntryDao(database: NotebookDatabase): RecurringEntryDao = database.recurringEntryDao()
+    fun provideRecurringEntryDao(database: NotebookDatabase): RecurringEntryDao =
+        database.recurringEntryDao()
 
     @Provides
     @Singleton

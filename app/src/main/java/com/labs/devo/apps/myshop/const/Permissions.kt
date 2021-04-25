@@ -5,6 +5,7 @@ enum class Permissions {
     GET_NOTEBOOK,
     CREATE_NOTEBOOK,
     DELETE_NOTEBOOK,
+    SYNC_NOTEBOOK,
 
 
     GET_PAGE,
