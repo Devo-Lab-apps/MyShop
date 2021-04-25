@@ -6,6 +6,8 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.paging.LoadState
+import androidx.paging.map
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.labs.devo.apps.myshop.R
 import com.labs.devo.apps.myshop.RECURRING_ENTRY_CHANNEL
@@ -13,6 +15,7 @@ import com.labs.devo.apps.myshop.business.helper.NotificationBuilder
 import com.labs.devo.apps.myshop.business.helper.NotificationWorkManagerBuilder
 import com.labs.devo.apps.myshop.business.helper.TimeDuration
 import com.labs.devo.apps.myshop.const.AppConstants.TAG
+import com.labs.devo.apps.myshop.data.mediator.GenericLoadStateAdapter
 import com.labs.devo.apps.myshop.data.models.notebook.RecurringEntry
 import com.labs.devo.apps.myshop.databinding.FragmentRecurringEntryBinding
 import com.labs.devo.apps.myshop.util.printLogD
@@ -24,6 +27,7 @@ import com.labs.devo.apps.myshop.view.util.DataStateListener
 import com.labs.devo.apps.myshop.view.util.NotificationWorker
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 
 @AndroidEntryPoint
 class RecurringEntryFragment : Fragment(R.layout.fragment_recurring_entry),
@@ -50,7 +54,6 @@ class RecurringEntryFragment : Fragment(R.layout.fragment_recurring_entry),
 
         initView()
         observeEvents()
-        viewModel.getRecurringEntries(pageId)
     }
 
     private fun initView() {
@@ -61,8 +64,11 @@ class RecurringEntryFragment : Fragment(R.layout.fragment_recurring_entry),
         binding.apply {
             recurringEntries.apply {
                 setHasFixedSize(true)
-                adapter = entryAdapter
+                adapter = entryAdapter.withLoadStateFooter(
+                    GenericLoadStateAdapter(entryAdapter::retry)
+                )
                 layoutManager = LinearLayoutManager(requireContext())
+                itemAnimator?.changeDuration = 0
             }
             recurringEntryToolbar.setNavigationOnClickListener {
                 requireActivity().onBackPressed()
@@ -77,49 +83,40 @@ class RecurringEntryFragment : Fragment(R.layout.fragment_recurring_entry),
                 collectEvent(event)
             }
         }
+
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            entryAdapter.loadStateFlow.collectLatest { state ->
+                when (state.refresh) {
+                    is LoadState.Error -> {
+                        val error = (state.refresh as LoadState.Error).error
+                        dataStateHandler.onDataStateChange(
+                            DataState.message<Nothing>(
+                                error.message ?: getString(R.string.unknown_error_occurred)
+                            )
+                        )
+                    }
+                    is LoadState.Loading -> {
+                        dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
+                    }
+                    else -> {
+                        dataStateHandler.onDataStateChange(DataState.loading<Nothing>(false))
+                    }
+                }
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            viewModel.recurringEntries.collectLatest { pagingData ->
+                entryAdapter.submitData(pagingData)
+                pagingData.map { recurringEntry ->
+                    registerWork(requireContext(), recurringEntry)
+                }
+            }
+        }
     }
 
     private fun collectEvent(event: RecurringEntryViewModel.RecurringEntryEvent) {
         when (event) {
-            is RecurringEntryViewModel.RecurringEntryEvent.GetRecurringEntriesEvent -> {
-                entryAdapter.submitList(event.entries)
-                event.entries.forEach { recurringEntry ->
-                    run {
-                        printLogD(TAG, recurringEntry)
-                        if (!NotificationWorker.checkIfWorkExists(
-                                requireContext(),
-                                recurringEntry.recurringEntryId
-                            )
-                        ) {
-                            printLogD(TAG, "DE")
-                            NotificationWorker.sendSingleNotification(
-                                requireContext(),
-                                NotificationWorkManagerBuilder(
-                                    recurringEntry.recurringEntryId,
-                                    RECURRING_ENTRY_CHANNEL,
-                                    recurringEntry.recurringEntryId,
-                                    true,
-                                    TimeDuration(
-                                        recurringEntry.recurringTime,
-                                        recurringEntry.frequency
-                                    )
-                                ),
-                                NotificationBuilder(
-                                    recurringEntry.name,
-                                    "Add ${recurringEntry.amount}?"
-                                ),
-                            )
-                        } else {
-                            printLogD(TAG, "E")
-                            NotificationWorker.cancelNotification(
-                                requireContext(),
-                                recurringEntry.recurringEntryId
-                            )
-                        }
-                    }
-                }
-                dataStateHandler.onDataStateChange(DataState.loading<Nothing>(false))
-            }
             is RecurringEntryViewModel.RecurringEntryEvent.ShowInvalidInputMessage -> {
                 dataStateHandler.onDataStateChange(
                     DataState.message<Nothing>(
@@ -143,4 +140,38 @@ class RecurringEntryFragment : Fragment(R.layout.fragment_recurring_entry),
 
     }
 
+}
+
+fun registerWork(context: Context, recurringEntry: RecurringEntry) {
+    printLogD(TAG, recurringEntry)
+    if (!NotificationWorker.checkIfWorkExists(
+            context,
+            recurringEntry.recurringEntryId
+        )
+    ) {
+        printLogD(TAG, "DE")
+        NotificationWorker.sendSingleNotification(
+            context,
+            NotificationWorkManagerBuilder(
+                recurringEntry.recurringEntryId,
+                RECURRING_ENTRY_CHANNEL,
+                recurringEntry.recurringEntryId,
+                true,
+                TimeDuration(
+                    recurringEntry.recurringTime,
+                    recurringEntry.frequency
+                )
+            ),
+            NotificationBuilder(
+                recurringEntry.name,
+                "Add ${recurringEntry.amount}?"
+            ),
+        )
+    } else {
+        printLogD(TAG, "E")
+        NotificationWorker.cancelNotification(
+            context,
+            recurringEntry.recurringEntryId
+        )
+    }
 }

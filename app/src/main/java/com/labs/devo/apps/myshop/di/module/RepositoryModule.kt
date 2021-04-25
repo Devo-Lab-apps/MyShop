@@ -66,8 +66,9 @@ object RepositoryModule {
     @Singleton
     fun provideRecurringEntryRepository(
         localRecurringEntryService: LocalRecurringEntryService,
-        remoteRecurringEntryService: RemoteRecurringEntryService
+        remoteRecurringEntryService: RemoteRecurringEntryService,
+        notebookDatabase: NotebookDatabase
     ): RecurringEntryRepository =
-        RecurringEntryRepositoryImpl(localRecurringEntryService, remoteRecurringEntryService)
+        RecurringEntryRepositoryImpl(localRecurringEntryService, remoteRecurringEntryService, notebookDatabase)
 
 }

@@ -1,12 +1,12 @@
 package com.labs.devo.apps.myshop.data.db.local.abstraction.notebook
 
-import com.labs.devo.apps.myshop.data.models.notebook.Entry
+import androidx.paging.PagingSource
 import com.labs.devo.apps.myshop.data.models.notebook.RecurringEntry
 
 interface LocalRecurringEntryService {
-    suspend fun getRecurringEntries(
+    fun getRecurringEntries(
         pageId: String
-    ): List<RecurringEntry>
+    ): PagingSource<Int, RecurringEntry>
 
     suspend fun getRecurringEntry(recurringEntryId: String): RecurringEntry?
 

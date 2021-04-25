@@ -6,7 +6,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Transaction
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.account
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.entry
-import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.microEntry
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.notebook
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.page
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.recurringEntry
@@ -91,28 +90,19 @@ object FirebaseHelper {
         return getEntryCollection(pageId).document()
     }
 
-    fun getRecurringEntryCollection(accountId: String, pageId: String): CollectionReference {
+    fun getRecurringEntryCollection(accountId: String): CollectionReference {
         return getAccountCollection().document(accountId).collection(recurringEntry)
     }
 
-    fun getRecurringEntryReference(accountId: String, pageId: String, recurringRecurringEntryId: String): DocumentReference {
-        return getRecurringEntryCollection(accountId, pageId).document(recurringRecurringEntryId)
+    fun getRecurringEntryReference(
+        accountId: String,
+        recurringRecurringEntryId: String
+    ): DocumentReference {
+        return getRecurringEntryCollection(accountId).document(recurringRecurringEntryId)
     }
 
-    fun getRecurringEntryReference(accountId: String, pageId: String): DocumentReference {
-        return getRecurringEntryCollection(accountId, pageId).document()
-    }
-
-    fun getMicroEntryCollection(pageId: String, recurringEntryId: String): CollectionReference {
-        return getRecurringEntryReference(pageId, recurringEntryId).collection(microEntry)
-    }
-
-    fun getMicroEntryReference(pageId: String, recurringEntryId: String, amount: String): DocumentReference {
-        return getMicroEntryCollection(pageId, recurringEntryId).document(amount)
-    }
-
-    fun getMicroEntryReference(pageId: String, recurringEntryId: String): DocumentReference {
-        return getMicroEntryCollection(pageId, recurringEntryId).document()
+    fun getRecurringEntryReference(accountId: String): DocumentReference {
+        return getRecurringEntryCollection(accountId).document()
     }
 
     suspend fun runWriteBatch(f: () -> Unit) {

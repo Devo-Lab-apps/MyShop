@@ -13,6 +13,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
+import androidx.paging.PagingData
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.labs.devo.apps.myshop.R
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants
@@ -106,7 +107,7 @@ class PageFragment : Fragment(R.layout.fragment_page), PageListAdapter.OnPageCli
 
 
     private fun observeEvents() {
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             combine(
                 preferencesManager.currentSelectedNotebook,
                 preferencesManager.importStatus

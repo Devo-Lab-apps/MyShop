@@ -5,7 +5,8 @@ import com.labs.devo.apps.myshop.data.models.notebook.RecurringEntry
 interface RemoteRecurringEntryService {
 
     suspend fun getRecurringEntries(
-        pageId: String
+        pageId: String?,
+        startAfter: String
     ): List<RecurringEntry>
 
     suspend fun insertRecurringEntries(recurringEntries: List<RecurringEntry>): List<RecurringEntry>

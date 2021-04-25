@@ -8,6 +8,7 @@ import com.google.gson.Gson
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants
 import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.data.db.remote.models.notebook.ImportStatus
+import com.labs.devo.apps.myshop.util.PreferencesManager.PreferenceKeys.recurringEntriesImportedStatus
 import com.labs.devo.apps.myshop.view.util.QueryParams
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.map
@@ -44,6 +45,10 @@ class PreferencesManager @Inject constructor(@ApplicationContext context: Contex
 
     val importStatus = dataStore.data.map { prefs ->
         prefs[PreferenceKeys.importStatus] ?: ImportStatus.IMPORTING.ordinal
+    }
+
+    val recurringEntriesImportedStatusData = dataStore.data.map { prefs ->
+        prefs[recurringEntriesImportedStatus] ?: false
     }
 
     suspend fun setForeignImported(importStatus: Int) {
@@ -85,6 +90,12 @@ class PreferencesManager @Inject constructor(@ApplicationContext context: Contex
         }
     }
 
+    suspend fun updateRecurringEntriesSynced() {
+        dataStore.edit { prefs ->
+            prefs[recurringEntriesImportedStatus] = true
+        }
+    }
+
     private object PreferenceKeys {
         val introActivityShown = preferencesKey<Boolean>("intro_activity_shown")
         val currentSelectedNotebook =
@@ -95,6 +106,8 @@ class PreferencesManager @Inject constructor(@ApplicationContext context: Contex
             preferencesKey<String>("entry_query_params")
         val importStatus =
             preferencesKey<Int>("import_status")
+        val recurringEntriesImportedStatus =
+            preferencesKey<Boolean>("recurring_entries_imported")
     }
 
 }

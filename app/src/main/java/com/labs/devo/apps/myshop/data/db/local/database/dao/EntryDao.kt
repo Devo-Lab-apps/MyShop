@@ -53,11 +53,10 @@ interface EntryDao {
         )
     }
 
-    @Query("SELECT * FROM entry where pageId = :pageId and entryId LIKE :searchQuery and isRepeating = :isRepeating ORDER BY fetchedAt LIMIT 1")
+    @Query("SELECT * FROM entry where pageId = :pageId and entryId LIKE :searchQuery ORDER BY fetchedAt LIMIT 1")
     fun getLastFetchedEntry(
         pageId: String,
-        searchQuery: String,
-        isRepeating: Boolean
+        searchQuery: String
     ): Entry?
 
     @Query("SELECT * FROM Entry WHERE entryId LIKE :pageId and createdAt >= :start and createdAt <= :end and isRepeating = :isRepeating ORDER BY entryTitle ASC")

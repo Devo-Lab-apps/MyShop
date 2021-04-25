@@ -6,41 +6,40 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
 import com.labs.devo.apps.myshop.const.AppConstants
-import com.labs.devo.apps.myshop.const.AppConstants.ONE_DAY_MILLIS
 import com.labs.devo.apps.myshop.data.db.local.database.RemoteKey
 import com.labs.devo.apps.myshop.data.db.local.database.database.NotebookDatabase
-import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemoteEntryService
-import com.labs.devo.apps.myshop.data.models.notebook.Entry
+import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemoteRecurringEntryService
+import com.labs.devo.apps.myshop.data.models.notebook.RecurringEntry
+import com.labs.devo.apps.myshop.util.PreferencesManager
 import com.labs.devo.apps.myshop.view.util.AsyncHelper
+import javax.inject.Inject
 
-//TODO change this for page also
-const val entryLoadKey = "page:"
+const val recurringEntryLoadKey = "recurring:"
 
 @ExperimentalPagingApi
-class EntryRemoteMediator(
-    private val pageId: String,
-    private val searchQuery: String,
+class RecurringEntryRemoteMediator(
+    private val pageId: String?,
     private val forceRefresh: Boolean,
     private val database: NotebookDatabase,
-    private val networkService: RemoteEntryService
-) : RemoteMediator<Int, Entry>() {
+    private val networkService: RemoteRecurringEntryService
+) : RemoteMediator<Int, RecurringEntry>() {
+
+    @Inject
+    lateinit var preferencesManager: PreferencesManager
 
     private val TAG = AppConstants.APP_PREFIX + javaClass.simpleName
 
-    private val entryDao = database.entryDao()
+    private val recurringEntryDao = database.recurringEntryDao()
 
     private val remoteKeyDao = database.remoteKeyDao()
 
 
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, Entry>
+        state: PagingState<Int, RecurringEntry>
     ): MediatorResult {
         try {
-            var remoteKey = "$entryLoadKey$pageId"
-            if (searchQuery.isNotBlank()) {
-                remoteKey += ":$searchQuery"
-            }
+            val remoteKey = "$recurringEntryLoadKey$pageId"
             val loadKey: String? = when (loadType) {
                 LoadType.REFRESH -> null
                 LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
@@ -60,22 +59,27 @@ class EntryRemoteMediator(
             }
 
 
-            val remoteEntries = networkService.getEntries(pageId, searchQuery, loadKey)
+            val remoteRecurringEntries = networkService.getRecurringEntries(pageId, loadKey ?: "")
 
             val endReached =
-                if (remoteEntries.size >= 10) remoteEntries[9].entryId
+                if (remoteRecurringEntries.size >= 10) remoteRecurringEntries[9].recurringEntryId
                 else null
 
             database.withTransaction {
                 if (loadType == LoadType.REFRESH) {
                     remoteKeyDao.deleteByQuery(remoteKey)
-                    entryDao.deleteEntries(pageId)
+                    if (pageId != null)
+                        recurringEntryDao.deleteRecurringEntries(pageId)
+                    else
+                        recurringEntryDao.deleteAll()
                 }
 
                 remoteKeyDao.insertOrReplace(RemoteKey(remoteKey, endReached))
-                entryDao.insertEntries(remoteEntries)
+                recurringEntryDao.insertRecurringEntries(remoteRecurringEntries)
             }
-            //TODO put appropriate condition
+            if (pageId == null && endReached == null) {
+                preferencesManager.updateRecurringEntriesSynced()
+            }
             return MediatorResult.Success(endOfPaginationReached = endReached == null)
         } catch (ex: Exception) {
             return MediatorResult.Error(ex)
@@ -83,14 +87,11 @@ class EntryRemoteMediator(
     }
 
     override suspend fun initialize(): InitializeAction {
-        var remoteKey = "$entryLoadKey$pageId"
-        if (searchQuery.isNotBlank()) {
-            remoteKey += ":$searchQuery"
-        }
+        val remoteKey = "$recurringEntryLoadKey$pageId"
         val lastModifiedEntry =
-            AsyncHelper.runAsync { entryDao.getLastFetchedEntry(pageId, remoteKey) }
+            AsyncHelper.runAsync { recurringEntryDao.getLastFetchedEntry(pageId, remoteKey) }
         lastModifiedEntry?.let {
-            if (System.currentTimeMillis() - it.modifiedAt > ONE_DAY_MILLIS) {
+            if (System.currentTimeMillis() - it.modifiedAt > AppConstants.ONE_DAY_MILLIS) {
                 return InitializeAction.LAUNCH_INITIAL_REFRESH
             }
         }
