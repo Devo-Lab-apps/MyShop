@@ -1,20 +1,18 @@
 package com.labs.devo.apps.myshop.data.db.local.implementation.notebook
 
+import androidx.paging.PagingSource
 import com.labs.devo.apps.myshop.data.db.local.abstraction.notebook.LocalRecurringEntryService
 import com.labs.devo.apps.myshop.data.db.local.database.dao.RecurringEntryDao
-import com.labs.devo.apps.myshop.data.models.notebook.Entry
 import com.labs.devo.apps.myshop.data.models.notebook.RecurringEntry
 import com.labs.devo.apps.myshop.view.util.AsyncHelper
 import javax.inject.Inject
 
 class LocalRecurringEntryServiceImpl
 @Inject constructor(private val dao: RecurringEntryDao) : LocalRecurringEntryService {
-    override suspend fun getRecurringEntries(
+    override fun getRecurringEntries(
         pageId: String
-    ): List<RecurringEntry> {
-        return AsyncHelper.runAsync {
-            dao.getRecurringEntries(pageId)
-        }
+    ): PagingSource<Int, RecurringEntry> {
+        return dao.getRecurringEntries(pageId)
     }
 
     override suspend fun getRecurringEntry(recurringEntryId: String): RecurringEntry? {

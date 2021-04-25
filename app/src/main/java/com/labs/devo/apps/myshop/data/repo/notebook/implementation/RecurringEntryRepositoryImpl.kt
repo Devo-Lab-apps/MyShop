@@ -1,44 +1,65 @@
 package com.labs.devo.apps.myshop.data.repo.notebook.implementation
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import com.labs.devo.apps.myshop.business.helper.PermissionsHelper
-import com.labs.devo.apps.myshop.const.AppConstants.ONE_DAY_MILLIS
 import com.labs.devo.apps.myshop.const.Permissions
 import com.labs.devo.apps.myshop.data.db.local.abstraction.notebook.LocalRecurringEntryService
+import com.labs.devo.apps.myshop.data.db.local.database.database.NotebookDatabase
 import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemoteRecurringEntryService
+import com.labs.devo.apps.myshop.data.mediator.RecurringEntryRemoteMediator
 import com.labs.devo.apps.myshop.data.models.notebook.RecurringEntry
 import com.labs.devo.apps.myshop.data.repo.notebook.abstraction.RecurringEntryRepository
 import com.labs.devo.apps.myshop.util.exceptions.RecurringEntryNotFoundException
 import com.labs.devo.apps.myshop.view.util.DataState
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class RecurringEntryRepositoryImpl
 @Inject constructor(
     private val localRecurringEntryService: LocalRecurringEntryService,
-    private val remoteRecurringEntryService: RemoteRecurringEntryService
+    private val remoteRecurringEntryService: RemoteRecurringEntryService,
+    private val notebookDatabase: NotebookDatabase
 ) : RecurringEntryRepository {
 
-    override suspend fun getRecurringEntries(pageId: String): DataState<List<RecurringEntry>> {
-        return try {
-            PermissionsHelper.checkPermissions(Permissions.GET_RECURRING_ENTRY)
-            val lastFetchedRecurringEntry =
-                localRecurringEntryService.getLastFetchedRecurringEntry(pageId)
-            lastFetchedRecurringEntry?.let { re ->
-                if (re.fetchedAt < System.currentTimeMillis() - ONE_DAY_MILLIS)
-                    return syncRecurringEntries(pageId)
-            }
-            var recurringEntries = localRecurringEntryService.getRecurringEntries(pageId)
-            if (recurringEntries.isNullOrEmpty()) {
-                val remoteRecurringEntries = remoteRecurringEntryService.getRecurringEntries(pageId)
-                localRecurringEntryService.insertRecurringEntries(remoteRecurringEntries)
-                recurringEntries = remoteRecurringEntries
-            }
-            DataState.data(recurringEntries)
-        } catch (ex: Exception) {
-            DataState.message(
-                ex.message ?: "An unknown error occurred. Please retry later."
-            )
+    override suspend fun getRecurringEntries(
+        pageId: String?,
+        forceRefresh: Boolean
+    ): Flow<PagingData<RecurringEntry>> = Pager(
+        config = PagingConfig(pageSize = 20, maxSize = 100),
+        remoteMediator = RecurringEntryRemoteMediator(
+            pageId,
+            forceRefresh,
+            notebookDatabase,
+            remoteRecurringEntryService
+        ),
+        pagingSourceFactory = {
+            localRecurringEntryService.getRecurringEntries(pageId ?: "")
         }
-    }
+    ).flow
+//    : DataState<List<RecurringEntry>> {
+//        return try {
+//            PermissionsHelper.checkPermissions(Permissions.GET_RECURRING_ENTRY)
+//            val lastFetchedRecurringEntry =
+//                localRecurringEntryService.getLastFetchedRecurringEntry(pageId)
+//            lastFetchedRecurringEntry?.let { re ->
+//                if (re.fetchedAt < System.currentTimeMillis() - ONE_DAY_MILLIS)
+//                    return syncRecurringEntries(pageId)
+//            }
+//            var recurringEntries = localRecurringEntryService.getRecurringEntries(pageId)
+//            if (recurringEntries.isNullOrEmpty()) {
+//                val remoteRecurringEntries = remoteRecurringEntryService.getRecurringEntries(pageId)
+//                localRecurringEntryService.insertRecurringEntries(remoteRecurringEntries)
+//                recurringEntries = remoteRecurringEntries
+//            }
+//            DataState.data(recurringEntries)
+//        } catch (ex: Exception) {
+//            DataState.message(
+//                ex.message ?: "An unknown error occurred. Please retry later."
+//            )
+//        }
+//    }
 
     override suspend fun getRecurringEntry(recurringEntryId: String): DataState<RecurringEntry> {
         return try {
@@ -142,7 +163,7 @@ class RecurringEntryRepositoryImpl
     override suspend fun syncRecurringEntries(pageId: String): DataState<List<RecurringEntry>> {
         return try {
             localRecurringEntryService.deleteRecurringEntries(pageId)
-            val recurringEntries = remoteRecurringEntryService.getRecurringEntries(pageId)
+            val recurringEntries = remoteRecurringEntryService.getRecurringEntries(pageId, "")
             localRecurringEntryService.insertRecurringEntries(recurringEntries)
             DataState.data(recurringEntries)
         } catch (ex: java.lang.Exception) {

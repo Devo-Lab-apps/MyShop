@@ -14,7 +14,10 @@ import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.Noteboo
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.PAGE_NAME
 import com.labs.devo.apps.myshop.view.util.BaseViewModel
 import com.labs.devo.apps.myshop.view.util.DataState
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 
 class EntryViewModel
@@ -23,14 +26,12 @@ class EntryViewModel
     @Assisted private val state: SavedStateHandle
 ) : BaseViewModel<EntryViewModel.EntryEvent>() {
 
-    val argPageId = state.get<String>(PAGE_ID)!!
+    val _pageId = state.getLiveData<String>(PAGE_ID)
     val pageName = state.get<String>(PAGE_NAME)!!
 
     private val _searchQuery = state.getLiveData("entrySearchQuery", EMPTY_STRING)
     val searchQuery: LiveData<String> = _searchQuery
 
-    private val _pageId = MutableStateFlow(EMPTY_STRING)
-    val pageId: StateFlow<String> = _pageId
 
     private val _orderBy = MutableStateFlow(EMPTY_STRING)
     val orderBy: StateFlow<String> = _orderBy
@@ -38,7 +39,7 @@ class EntryViewModel
     private var refreshStatus = false
 
     val entries = combine(
-        _pageId, _searchQuery.asFlow(), _orderBy
+        _pageId.asFlow(), _searchQuery.asFlow(), _orderBy
     ) { _pageId, _searchQuery, _orderBy ->
         Triple(_pageId, _searchQuery, _orderBy)
     }.flatMapLatest { (pageId, searchQuery, orderBy) ->
@@ -74,10 +75,6 @@ class EntryViewModel
         val pageId = _pageId.value
         _pageId.value = EMPTY_STRING
         refreshStatus = true
-        _pageId.value = pageId
-    }
-
-    fun setPageId(pageId: String) {
         _pageId.value = pageId
     }
 

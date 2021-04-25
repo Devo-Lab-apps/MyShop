@@ -95,7 +95,6 @@ class EntryFragment : Fragment(R.layout.fragment_entry), EntryListAdapter.OnEntr
             }
         }
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            viewModel.setPageId(viewModel.argPageId)
             entryListAdapter.loadStateFlow.collectLatest { state ->
                 when (state.refresh) {
                     is LoadState.Error -> {
@@ -133,19 +132,19 @@ class EntryFragment : Fragment(R.layout.fragment_entry), EntryListAdapter.OnEntr
             }
             is EntryViewModel.EntryEvent.AddEntryEvent -> {
                 val action = EntryFragmentDirections.actionEntryFragmentToAddEditEntryFragment(
-                    ADD_ENTRY_OPERATION, viewModel.argPageId, null
+                    ADD_ENTRY_OPERATION, viewModel._pageId.value!!, null
                 )
                 findNavController().navigate(action)
             }
             is EntryViewModel.EntryEvent.EditEntryEvent -> {
                 val action = EntryFragmentDirections.actionEntryFragmentToAddEditEntryFragment(
-                    EDIT_ENTRY_OPERATION, viewModel.argPageId, event.entry
+                    EDIT_ENTRY_OPERATION, viewModel._pageId.value!!, event.entry
                 )
                 findNavController().navigate(action)
             }
             is EntryViewModel.EntryEvent.NavigateToRecurringEntryEvent -> {
                 val action =
-                    EntryFragmentDirections.actionEntryFragmentToRecurringEntryFragment(viewModel.argPageId)
+                    EntryFragmentDirections.actionEntryFragmentToRecurringEntryFragment(viewModel._pageId.value!!)
                 findNavController().navigate(action)
             }
         }

@@ -1,6 +1,8 @@
 package com.labs.devo.apps.myshop.view.activity.notebook.entry
 
+import androidx.hilt.Assisted
 import androidx.hilt.lifecycle.ViewModelInject
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.labs.devo.apps.myshop.business.helper.FirebaseHelper
 import com.labs.devo.apps.myshop.business.helper.UserManager
@@ -10,6 +12,9 @@ import com.labs.devo.apps.myshop.data.models.notebook.RecurringEntry
 import com.labs.devo.apps.myshop.data.repo.notebook.abstraction.EntryRepository
 import com.labs.devo.apps.myshop.data.repo.notebook.abstraction.RecurringEntryRepository
 import com.labs.devo.apps.myshop.util.exceptions.UserNotInitializedException
+import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.ENTRY
+import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.OPERATION
+import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.PAGE_ID
 import com.labs.devo.apps.myshop.view.activity.notebook.entry.AddEditEntryViewModel.AddEntryModelConstants.DIFFERENT_ENTRY_UPDATE
 import com.labs.devo.apps.myshop.view.activity.notebook.entry.AddEditEntryViewModel.AddEntryModelConstants.ENTRY_DELETED
 import com.labs.devo.apps.myshop.view.activity.notebook.entry.AddEditEntryViewModel.AddEntryModelConstants.ENTRY_INSERTED_MSG
@@ -20,10 +25,16 @@ import kotlinx.coroutines.launch
 
 class AddEditEntryViewModel @ViewModelInject constructor(
     private val entryRepository: EntryRepository,
-    private val recurringEntryRepository: RecurringEntryRepository
+    private val recurringEntryRepository: RecurringEntryRepository,
+    @Assisted val state: SavedStateHandle
 ) :
     BaseViewModel<AddEditEntryViewModel.AddEditEntryEvent>() {
 
+    val entry = state.get<Entry>(ENTRY)
+
+    val pageId = state.get<String>(PAGE_ID)!!
+
+    val operation = state.get<String>(OPERATION)!!
 
     fun addEntry(entry: Entry) = viewModelScope.launch {
         if (entry.isRepeating) {
@@ -46,7 +57,7 @@ class AddEditEntryViewModel @ViewModelInject constructor(
 
     private fun recurringEntry(entry: Entry): RecurringEntry {
         val user = UserManager.user ?: throw UserNotInitializedException()
-        val id = FirebaseHelper.getRecurringEntryReference(user.accountId, entry.pageId).id
+        val id = FirebaseHelper.getRecurringEntryReference(user.accountId).id
         val metadata = entry.entryMetadata
         return RecurringEntry(
             pageId = entry.pageId,

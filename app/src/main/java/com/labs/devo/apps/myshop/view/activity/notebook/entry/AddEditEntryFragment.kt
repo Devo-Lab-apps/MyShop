@@ -39,24 +39,12 @@ class AddEditEntryFragment : Fragment(R.layout.add_edit_entry_fragment) {
 
     private lateinit var dataStateHandler: DataStateListener
 
-    private lateinit var operation: String
-
-    private var entry: Entry? = null
-
-    private lateinit var pageId: String
-
     private lateinit var selectedRepeatingTime: String
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = AddEditEntryFragmentBinding.bind(view)
-
-        arguments?.apply {
-            entry = getParcelable(ENTRY)
-            pageId = getString(PAGE_ID)!!
-            operation = getString(OPERATION).toString()
-        }
 
         initView()
         observeEvents()
@@ -79,16 +67,16 @@ class AddEditEntryFragment : Fragment(R.layout.add_edit_entry_fragment) {
             addEditEntryBtn.setOnClickListener {
                 addEditEntryBtn.isEnabled = false
                 isRecurring.isEnabled = false
-                if (operation == ADD_ENTRY_OPERATION) {
+                if (viewModel.operation == ADD_ENTRY_OPERATION) {
                     addOperation()
                 } else {
                     editOperation()
                 }
             }
 
-            if (operation == EDIT_ENTRY_OPERATION) {
+            if (viewModel.operation == EDIT_ENTRY_OPERATION) {
                 addEditEntryBtn.text = getString(R.string.update_entry)
-                entry?.let { e ->
+                viewModel.entry?.let { e ->
                     entryTitle.setText(e.entryTitle)
                     entryAmount.setText(e.entryAmount.toString())
                 } ?: run {
@@ -127,7 +115,7 @@ class AddEditEntryFragment : Fragment(R.layout.add_edit_entry_fragment) {
     private fun editOperation() {
         binding.apply {
             dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
-            entry?.let { e ->
+            viewModel.entry?.let { e ->
                 val entryTitle = entryTitle.text.toString()
                 val amountText = entryAmount.text.toString()
                 try {
@@ -167,7 +155,7 @@ class AddEditEntryFragment : Fragment(R.layout.add_edit_entry_fragment) {
                             RECURRING_ENTRY_FREQUENCY to repeatingEntryFrequency.selectedItem.toString()
                         )
                         val entry = Entry(
-                            pageId = pageId,
+                            pageId = viewModel.pageId,
                             entryTitle = entryTitle,
                             entryAmount = amount,
                             isRepeating = true,
@@ -181,7 +169,7 @@ class AddEditEntryFragment : Fragment(R.layout.add_edit_entry_fragment) {
                     }
                 } else {
                     val entry = Entry(
-                        pageId = pageId,
+                        pageId = viewModel.pageId,
                         entryTitle = entryTitle,
                         entryAmount = amount
                     )
