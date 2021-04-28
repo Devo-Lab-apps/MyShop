@@ -24,7 +24,6 @@ import com.labs.devo.apps.myshop.view.activity.auth.AuthenticationActivity
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity
 import com.labs.devo.apps.myshop.view.activity.notebook.entry.registerWork
 import com.labs.devo.apps.myshop.view.adapter.notebook.RecurringEntryListAdapter
-import com.labs.devo.apps.myshop.view.util.NotificationWorker
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
@@ -146,7 +145,7 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         when (item.itemId) {
             R.id.notebooks_nav -> openNotebookActivity()
             R.id.logout_user -> logoutUser()
-            R.id.cancel_notification -> NotificationWorker.cancelAllWork(this)
+//            R.id.cancel_notification -> NotificationWorker.cancelAllWork(this)
         }
         return true
     }

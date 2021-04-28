@@ -11,20 +11,18 @@ import androidx.paging.map
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.labs.devo.apps.myshop.R
 import com.labs.devo.apps.myshop.RECURRING_ENTRY_CHANNEL
+import com.labs.devo.apps.myshop.business.helper.MyNotificationManager
 import com.labs.devo.apps.myshop.business.helper.NotificationBuilder
-import com.labs.devo.apps.myshop.business.helper.NotificationWorkManagerBuilder
+import com.labs.devo.apps.myshop.business.helper.NotificationMetadataBuilder
 import com.labs.devo.apps.myshop.business.helper.TimeDuration
-import com.labs.devo.apps.myshop.const.AppConstants.TAG
 import com.labs.devo.apps.myshop.data.mediator.GenericLoadStateAdapter
 import com.labs.devo.apps.myshop.data.models.notebook.RecurringEntry
 import com.labs.devo.apps.myshop.databinding.FragmentRecurringEntryBinding
-import com.labs.devo.apps.myshop.util.printLogD
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.PAGE_ID
 import com.labs.devo.apps.myshop.view.adapter.notebook.RecurringEntryListAdapter
 import com.labs.devo.apps.myshop.view.util.DataState
 import com.labs.devo.apps.myshop.view.util.DataStateListener
-import com.labs.devo.apps.myshop.view.util.NotificationWorker
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
@@ -143,35 +141,24 @@ class RecurringEntryFragment : Fragment(R.layout.fragment_recurring_entry),
 }
 
 fun registerWork(context: Context, recurringEntry: RecurringEntry) {
-    printLogD(TAG, recurringEntry)
-    if (!NotificationWorker.checkIfWorkExists(
+    if (!MyNotificationManager.checkIfAlarmExists(
             context,
             recurringEntry.recurringEntryId
         )
     ) {
-        printLogD(TAG, "DE")
-        NotificationWorker.sendSingleNotification(
+        MyNotificationManager.sendRecurringNotification(
             context,
-            NotificationWorkManagerBuilder(
+            NotificationMetadataBuilder(
                 recurringEntry.recurringEntryId,
                 RECURRING_ENTRY_CHANNEL,
                 recurringEntry.recurringEntryId,
                 true,
-                TimeDuration(
-                    recurringEntry.recurringTime,
-                    recurringEntry.frequency
-                )
+                TimeDuration(recurringEntry.recurringTime, recurringEntry.frequency)
             ),
             NotificationBuilder(
                 recurringEntry.name,
                 "Add ${recurringEntry.amount}?"
             ),
-        )
-    } else {
-        printLogD(TAG, "E")
-        NotificationWorker.cancelNotification(
-            context,
-            recurringEntry.recurringEntryId
         )
     }
 }
