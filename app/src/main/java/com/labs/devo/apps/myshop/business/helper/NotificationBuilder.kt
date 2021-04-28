@@ -22,7 +22,7 @@ data class NotificationBuilder(
     val alertOnlyOnce: Boolean = true,
     val autoCancel: Boolean = true
 ) {
-    fun getNotification(context: Context, channelId: String): NotificationCompat.Builder {
+    private fun getNotification(context: Context, channelId: String): NotificationCompat.Builder {
         val notificationBuilder: NotificationCompat.Builder =
             NotificationCompat.Builder(context, channelId)
         notificationBuilder.setContentTitle(notificationTitle)
@@ -56,9 +56,9 @@ data class NotificationBuilder(
         notificationManager.notify(notificationId, 0, getNotification(context, channelId).build())
     }
 
-    fun cancelNotification(context: Context, notificationId: Int) {
+    fun cancelNotification(context: Context, notificationId: String) {
         val notificationManager =
             context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.cancel(notificationId)
+        notificationManager.cancel(notificationId, 0)
     }
 }
