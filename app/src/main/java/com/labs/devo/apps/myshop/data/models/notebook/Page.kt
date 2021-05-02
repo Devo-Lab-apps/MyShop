@@ -18,7 +18,10 @@ data class Page(
 
     val createdAt: Long = System.currentTimeMillis(),
     val modifiedAt: Long = System.currentTimeMillis(),
-    val fetchedAt: Long = System.currentTimeMillis()
+    val fetchedAt: Long = System.currentTimeMillis(),
+    val userPhoneNumber: String? = null,
+    val userAddress: String? = null,
+    val userImageUrl: String? = null
 
 ) : Parcelable
 //creatorUserName, creatorAccountId, consumerAccountId, pageContactNumber, pageDisplayImage, isSubscriber

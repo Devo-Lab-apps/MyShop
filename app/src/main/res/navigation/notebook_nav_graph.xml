@@ -48,7 +48,7 @@
     </fragment>
     <fragment
         android:id="@+id/addEditPageFragment"
-        android:name="com.labs.devo.apps.myshop.view.activity.page.page.AddEditPageFragment"
+        android:name="com.labs.devo.apps.myshop.view.activity.notebook.page.AddEditPageFragment"
         android:label="AddEditPageFragment"
         tools:layout="@layout/add_edit_page_fragment">
         <argument
@@ -59,6 +59,7 @@
             android:name="page"
             app:argType="com.labs.devo.apps.myshop.data.models.notebook.Page"
             app:nullable="true" />
+        <argument android:name="notebook_id" />
     </fragment>
     <fragment
         android:id="@+id/entryFragment"

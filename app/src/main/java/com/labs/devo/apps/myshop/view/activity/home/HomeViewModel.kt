@@ -2,13 +2,11 @@ package com.labs.devo.apps.myshop.view.activity.home
 
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.labs.devo.apps.myshop.business.helper.UserManager
 import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.data.db.local.database.dao.RecurringEntryDao
 import com.labs.devo.apps.myshop.data.db.local.database.dao.RemoteKeyDao
-import com.labs.devo.apps.myshop.data.models.notebook.RecurringEntry
 import com.labs.devo.apps.myshop.data.repo.account.abstraction.UserRepository
 import com.labs.devo.apps.myshop.data.repo.notebook.abstraction.EntryRepository
 import com.labs.devo.apps.myshop.data.repo.notebook.abstraction.NotebookRepository
@@ -16,7 +14,6 @@ import com.labs.devo.apps.myshop.data.repo.notebook.abstraction.PageRepository
 import com.labs.devo.apps.myshop.data.repo.notebook.abstraction.RecurringEntryRepository
 import com.labs.devo.apps.myshop.util.AppData
 import com.labs.devo.apps.myshop.view.util.BaseViewModel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flatMapLatest

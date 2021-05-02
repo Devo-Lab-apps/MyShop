@@ -26,7 +26,6 @@ abstract class AppDatabase : RoomDatabase() {
             super.onCreate(db)
             applicationScope.launch {
                 val rateDao = database.get().rateDao()
-                val currentTime = System.currentTimeMillis()
                 for (operation in allowedOperationMap) {
                     rateDao.insertRateLimit(RateLimit(operation.key, 0))
                 }

@@ -9,5 +9,8 @@ data class RemoteEntityPage(
     val pageName: String = "",
 
     val createdAt: Long = System.currentTimeMillis(),
-    val modifiedAt: Long = System.currentTimeMillis()
+    val modifiedAt: Long = System.currentTimeMillis(),
+    val userPhoneNumber: String? = null,
+    val userAddress: String? = null,
+    val userImageUrl: String? = null
 )
