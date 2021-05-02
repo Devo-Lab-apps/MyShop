@@ -71,6 +71,7 @@ dependencies {
 
     // Room
     implementation "androidx.room:room-runtime:$roomVersion"
+    implementation "com.google.firebase:firebase-storage:$firebaseStorage"
 
     kapt "androidx.room:room-compiler:$roomVersion"
     implementation "androidx.room:room-ktx:$roomVersion"
@@ -95,10 +96,12 @@ dependencies {
 
     //other
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'de.hdodenhof:circleimageview:3.1.0'
+    implementation "de.hdodenhof:circleimageview:$circleImage"
+    implementation "com.github.bumptech.glide:glide:$glide"
+    annotationProcessor "com.github.bumptech.glide:compiler:$glide"
 
     //paging
-    implementation "androidx.paging:paging-runtime-ktx:3.0.0-beta02"
+    implementation "androidx.paging:paging-runtime-ktx:$paging"
 
 
     testImplementation 'junit:junit:4.13.2'

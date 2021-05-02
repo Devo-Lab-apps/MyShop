@@ -29,7 +29,6 @@
             android:ems="10"
             android:fontFamily="@font/open_sans_semibold"
             android:hint="Page Name"
-            android:inputType="textEmailAddress"
             android:padding="16dp"
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -49,7 +48,7 @@
             app:layout_constraintTop_toBottomOf="@+id/page_name" />
 
         <EditText
-            android:id="@+id/page_id"
+            android:id="@+id/consumer_user_id"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
@@ -64,6 +63,78 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/page_id_tv" />
 
+        <CheckBox
+            android:id="@+id/add_user_details_checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:checked="false"
+            android:text="More user details"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/consumer_user_id"
+            app:useMaterialThemeColors="true" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/user_details_form"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@+id/add_user_details_checkbox">
+
+            <EditText
+                android:id="@+id/user_phone_number"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/text_input_bg"
+                android:hint="Phone number"
+                android:inputType="phone"
+                android:padding="16dp"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <EditText
+                android:id="@+id/user_address"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/text_input_bg"
+                android:hint="User's address"
+                android:inputType="textPostalAddress"
+                android:padding="16dp"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/user_phone_number" />
+
+            <Button
+                android:id="@+id/add_picture_btn"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:elevation="0dp"
+                android:layout_marginTop="20dp"
+                android:background="@android:color/transparent"
+                android:hint="Upload Picture"
+                android:inputType="phone"
+                android:textColor="@color/purple_500"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/user_address" />
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/user_image"
+                android:layout_width="100dp"
+                android:src="@drawable/user_image"
+                android:layout_marginTop="20dp"
+                android:layout_height="100dp"
+                app:layout_constraintEnd_toStartOf="@+id/add_picture_btn"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/user_address" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
         <Button
             android:id="@+id/add_edit_page_btn"
             android:layout_width="0dp"
@@ -77,7 +148,7 @@
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/page_id" />
+            app:layout_constraintTop_toBottomOf="@+id/user_details_form" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

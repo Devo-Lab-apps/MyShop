@@ -31,7 +31,10 @@ class RemotePageMapper : EntityMapper<RemoteEntityPage, Page> {
             pageId = remoteEntity.pageId,
             pageName = remoteEntity.pageName,
             createdAt = remoteEntity.createdAt,
-            modifiedAt = remoteEntity.modifiedAt
+            modifiedAt = remoteEntity.modifiedAt,
+            userPhoneNumber = remoteEntity.userPhoneNumber,
+            userAddress = remoteEntity.userAddress,
+            userImageUrl = remoteEntity.userImageUrl
         )
     }
 
@@ -44,7 +47,10 @@ class RemotePageMapper : EntityMapper<RemoteEntityPage, Page> {
             pageId = model.pageId,
             pageName = model.pageName,
             createdAt = model.createdAt,
-            modifiedAt = model.modifiedAt
+            modifiedAt = model.modifiedAt,
+            userPhoneNumber = model.userPhoneNumber,
+            userAddress = model.userAddress,
+            userImageUrl = model.userImageUrl
         )
     }
 

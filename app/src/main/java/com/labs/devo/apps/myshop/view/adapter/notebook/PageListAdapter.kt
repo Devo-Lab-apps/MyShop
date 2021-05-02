@@ -5,6 +5,8 @@ import android.view.ViewGroup
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.labs.devo.apps.myshop.R
 import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.const.AppConstants.DATE_FORMAT
 import com.labs.devo.apps.myshop.data.models.notebook.Page
@@ -30,6 +32,10 @@ class PageListAdapter(
                 if (pos != RecyclerView.NO_POSITION && p != null) {
                     binding.pageSettings.setOnClickListener {
                         onPageSettingsSettingsClick.onPageSettingsClick(p)
+                    }
+                    if (page.userImageUrl != null) {
+                        Glide.with(binding.root).load(page.userImageUrl)
+                            .placeholder(R.drawable.user_image).into(binding.circleImageView)
                     }
                     pageModifiedAt.text = SimpleDateFormat(DATE_FORMAT, Locale.ENGLISH).format(Date(p.modifiedAt))
                     binding.root.setOnClickListener {

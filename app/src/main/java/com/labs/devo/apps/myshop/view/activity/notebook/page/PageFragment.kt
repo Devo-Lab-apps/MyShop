@@ -96,11 +96,9 @@ class PageFragment : Fragment(R.layout.fragment_page), PageListAdapter.OnPageCli
             }
 
             addPageBtn.setOnClickListener {
-                val args = bundleOf(
-                    OPERATION to ADD_PAGE_OPERATION,
-                    NOTEBOOK_ID to notebookId
-                )
-                findNavController().navigate(R.id.addEditPageFragment, args)
+                val action = PageFragmentDirections.actionPageFragmentToAddEditPageFragment(
+                    ADD_PAGE_OPERATION, null, notebookId)
+                findNavController().navigate(action)
             }
         }
     }
@@ -227,7 +225,7 @@ class PageFragment : Fragment(R.layout.fragment_page), PageListAdapter.OnPageCli
     }
 
     override fun onPageSettingsClick(page: Page) {
-        val action = PageFragmentDirections.actionPageFragmentToAddEditPageFragment(EDIT_PAGE_OPERATION, page)
+        val action = PageFragmentDirections.actionPageFragmentToAddEditPageFragment(EDIT_PAGE_OPERATION, page, notebookId)
         findNavController().navigate(action)
     }
 
