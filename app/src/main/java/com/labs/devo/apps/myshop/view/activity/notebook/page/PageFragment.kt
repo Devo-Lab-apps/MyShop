@@ -7,7 +7,6 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.widget.SearchView
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -27,12 +26,7 @@ import com.labs.devo.apps.myshop.util.extensions.onQueryTextChanged
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.ADD_PAGE_OPERATION
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.EDIT_PAGE_OPERATION
-import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.NOTEBOOK_ID
-import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.OPERATION
-import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.PAGE
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.PAGES_NOT_IMPORTED_ERR
-import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.PAGE_ID
-import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.PAGE_NAME
 import com.labs.devo.apps.myshop.view.adapter.notebook.PageListAdapter
 import com.labs.devo.apps.myshop.view.util.DataState
 import com.labs.devo.apps.myshop.view.util.DataStateListener
@@ -40,7 +34,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -97,7 +90,8 @@ class PageFragment : Fragment(R.layout.fragment_page), PageListAdapter.OnPageCli
 
             addPageBtn.setOnClickListener {
                 val action = PageFragmentDirections.actionPageFragmentToAddEditPageFragment(
-                    ADD_PAGE_OPERATION, null, notebookId)
+                    ADD_PAGE_OPERATION, null, notebookId
+                )
                 findNavController().navigate(action)
             }
         }
@@ -122,6 +116,7 @@ class PageFragment : Fragment(R.layout.fragment_page), PageListAdapter.OnPageCli
                             PAGES_NOT_IMPORTED_ERR
                         )
                     )
+                    viewModel.setNotebookId("null")
                 }
                 binding.selectNotebookButton.isEnabled = true
             }
@@ -225,13 +220,18 @@ class PageFragment : Fragment(R.layout.fragment_page), PageListAdapter.OnPageCli
     }
 
     override fun onPageSettingsClick(page: Page) {
-        val action = PageFragmentDirections.actionPageFragmentToAddEditPageFragment(EDIT_PAGE_OPERATION, page, notebookId)
+        val action = PageFragmentDirections.actionPageFragmentToAddEditPageFragment(
+            EDIT_PAGE_OPERATION,
+            page,
+            notebookId
+        )
         findNavController().navigate(action)
     }
 
 
     override fun onClick(page: Page) {
-        val action = PageFragmentDirections.actionPageFragmentToEntryFragment(page.pageId, page.pageName)
+        val action =
+            PageFragmentDirections.actionPageFragmentToEntryFragment(page.pageId, page.pageName)
         findNavController().navigate(action)
     }
 
