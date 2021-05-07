@@ -9,9 +9,11 @@ import android.view.View
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
+import androidx.paging.map
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.labs.devo.apps.myshop.R
 import com.labs.devo.apps.myshop.const.AppConstants
@@ -20,6 +22,7 @@ import com.labs.devo.apps.myshop.data.models.notebook.Entry
 import com.labs.devo.apps.myshop.databinding.FragmentEntryBinding
 import com.labs.devo.apps.myshop.util.PreferencesManager
 import com.labs.devo.apps.myshop.util.extensions.onQueryTextChanged
+import com.labs.devo.apps.myshop.util.printLogD
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.ADD_ENTRY_OPERATION
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.EDIT_ENTRY_OPERATION
@@ -27,8 +30,11 @@ import com.labs.devo.apps.myshop.view.adapter.entry.EntryListAdapter
 import com.labs.devo.apps.myshop.view.util.DataState
 import com.labs.devo.apps.myshop.view.util.DataStateListener
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -114,6 +120,13 @@ class EntryFragment : Fragment(R.layout.fragment_entry), EntryListAdapter.OnEntr
                 }
             }
         }
+        viewModel.amountSum.observe(viewLifecycleOwner, {
+            if (it == null) {
+                binding.totalSum.text = "Total: 0"
+            } else {
+                binding.totalSum.text = "Total: $it"
+            }
+        })
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             viewModel.channelFlow.collect { event ->
                 collectEvent(event)

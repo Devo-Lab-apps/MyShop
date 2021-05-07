@@ -1,5 +1,6 @@
 package com.labs.devo.apps.myshop.data.repo.notebook.abstraction
 
+import androidx.lifecycle.LiveData
 import androidx.paging.PagingData
 import com.labs.devo.apps.myshop.data.models.notebook.Entry
 import com.labs.devo.apps.myshop.view.util.DataState
@@ -32,4 +33,6 @@ interface EntryRepository {
     suspend fun deleteEntries()
 
     suspend fun syncEntries(pageId: String): DataState<List<Entry>>
+
+    fun getEntriesTotalAmount(pageId: String): LiveData<Double>
 }

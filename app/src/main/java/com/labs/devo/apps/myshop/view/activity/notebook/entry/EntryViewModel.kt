@@ -36,6 +36,8 @@ class EntryViewModel
     private val _orderBy = MutableStateFlow(EMPTY_STRING)
     val orderBy: StateFlow<String> = _orderBy
 
+    val amountSum = entryRepository.getEntriesTotalAmount(_pageId.value!!)
+
     private var refreshStatus = false
 
     val entries = combine(
