@@ -13,35 +13,39 @@ object FirebaseStorageHelper {
     suspend fun uploadFile(filePath: String, uri: Uri): DataState<String> {
         return try {
             storageRef.child(filePath).putFile(uri).await()
-            DataState.data(FirebaseStorageStatus.FILE_UPLOADED.name)
+            DataState.data("") //TODO change msg
         } catch (ex: Exception) {
             DataState.message(ex.message ?: "An error occurred")
         }
     }
 
-    suspend fun uploadFileAndGetDownloadUrl(filePath: String, uri: Uri): DataState<String> {
+    suspend fun <T : Exception> uploadFileAndGetDownloadUrl(
+        filePath: String,
+        uri: Uri,
+        exceptionClass: Class<T>
+    ): String {
         return try {
             val ref = storageRef.child(filePath)
             ref.putFile(uri).await()
-            val url = ref.downloadUrl.await().toString()
-            DataState.data(url)
+            ref.downloadUrl.await().toString()
         } catch (ex: Exception) {
-            DataState.message(ex.message ?: "An error occurred")
+            val exception = exceptionClass.getDeclaredConstructor(exceptionClass)
+                .newInstance(ex.message ?: "An error occurred")
+            throw exception
         }
     }
 
     suspend fun uploadFile(filePath: String, byteArray: ByteArray): DataState<String> {
         return try {
             storageRef.child(filePath).putBytes(byteArray).await()
-            DataState.data(FirebaseStorageStatus.FILE_UPLOADED.name)
+            DataState.data("") //TODO change this
         } catch (ex: Exception) {
             DataState.message(ex.message ?: "An error occurred")
         }
     }
 
-
-    enum class FirebaseStorageStatus {
-        FILE_UPLOADED
+    fun getPageUserImageUrl(userId: String, consumerId: String): String {
+        return "/user/$userId/pages/$consumerId/profile-img/"
     }
 
 }
