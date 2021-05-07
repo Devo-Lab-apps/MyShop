@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.view.View
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -16,24 +17,27 @@ import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.labs.devo.apps.myshop.R
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants
+import com.labs.devo.apps.myshop.business.helper.FirebaseStorageHelper.getPageUserImageUrl
 import com.labs.devo.apps.myshop.business.helper.FirebaseStorageHelper.uploadFileAndGetDownloadUrl
 import com.labs.devo.apps.myshop.business.helper.UserManager
 import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.data.models.account.User
 import com.labs.devo.apps.myshop.data.models.notebook.Page
 import com.labs.devo.apps.myshop.databinding.AddEditPageFragmentBinding
+import com.labs.devo.apps.myshop.util.StringUtils.containsSpecialChars
+import com.labs.devo.apps.myshop.util.ThreadUtil.doOnMainSync
+import com.labs.devo.apps.myshop.util.checkIsImageBiggerInSize
 import com.labs.devo.apps.myshop.util.exceptions.UserNotInitializedException
-import com.labs.devo.apps.myshop.util.printLogD
+import com.labs.devo.apps.myshop.util.extensions.isValidEmail
+import com.labs.devo.apps.myshop.util.extensions.isValidPhone
+import com.labs.devo.apps.myshop.util.extensions.specialCharsNotAllowedMsg
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.ADD_PAGE_OPERATION
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.EDIT_PAGE_OPERATION
 import com.labs.devo.apps.myshop.view.util.DataState
 import com.labs.devo.apps.myshop.view.util.DataStateListener
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 
 @AndroidEntryPoint
@@ -53,6 +57,27 @@ class AddEditPageFragment : Fragment(R.layout.add_edit_page_fragment) {
 
     private lateinit var downloadUrl: String
 
+    // coroutine handler to handle exceptions
+    private val coroutineExceptionHandler = CoroutineExceptionHandler { _, exception ->
+        CoroutineScope(Dispatchers.Main).launch {
+            if (exception is UIException) {
+                if (exception.navigateUp) {
+                    sendMessageAndNavigateUp(exception.msg)
+                } else {
+                    dataStateHandler.onDataStateChange(DataState.message<Nothing>(exception.msg))
+                }
+
+            } else {
+                dataStateHandler.onDataStateChange(
+                    DataState.message<Nothing>(
+                        exception.message ?: getString(R.string.unknown_error_occurred)
+                    )
+                )
+            }
+            if (::binding.isInitialized) binding.addEditPageBtn.isEnabled = true
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = AddEditPageFragmentBinding.bind(view)
@@ -65,40 +90,22 @@ class AddEditPageFragment : Fragment(R.layout.add_edit_page_fragment) {
     private fun initView() {
         binding.apply {
             addUserDetailsCheckbox.setOnCheckedChangeListener { _, isChecked ->
-                if (!isChecked) {
-                    binding.userDetailsForm.visibility = View.GONE
-                } else {
-                    binding.userDetailsForm.visibility = View.VISIBLE
-                }
+                userDetailsForm.isVisible = isChecked
             }
             addEditPageBtn.setOnClickListener {
                 addEditPageBtn.isEnabled = false
+                dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
                 if (viewModel.operation == ADD_PAGE_OPERATION) {
                     val pageName = pageName.text.toString()
                     val consumerId = consumerUserId.text.toString()
                     addPage(pageName, consumerId)
                 } else {
-                    dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
                     val pageName = pageName.text.toString()
                     updatePage(pageName)
                 }
             }
             if (viewModel.operation == EDIT_PAGE_OPERATION) {
-                addEditPageBtn.text = getString(R.string.update_page)
-                //disable editing pageId.
-                pageIdTv.visibility = View.GONE
-                consumerUserId.visibility = View.GONE
-                consumerUserId.isEnabled = false
-                userPhoneNumber.setText(viewModel.page!!.userPhoneNumber ?: "")
-                userAddress.setText(viewModel.page!!.userAddress ?: "")
-                if (viewModel.page!!.userImageUrl != null) {
-                    Glide.with(requireContext()).load(viewModel.page!!.userImageUrl).into(userImage)
-                }
-                viewModel.page?.let {
-                    pageName.setText(viewModel.page!!.pageName)
-                } ?: run {
-                    sendMessageAndNavigateUp(getString(R.string.unknown_error_occurred))
-                }
+                editPageOperation()
             }
             addPictureBtn.setOnClickListener {
                 val cameraIntent =
@@ -111,38 +118,73 @@ class AddEditPageFragment : Fragment(R.layout.add_edit_page_fragment) {
         }
     }
 
+    private fun editPageOperation() {
+        binding.apply {
+            addEditPageBtn.text = getString(R.string.update_page)
+            //disable editing pageId.
+            pageIdTv.visibility = View.GONE
+            consumerUserId.visibility = View.GONE
+            consumerUserId.isEnabled = false
+            viewModel.page?.let { page ->
+                pageName.setText(page.pageName)
+                userPhoneNumber.setText(page.userPhoneNumber ?: "")
+                userAddress.setText(page.userAddress ?: "")
+                if (page.userImageUrl != null) {
+                    Glide.with(requireContext()).load(page.userImageUrl).into(userImage)
+                }
+            } ?: sendMessageAndNavigateUp(getString(R.string.unknown_error_occurred))
+        }
+    }
+
+
     private fun addPage(pageName: String, consumerId: String) {
-        CoroutineScope(Dispatchers.IO).launch {
-            val user = UserManager.user
-            if (user == null) {
-                sendMessageAndNavigateUp(UserNotInitializedException().msg)
-                return@launch
+        CoroutineScope(Dispatchers.IO).launch(coroutineExceptionHandler) {
+            val user = UserManager.user ?: throw UIException(UserNotInitializedException().msg)
+            val page: Page = doOnMainSync(Dispatchers.Main) {
+                getPageForAdd(user, pageName, consumerId)
             }
-            showLoadingOnMain()
+            validateAddPageInputs(page)
             checkAndUploadImage(user.email, consumerId)
-            doOnMain {
-                val page = validateAndGetUserOnAdd(user, pageName, consumerId)
-                if (page != null) viewModel.addPage(page)
-            }
+            val isDownloadUrlInitialized = this@AddEditPageFragment::downloadUrl.isInitialized
+            val userDownloadUrl = if (isDownloadUrlInitialized) downloadUrl else null
+            val pageWithImage = page.copy(userImageUrl = userDownloadUrl)
+            viewModel.addPage(pageWithImage)
 
         }
     }
 
-    private fun validateAndGetUserOnAdd(
+    private fun updatePage(pageName: String) {
+        CoroutineScope(Dispatchers.IO).launch(coroutineExceptionHandler) {
+            val user =
+                UserManager.user ?: throw UIException(UserNotInitializedException().msg, true)
+            val p = viewModel.page ?: throw UIException(
+                getString(R.string.unknown_error_occurred),
+                true
+            )
+            val page: Page = doOnMainSync(Dispatchers.Main) { getPageForUpdate(pageName, p) }
+            validateEditPageInputs(p, page)
+            checkAndUploadImage(user.email, p.consumerUserId)
+            val userDownloadUrl = if (this@AddEditPageFragment::downloadUrl.isInitialized) {
+                downloadUrl
+            } else if (!page.userImageUrl.isNullOrEmpty()) {
+                page.userImageUrl
+            } else null
+            val pageWithImage = page.copy(userImageUrl = userDownloadUrl)
+            viewModel.updatePage(pageWithImage)
+        }
+    }
+
+    private fun getPageForAdd(
         user: User,
         pageName: String,
         consumerUserId: String,
-    ): Page? {
+    ): Page {
         if (viewModel.notebookId == null) {
-            sendMessageAndNavigateUp(UserNotInitializedException().msg)
-            return null
+            throw UIException(UserNotInitializedException().msg, true)
         }
-        val isDownloadUrlInitialized = this@AddEditPageFragment::downloadUrl.isInitialized
+
         val notebookId = viewModel.notebookId
-        if (notebookId == null) {
-            sendMessageAndNavigateUp(getString(R.string.unknown_error_occurred))
-            return null
-        }
+            ?: throw UIException(getString(R.string.unknown_error_occurred), true)
 
         val userPhoneNumber = if (
             binding.userPhoneNumber.text.toString().isEmpty()
@@ -153,8 +195,6 @@ class AddEditPageFragment : Fragment(R.layout.add_edit_page_fragment) {
             binding.userAddress.text.toString().isEmpty()
         ) null
         else binding.userAddress.text.toString()
-
-        val userDownloadUrl = if (isDownloadUrlInitialized) downloadUrl else null
 
         return Page(
             creatorUserId = user.email,
@@ -164,22 +204,15 @@ class AddEditPageFragment : Fragment(R.layout.add_edit_page_fragment) {
             pageName = pageName,
             userPhoneNumber = userPhoneNumber,
             userAddress = userAddress,
-            userImageUrl = userDownloadUrl
         )
     }
 
-    private fun validateAndGetUserOnUpdate(
+    private fun getPageForUpdate(
         pageName: String,
         page: Page
-    ): Page? {
+    ): Page {
         if (viewModel.notebookId == null) {
-            sendMessageAndNavigateUp(UserNotInitializedException().msg)
-            return null
-        }
-        val notebookId = viewModel.notebookId
-        if (notebookId == null) {
-            sendMessageAndNavigateUp(getString(R.string.unknown_error_occurred))
-            return null
+            throw UIException(UserNotInitializedException().msg, true)
         }
 
         val userPhoneNumber = if (
@@ -192,25 +225,17 @@ class AddEditPageFragment : Fragment(R.layout.add_edit_page_fragment) {
         ) null
         else binding.userAddress.text.toString()
 
-        val userDownloadUrl = if (this@AddEditPageFragment::downloadUrl.isInitialized) {
-            downloadUrl
-        } else if (!page.userImageUrl.isNullOrEmpty()) {
-            page.userImageUrl
-        } else null
-
         return page.copy(
             pageName = pageName,
             userPhoneNumber = userPhoneNumber,
             userAddress = userAddress,
-            userImageUrl = userDownloadUrl,
             modifiedAt = System.currentTimeMillis()
         )
     }
 
     private suspend fun checkAndUploadImage(userId: String, consumerId: String) {
-        val isUriInitialized: Boolean
-        withContext(Dispatchers.Main) {
-            isUriInitialized = this@AddEditPageFragment::uri.isInitialized
+        val isUriInitialized = doOnMainSync(Dispatchers.Main) {
+            this@AddEditPageFragment::uri.isInitialized
         }
         if (isUriInitialized) {
             uploadImage(userId, consumerId)
@@ -218,13 +243,17 @@ class AddEditPageFragment : Fragment(R.layout.add_edit_page_fragment) {
     }
 
     private suspend fun uploadImage(userId: String, consumerId: String) {
-        val result = uploadFileAndGetDownloadUrl("/user/$userId/pages/$consumerId/profile-img/", uri)
-        val urlOrError = result.data?.getContentIfNotHandled()
-        if (urlOrError?.startsWith("https://") == true) {
-            downloadUrl = urlOrError
-        } else {
-            toastOnMain(urlOrError ?: "An error occurred while uploading the image", true)
-        }
+        checkIsImageBiggerInSize(
+            uri,
+            100000,
+            UIException("Image size should be smaller than ${100} KB")
+        )
+        downloadUrl =
+            uploadFileAndGetDownloadUrl(
+                getPageUserImageUrl(userId, consumerId),
+                uri,
+                UIException::class.java
+            )
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -250,27 +279,6 @@ class AddEditPageFragment : Fragment(R.layout.add_edit_page_fragment) {
         }
     }
 
-    private suspend fun toastOnMain(msg: String, enableAddButton: Boolean) {
-        withContext(Dispatchers.Main) {
-            binding.addEditPageBtn.isEnabled = enableAddButton
-            dataStateHandler.onDataStateChange(
-                DataState.message<Nothing>(msg)
-            )
-        }
-    }
-
-    private suspend fun doOnMain(f: () -> Unit) {
-        withContext(Dispatchers.Main) {
-            f.invoke()
-        }
-    }
-
-    private suspend fun showLoadingOnMain() {
-        withContext(Dispatchers.Main) {
-            dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
-        }
-    }
-
     private fun sendMessageAndNavigateUp(string: String) {
         dataStateHandler.onDataStateChange(
             DataState.message<Nothing>(
@@ -280,25 +288,6 @@ class AddEditPageFragment : Fragment(R.layout.add_edit_page_fragment) {
         findNavController().navigateUp()
     }
 
-    private fun updatePage(pageName: String) {
-        CoroutineScope(Dispatchers.IO).launch {
-            val user = UserManager.user
-            if (user == null) {
-                sendMessageAndNavigateUp(UserNotInitializedException().msg)
-                return@launch
-            }
-            viewModel.page?.let { p ->
-                checkAndUploadImage(user.email, p.consumerUserId)
-                doOnMain {
-                    val page = validateAndGetUserOnUpdate(pageName, p) ?: return@doOnMain
-                    viewModel.updatePage(p, page)
-                }
-            } ?: doOnMain {
-                sendMessageAndNavigateUp(getString(R.string.unknown_error_occurred))
-            }
-        }
-
-    }
 
     private fun observeEvents() {
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
@@ -340,4 +329,55 @@ class AddEditPageFragment : Fragment(R.layout.add_edit_page_fragment) {
 
     }
 
+
+    private fun validateAddPageInputs(page: Page) {
+
+        if (page.pageName.length > 20) {
+            throw UIException("Name should be less than 20 characters.")
+        }
+
+        if (page.pageId.isNotBlank()) {
+            throw UIException("Please provide valid inputs")
+        }
+
+        if (containsSpecialChars(page.pageName)) {
+            throw UIException(specialCharsNotAllowedMsg("page name"))
+        }
+
+        if (!page.consumerUserId.isValidEmail()) {
+            throw UIException("Customer email id is not a valid email.")
+        }
+
+
+        if (!page.userPhoneNumber.isValidPhone()) {
+            throw UIException("Phone number is not valid")
+        }
+
+    }
+
+    private fun validateEditPageInputs(prevPage: Page, newPage: Page) {
+
+        if (newPage.pageName.length > 20) {
+            throw UIException("Name should be less than 20 characters.")
+        }
+
+        if (newPage.pageId.isBlank()) {
+            throw UIException("Please provide valid inputs")
+        }
+
+        if (containsSpecialChars(prevPage.pageName)) {
+            throw UIException(specialCharsNotAllowedMsg("page name"))
+        }
+
+        if (!newPage.userPhoneNumber.isValidPhone()) {
+            throw UIException("Phone number is not valid")
+        }
+
+        if (!newPage.consumerUserId.isValidEmail()) {
+            throw UIException("Customer email id is not correctly formatted.")
+        }
+    }
+
 }
+
+data class UIException(val msg: String, val navigateUp: Boolean = false) : java.lang.Exception(msg)

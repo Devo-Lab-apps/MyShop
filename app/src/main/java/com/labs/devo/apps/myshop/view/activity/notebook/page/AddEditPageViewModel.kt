@@ -11,7 +11,6 @@ import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.Noteboo
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.PAGE
 import com.labs.devo.apps.myshop.view.activity.notebook.page.AddEditPageViewModel.PageEventConstants.PAGE_ADDED
 import com.labs.devo.apps.myshop.view.activity.notebook.page.AddEditPageViewModel.PageEventConstants.PAGE_DELETED
-import com.labs.devo.apps.myshop.view.activity.notebook.page.AddEditPageViewModel.PageEventConstants.PAGE_NAME_NOT_UPDATED_ERR
 import com.labs.devo.apps.myshop.view.activity.notebook.page.AddEditPageViewModel.PageEventConstants.PAGE_UPDATED
 import com.labs.devo.apps.myshop.view.util.BaseViewModel
 import kotlinx.coroutines.launch
@@ -38,11 +37,7 @@ constructor(
             ?: channel.send(AddEditPageEvent.ShowInvalidInputMessage(res.message?.getContentIfNotHandled()))
     }
 
-    fun updatePage(prevPage: Page, page: Page) = viewModelScope.launch {
-        if (page.pageName == prevPage.pageName) {
-            channel.send(AddEditPageEvent.ShowInvalidInputMessage(PAGE_NAME_NOT_UPDATED_ERR))
-            return@launch
-        }
+    fun updatePage(page: Page) = viewModelScope.launch {
         val data = pageRepository.updatePage(page)
         data.data?.let {
             channel.send(AddEditPageEvent.PageUpdated(PAGE_UPDATED))
