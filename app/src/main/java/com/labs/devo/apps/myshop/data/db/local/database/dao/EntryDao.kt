@@ -1,8 +1,10 @@
 package com.labs.devo.apps.myshop.data.db.local.database.dao
 
+import androidx.lifecycle.LiveData
 import androidx.paging.PagingSource
 import androidx.room.*
 import com.labs.devo.apps.myshop.data.models.notebook.Entry
+import kotlinx.coroutines.flow.Flow
 
 
 @Dao
@@ -17,6 +19,9 @@ interface EntryDao {
         Entry::entryTitle.name -> getEntriesOrderByTitle(pageId, searchQuery, isRepeating)
         else -> getEntriesOrderByModifiedAt(pageId, searchQuery, isRepeating)
     }
+
+    @Query("SELECT Sum(entryAmount) FROM entry where pageId = :pageId")
+    fun getEntriesTotalAmount(pageId: String): LiveData<Double>
 
 
     @Query("SELECT * FROM Entry WHERE pageId = :pageId and (entryTitle LIKE :searchQuery or entryDescription LIKE :searchQuery) and isRepeating = :isRepeating ORDER BY entryTitle ASC")

@@ -1,7 +1,9 @@
 package com.labs.devo.apps.myshop.data.db.local.abstraction.notebook
 
+import androidx.lifecycle.LiveData
 import androidx.paging.PagingSource
 import com.labs.devo.apps.myshop.data.models.notebook.Entry
+import kotlinx.coroutines.flow.Flow
 
 interface LocalEntryService {
 
@@ -18,6 +20,8 @@ interface LocalEntryService {
         orderBy: String,
         isRepeating: Boolean
     ): PagingSource<Int, Entry>
+
+    fun getEntriesTotalAmount(pageId: String): LiveData<Double>
 
     suspend fun getEntry(entryId: String): Entry?
 

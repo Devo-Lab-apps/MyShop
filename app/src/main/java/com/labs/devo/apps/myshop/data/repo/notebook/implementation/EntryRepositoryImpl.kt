@@ -1,10 +1,12 @@
 package com.labs.devo.apps.myshop.data.repo.notebook.implementation
 
+import androidx.lifecycle.LiveData
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.labs.devo.apps.myshop.business.helper.PermissionsHelper.checkPermissions
+import com.labs.devo.apps.myshop.const.AppConstants.TAG
 import com.labs.devo.apps.myshop.const.Permissions
 import com.labs.devo.apps.myshop.data.db.local.abstraction.notebook.LocalEntryService
 import com.labs.devo.apps.myshop.data.db.local.database.database.NotebookDatabase
@@ -12,6 +14,7 @@ import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemoteEntry
 import com.labs.devo.apps.myshop.data.mediator.EntryRemoteMediator
 import com.labs.devo.apps.myshop.data.models.notebook.Entry
 import com.labs.devo.apps.myshop.data.repo.notebook.abstraction.EntryRepository
+import com.labs.devo.apps.myshop.util.printLogD
 import com.labs.devo.apps.myshop.view.util.DataState
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -182,5 +185,9 @@ class EntryRepositoryImpl
                 ex.message ?: "An unknown error occurred. Please retry later."
             )
         }
+    }
+
+    override fun getEntriesTotalAmount(pageId: String): LiveData<Double> {
+        return localEntryService.getEntriesTotalAmount(pageId)
     }
 }

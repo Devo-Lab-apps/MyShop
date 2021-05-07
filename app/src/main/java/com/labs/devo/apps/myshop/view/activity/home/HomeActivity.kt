@@ -75,22 +75,23 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         showToast(
                             "You've been logged out of all devices."
                         )
-                        auth.signOut()
-                        val intent = Intent(this@HomeActivity, AuthenticationActivity::class.java)
-                        intent.flags =
-                            Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-                        startActivity(intent)
-                        finish()
+                        logoutUser()
                     }
                     HomeViewModel.HomeViewModelEvent.UserNotFound -> {
                         printLogD(TAG, "User not found. Logging out.")
                         showToast("Someone deleted the user. Please retry later.")
-                        auth.signOut()
-                        val intent = Intent(this@HomeActivity, AuthenticationActivity::class.java)
-                        intent.flags =
-                            Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-                        startActivity(intent)
-                        finish()
+                        logoutUser()
+                    }
+                    HomeViewModel.HomeViewModelEvent.DataCleared -> {
+                        withContext(Dispatchers.Main) {
+                            auth.signOut()
+                            val intent =
+                                Intent(this@HomeActivity, AuthenticationActivity::class.java)
+                            intent.flags =
+                                Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+                            startActivity(intent)
+                            finish()
+                        }
                     }
                 }
             }
@@ -119,8 +120,11 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
-    private fun showToast(s: String) {
-        Toast.makeText(this, s, Toast.LENGTH_LONG).show()
+    private suspend fun showToast(s: String) {
+        withContext(Dispatchers.Main) {
+            Toast.makeText(this@HomeActivity, s, Toast.LENGTH_LONG).show()
+        }
+
     }
 
     /**
@@ -165,11 +169,7 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         binding.homeDrawerLayout.closeDrawers()
         CoroutineScope(Dispatchers.IO).launch {
             viewModel.deleteAllLocalData()
-            auth.signOut()
-            withContext(Dispatchers.Main) {
-                startActivity(Intent(this@HomeActivity, AuthenticationActivity::class.java))
-                finish()
-            }
+            viewModel.dataCleared()
         }
     }
 

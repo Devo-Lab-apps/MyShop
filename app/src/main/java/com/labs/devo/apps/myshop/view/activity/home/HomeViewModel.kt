@@ -62,6 +62,10 @@ class HomeViewModel @ViewModelInject constructor(
         //TODO clean data store
     }
 
+    fun dataCleared() = viewModelScope.launch {
+        channel.send(HomeViewModelEvent.DataCleared)
+    }
+
     sealed class HomeViewModelEvent {
 
         object DataCleared : HomeViewModelEvent()
