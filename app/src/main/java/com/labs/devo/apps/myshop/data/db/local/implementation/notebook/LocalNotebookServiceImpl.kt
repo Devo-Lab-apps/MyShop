@@ -1,7 +1,7 @@
 package com.labs.devo.apps.myshop.data.db.local.implementation.notebook
 
 import com.labs.devo.apps.myshop.data.db.local.abstraction.notebook.LocalNotebookService
-import com.labs.devo.apps.myshop.data.db.local.database.dao.NotebookDao
+import com.labs.devo.apps.myshop.data.db.local.database.dao.notebook.NotebookDao
 import com.labs.devo.apps.myshop.data.models.notebook.Notebook
 import com.labs.devo.apps.myshop.view.util.AsyncHelper
 import javax.inject.Inject

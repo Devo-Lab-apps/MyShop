@@ -2,7 +2,7 @@ package com.labs.devo.apps.myshop.data.db.local.implementation.notebook
 
 import androidx.paging.PagingSource
 import com.labs.devo.apps.myshop.data.db.local.abstraction.notebook.LocalRecurringEntryService
-import com.labs.devo.apps.myshop.data.db.local.database.dao.RecurringEntryDao
+import com.labs.devo.apps.myshop.data.db.local.database.dao.notebook.RecurringEntryDao
 import com.labs.devo.apps.myshop.data.models.notebook.RecurringEntry
 import com.labs.devo.apps.myshop.view.util.AsyncHelper
 import javax.inject.Inject

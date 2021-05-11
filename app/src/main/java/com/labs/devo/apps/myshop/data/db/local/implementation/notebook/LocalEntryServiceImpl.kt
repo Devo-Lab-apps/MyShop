@@ -4,10 +4,9 @@ import androidx.lifecycle.LiveData
 import androidx.paging.PagingSource
 import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.data.db.local.abstraction.notebook.LocalEntryService
-import com.labs.devo.apps.myshop.data.db.local.database.dao.EntryDao
+import com.labs.devo.apps.myshop.data.db.local.database.dao.notebook.EntryDao
 import com.labs.devo.apps.myshop.data.models.notebook.Entry
 import com.labs.devo.apps.myshop.view.util.AsyncHelper
-import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class LocalEntryServiceImpl

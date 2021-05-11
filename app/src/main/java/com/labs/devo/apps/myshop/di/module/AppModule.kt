@@ -7,9 +7,19 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.gson.Gson
 import com.labs.devo.apps.myshop.business.auth.abstraction.UserAuth
 import com.labs.devo.apps.myshop.business.auth.implementation.FirebaseUserAuth
+import com.labs.devo.apps.myshop.const.AppConstants.APP_DATABASE
+import com.labs.devo.apps.myshop.const.AppConstants.ITEM_DATABASE
 import com.labs.devo.apps.myshop.const.AppConstants.NOTEBOOK_DATABASE
-import com.labs.devo.apps.myshop.data.db.local.database.dao.*
+import com.labs.devo.apps.myshop.data.db.local.database.dao.RateDao
+import com.labs.devo.apps.myshop.data.db.local.database.dao.RemoteKeyDao
+import com.labs.devo.apps.myshop.data.db.local.database.dao.item.ItemDao
+import com.labs.devo.apps.myshop.data.db.local.database.dao.item.ItemDetailDao
+import com.labs.devo.apps.myshop.data.db.local.database.dao.notebook.EntryDao
+import com.labs.devo.apps.myshop.data.db.local.database.dao.notebook.NotebookDao
+import com.labs.devo.apps.myshop.data.db.local.database.dao.notebook.PageDao
+import com.labs.devo.apps.myshop.data.db.local.database.dao.notebook.RecurringEntryDao
 import com.labs.devo.apps.myshop.data.db.local.database.database.AppDatabase
+import com.labs.devo.apps.myshop.data.db.local.database.database.ItemDatabase
 import com.labs.devo.apps.myshop.data.db.local.database.database.NotebookDatabase
 import dagger.Module
 import dagger.Provides
@@ -53,14 +63,30 @@ class AppModule {
     fun providesAppDatabase(
         app: Application,
         callback: AppDatabase.Callback
-    ): AppDatabase = Room.databaseBuilder(app, AppDatabase::class.java, NOTEBOOK_DATABASE)
+    ): AppDatabase = Room.databaseBuilder(app, AppDatabase::class.java, APP_DATABASE)
         .fallbackToDestructiveMigration()
         .addCallback(callback)
         .build()
 
     @Provides
     @Singleton
+    fun providesItemDatabase(
+        app: Application
+    ): ItemDatabase = Room.databaseBuilder(app, ItemDatabase::class.java, ITEM_DATABASE)
+        .fallbackToDestructiveMigration()
+        .build()
+
+    @Provides
+    @Singleton
     fun provideRateLimitDao(appDatabase: AppDatabase): RateDao = appDatabase.rateDao()
+
+    @Provides
+    @Singleton
+    fun provideItemDao(itemDatabase: ItemDatabase): ItemDao = itemDatabase.itemDao()
+
+    @Provides
+    @Singleton
+    fun provideItemDetailDao(itemDatabase: ItemDatabase): ItemDetailDao = itemDatabase.itemDetailDao()
 
     @Provides
     @Singleton

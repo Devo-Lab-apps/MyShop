@@ -2,7 +2,7 @@ package com.labs.devo.apps.myshop.data.db.local.implementation.notebook
 
 import androidx.paging.PagingSource
 import com.labs.devo.apps.myshop.data.db.local.abstraction.notebook.LocalPageService
-import com.labs.devo.apps.myshop.data.db.local.database.dao.PageDao
+import com.labs.devo.apps.myshop.data.db.local.database.dao.notebook.PageDao
 import com.labs.devo.apps.myshop.data.models.notebook.Page
 import com.labs.devo.apps.myshop.view.util.AsyncHelper
 import javax.inject.Inject
