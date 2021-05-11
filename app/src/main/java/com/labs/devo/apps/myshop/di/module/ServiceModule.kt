@@ -4,10 +4,10 @@ import com.labs.devo.apps.myshop.data.db.local.abstraction.notebook.LocalEntrySe
 import com.labs.devo.apps.myshop.data.db.local.abstraction.notebook.LocalNotebookService
 import com.labs.devo.apps.myshop.data.db.local.abstraction.notebook.LocalPageService
 import com.labs.devo.apps.myshop.data.db.local.abstraction.notebook.LocalRecurringEntryService
-import com.labs.devo.apps.myshop.data.db.local.database.dao.EntryDao
-import com.labs.devo.apps.myshop.data.db.local.database.dao.NotebookDao
-import com.labs.devo.apps.myshop.data.db.local.database.dao.PageDao
-import com.labs.devo.apps.myshop.data.db.local.database.dao.RecurringEntryDao
+import com.labs.devo.apps.myshop.data.db.local.database.dao.notebook.EntryDao
+import com.labs.devo.apps.myshop.data.db.local.database.dao.notebook.NotebookDao
+import com.labs.devo.apps.myshop.data.db.local.database.dao.notebook.PageDao
+import com.labs.devo.apps.myshop.data.db.local.database.dao.notebook.RecurringEntryDao
 import com.labs.devo.apps.myshop.data.db.local.implementation.notebook.LocalEntryServiceImpl
 import com.labs.devo.apps.myshop.data.db.local.implementation.notebook.LocalNotebookServiceImpl
 import com.labs.devo.apps.myshop.data.db.local.implementation.notebook.LocalPageServiceImpl

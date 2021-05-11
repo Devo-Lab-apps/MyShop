@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import com.labs.devo.apps.myshop.business.helper.UserManager
 import com.labs.devo.apps.myshop.const.AppConstants
-import com.labs.devo.apps.myshop.data.db.local.database.dao.RecurringEntryDao
+import com.labs.devo.apps.myshop.data.db.local.database.dao.notebook.RecurringEntryDao
 import com.labs.devo.apps.myshop.data.db.local.database.dao.RemoteKeyDao
 import com.labs.devo.apps.myshop.data.repo.account.abstraction.UserRepository
 import com.labs.devo.apps.myshop.data.repo.notebook.abstraction.EntryRepository

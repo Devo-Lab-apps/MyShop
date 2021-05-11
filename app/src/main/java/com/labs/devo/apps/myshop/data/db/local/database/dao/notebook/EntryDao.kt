@@ -1,4 +1,4 @@
-package com.labs.devo.apps.myshop.data.db.local.database.dao
+package com.labs.devo.apps.myshop.data.db.local.database.dao.notebook
 
 import androidx.lifecycle.LiveData
 import androidx.paging.PagingSource
