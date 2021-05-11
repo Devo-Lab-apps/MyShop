@@ -16,17 +16,11 @@ interface PageRepository {
 
     suspend fun getPage(pageId: String): Page
 
-    suspend fun insertPages(pages: List<Page>): DataState<List<Page>>
-
     suspend fun insertPage(page: Page): DataState<Page>
-
-    suspend fun updatePages(pages: List<Page>): DataState<List<Page>>
 
     suspend fun updatePage(page: Page): DataState<Page>
 
     suspend fun deletePage(page: Page): DataState<Page>
-
-    suspend fun deletePages(pages: List<Page>): DataState<List<Page>>
 
     suspend fun deletePages()
 

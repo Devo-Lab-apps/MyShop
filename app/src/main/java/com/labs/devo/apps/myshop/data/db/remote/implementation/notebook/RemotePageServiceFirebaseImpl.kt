@@ -39,28 +39,6 @@ class RemotePageServiceFirebaseImpl @Inject constructor(
         return get(pageIds, searchQuery, startAfter)
     }
 
-
-    override suspend fun insertPages(pages: List<Page>): List<Page> {
-        if (pages.isEmpty()) {
-            throw NoPagesToCreateException()
-        }
-        val insertedPages = mutableListOf<Page>()
-        val page1 = pages.first()
-        FirebaseHelper.runTransaction { transaction ->
-            val notebookEntity =
-                getEntityNotebookFromTransaction(page1.creatorNotebookId, transaction)
-            if (notebookEntity.pages.size + pages.size > 50) {
-                throw PageLimitExceededException()
-            }
-            pages.forEach { page ->
-                insertedPages.add(insertInDb(page, transaction))
-            }
-            val pageIds = pages.map { page -> page.pageId }
-            addPagesInNotebookEntity(notebookEntity, pageIds, transaction)
-        }
-        return insertedPages
-    }
-
     override suspend fun insertPage(page: Page): Page {
         if (!page.consumerUserId.isValidEmail()) {
             throw java.lang.Exception("Invalid receiver's email.")
@@ -76,25 +54,6 @@ class RemotePageServiceFirebaseImpl @Inject constructor(
             addPagesInNotebookEntity(notebookEntity, listOf(createdPage.pageId), transaction)
         }
         return createdPage
-    }
-
-    override suspend fun updatePages(pages: List<Page>): List<Page> {
-        val updatedPages = mutableListOf<Page>()
-
-        FirebaseHelper.runTransaction { transaction ->
-            pages.forEach { page ->
-                val ref =
-                    FirebaseHelper.getPageReference(page.pageId)
-                val existing = transaction.get(ref)
-                if (!existing.exists()) {
-                    throw PageNotFoundException()
-                }
-            }
-            pages.forEach { page ->
-                updatedPages.add(updateInDb(page, transaction))
-            }
-        }
-        return updatedPages
     }
 
     override suspend fun updatePage(page: Page): Page {
@@ -122,21 +81,6 @@ class RemotePageServiceFirebaseImpl @Inject constructor(
                 throw PageNotFoundException()
             }
             deleteFromDb(pageId, transaction)
-        }
-    }
-
-    override suspend fun deletePages(pages: List<Page>) {
-        val pageIds = pages.map { it.pageId }
-        FirebaseHelper.runTransaction { transaction ->
-            pageIds.forEach { pageId ->
-                val ref =
-                    FirebaseHelper.getPageReference(pageId)
-                val existing = transaction.get(ref)
-                if (!existing.exists()) {
-                    throw PageNotFoundException()
-                }
-            }
-            pageIds.forEach { pageId -> deleteFromDb(pageId, transaction) }
         }
     }
 

@@ -27,19 +27,6 @@ class RemoteEntryServiceFirebaseImpl
         return get(pageId, query, startAfter)
     }
 
-    override suspend fun insertEntries(entries: List<Entry>): List<Entry> {
-        if (entries.isNullOrEmpty()) {
-            throw NoEntryException()
-        }
-        val insertedEntries = mutableListOf<Entry>()
-        FirebaseHelper.runTransaction { transaction ->
-            entries.forEach { entry ->
-                insertedEntries.add(insertInDb(entry.pageId, entry, transaction))
-            }
-        }
-        return insertedEntries
-    }
-
 
     override suspend fun insertEntry(entry: Entry): Entry {
         var insertedEntry = entry.copy()
@@ -48,21 +35,6 @@ class RemoteEntryServiceFirebaseImpl
         }
         return insertedEntry
     }
-
-    override suspend fun updateEntries(entries: List<Entry>): List<Entry> {
-        if (entries.isNullOrEmpty()) {
-            throw NoEntryException()
-        }
-        val firstEntry = entries.first()
-        val updatedEntries = mutableListOf<Entry>()
-        FirebaseHelper.runTransaction { transaction ->
-            entries.forEach { entry ->
-                updatedEntries.add(updateInDb(firstEntry.pageId, entry, transaction))
-            }
-        }
-        return updatedEntries
-    }
-
 
     override suspend fun updateEntry(entry: Entry): Entry {
         var updatedEntry = entry.copy()
@@ -75,17 +47,6 @@ class RemoteEntryServiceFirebaseImpl
     override suspend fun deleteEntry(entry: Entry) {
         FirebaseHelper.runTransaction { transaction ->
             deleteFromDb(entry.pageId, entry, transaction)
-        }
-    }
-
-    override suspend fun deleteEntries(entries: List<Entry>) {
-        if (entries.isNullOrEmpty()) {
-            throw NoEntryException()
-        }
-        FirebaseHelper.runTransaction { transaction ->
-            entries.forEach { entry ->
-                deleteFromDb(entry.pageId, entry, transaction)
-            }
         }
     }
 

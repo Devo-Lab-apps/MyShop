@@ -12,6 +12,7 @@ import com.labs.devo.apps.myshop.data.models.notebook.Notebook
 import com.labs.devo.apps.myshop.util.exceptions.NotebookLimitExceededException
 import com.labs.devo.apps.myshop.util.exceptions.NotebookNotFoundException
 import com.labs.devo.apps.myshop.util.exceptions.UserNotInitializedException
+import com.labs.devo.apps.myshop.util.printLogD
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -32,21 +33,6 @@ class RemoteNotebookServiceFirebaseImpl @Inject constructor(
         })
     }
 
-    override suspend fun insertNotebooks(notebooks: List<Notebook>): List<Notebook> {
-        val existingNotebooks = getNotebooks()
-
-        if (existingNotebooks.size == 3) {
-            throw NotebookLimitExceededException("You can't have more than 3 notebooks per account.")
-        }
-        val insertedNotebooks = mutableListOf<Notebook>()
-        FirebaseHelper.runWriteBatch {
-            notebooks.forEach { notebook ->
-                insertedNotebooks.add(insertInDb(notebook))
-            }
-        }
-        return insertedNotebooks
-    }
-
     override suspend fun insertNotebook(notebook: Notebook): Notebook {
         val existingNotebooks = getNotebooks()
 
@@ -58,25 +44,6 @@ class RemoteNotebookServiceFirebaseImpl @Inject constructor(
             insertedNotebook = insertInDb(notebook)
         }
         return insertedNotebook
-    }
-
-    override suspend fun updateNotebooks(notebooks: List<Notebook>): List<Notebook> {
-        val updatedNotebooks = mutableListOf<Notebook>()
-        val user = UserManager.user ?: throw UserNotInitializedException()
-
-        FirebaseHelper.runTransaction { transaction ->
-            updatedNotebooks.forEach { notebook ->
-                val ref = FirebaseHelper.getNotebookReference(user.accountId, notebook.notebookId)
-                val existing = transaction.get(ref)
-                if (!existing.exists()) {
-                    throw NotebookNotFoundException()
-                }
-            }
-            updatedNotebooks.forEach { notebook ->
-                updatedNotebooks.add(updateInDb(notebook, transaction))
-            }
-        }
-        return updatedNotebooks
     }
 
     override suspend fun updateNotebook(notebook: Notebook): Notebook {
@@ -104,23 +71,6 @@ class RemoteNotebookServiceFirebaseImpl @Inject constructor(
             }
             deleteFromDb(notebookId, transaction)
         }
-    }
-
-    override suspend fun deleteNotebooks(notebooks: List<Notebook>) {
-        val user = UserManager.user ?: throw UserNotInitializedException()
-        val notebookIds = notebooks.map { it.notebookId }
-        FirebaseHelper.runTransaction { transaction ->
-            notebookIds.forEach { notebookId ->
-                val ref =
-                    FirebaseHelper.getNotebookReference(user.accountId, notebookId)
-                val existing = transaction.get(ref)
-                if (!existing.exists()) {
-                    throw NotebookNotFoundException()
-                }
-            }
-            notebookIds.forEach { notebookId -> deleteFromDb(notebookId, transaction) }
-        }
-
     }
 
     private fun checkIfForeign(notebook: Notebook) {

@@ -52,38 +52,12 @@ class PageRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun insertPages(pages: List<Page>): DataState<List<Page>> {
-        return try {
-            checkPermissions(Permissions.CREATE_PAGE)
-            val newPages = remotePageService.insertPages(pages)
-            localPageService.insertPages(newPages)
-            DataState.data(newPages)
-        } catch (ex: java.lang.Exception) {
-            DataState.message(
-                ex.message ?: "An unknown error occurred. Please retry later."
-            )
-        }
-    }
-
     override suspend fun insertPage(page: Page): DataState<Page> {
         return try {
             checkPermissions(Permissions.CREATE_PAGE)
             val newPage = remotePageService.insertPage(page)
             localPageService.insertPage(newPage)
             DataState.data(newPage)
-        } catch (ex: java.lang.Exception) {
-            DataState.message(
-                ex.message ?: "An unknown error occurred. Please retry later."
-            )
-        }
-    }
-
-    override suspend fun updatePages(pages: List<Page>): DataState<List<Page>> {
-        return try {
-            checkPermissions(Permissions.CREATE_PAGE)
-            val updatedPages = remotePageService.updatePages(pages)
-            localPageService.updatePages(updatedPages)
-            DataState.data(updatedPages)
         } catch (ex: java.lang.Exception) {
             DataState.message(
                 ex.message ?: "An unknown error occurred. Please retry later."
@@ -110,19 +84,6 @@ class PageRepositoryImpl @Inject constructor(
             remotePageService.deletePage(page)
             localPageService.deletePage(page)
             DataState.data(page)
-        } catch (ex: java.lang.Exception) {
-            DataState.message(
-                ex.message ?: "An unknown error occurred. Please retry later."
-            )
-        }
-    }
-
-    override suspend fun deletePages(pages: List<Page>): DataState<List<Page>> {
-        return try {
-            checkPermissions(Permissions.DELETE_PAGE)
-            remotePageService.deletePages(pages)
-            localPageService.deletePages(pages)
-            DataState.data(pages)
         } catch (ex: java.lang.Exception) {
             DataState.message(
                 ex.message ?: "An unknown error occurred. Please retry later."

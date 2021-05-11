@@ -34,12 +34,6 @@ class LocalRecurringEntryServiceImpl
         }
     }
 
-    override suspend fun updateRecurringEntries(entries: List<RecurringEntry>) {
-        return AsyncHelper.runAsync {
-            dao.updateRecurringEntries(entries)
-        }
-    }
-
     override suspend fun updateRecurringEntry(entry: RecurringEntry) {
         return AsyncHelper.runAsync {
             dao.updateRecurringEntry(entry)
@@ -49,12 +43,6 @@ class LocalRecurringEntryServiceImpl
     override suspend fun deleteRecurringEntry(entry: RecurringEntry) {
         return AsyncHelper.runAsync {
             dao.deleteRecurringEntry(entry)
-        }
-    }
-
-    override suspend fun deleteRecurringEntries(entries: List<RecurringEntry>) {
-        return AsyncHelper.runAsync {
-            dao.deleteRecurringEntries(entries)
         }
     }
 

@@ -1,6 +1,5 @@
 package com.labs.devo.apps.myshop.data.db.remote.implementation.notebook
 
-import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.Transaction
 import com.labs.devo.apps.myshop.business.helper.FirebaseHelper
 import com.labs.devo.apps.myshop.business.helper.UserManager
@@ -9,7 +8,10 @@ import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemoteRecur
 import com.labs.devo.apps.myshop.data.db.remote.mapper.notebook.RemoteRecurringEntryMapper
 import com.labs.devo.apps.myshop.data.db.remote.models.notebook.RemoteEntityRecurringEntry
 import com.labs.devo.apps.myshop.data.models.notebook.RecurringEntry
-import com.labs.devo.apps.myshop.util.exceptions.*
+import com.labs.devo.apps.myshop.util.exceptions.PageNotFoundException
+import com.labs.devo.apps.myshop.util.exceptions.RecurringEntryLimitExceededException
+import com.labs.devo.apps.myshop.util.exceptions.RecurringEntryNotFoundException
+import com.labs.devo.apps.myshop.util.exceptions.UserNotInitializedException
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -27,31 +29,6 @@ class RemoteRecurringEntryServiceFirebaseImpl
         return get(pageId, startAfter)
     }
 
-    override suspend fun insertRecurringEntries(recurringEntries: List<RecurringEntry>): List<RecurringEntry> {
-        if (recurringEntries.isNullOrEmpty()) {
-            throw NoRecurringEntryException()
-        }
-        val firstEntry = recurringEntries.first()
-        val existingEntries = get(firstEntry.pageId, "")
-        if (existingEntries.size > 1) {
-            throw RecurringEntryLimitExceededException()
-        }
-        val insertedEntries = mutableListOf<RecurringEntry>()
-        FirebaseHelper.runTransaction { transaction ->
-            recurringEntries.forEach { recurringRecurringEntry ->
-                insertedEntries.add(
-                    insertInDb(
-                        recurringRecurringEntry.pageId,
-                        recurringRecurringEntry,
-                        transaction
-                    )
-                )
-            }
-        }
-        return insertedEntries
-    }
-
-
     override suspend fun insertRecurringEntry(recurringEntry: RecurringEntry): RecurringEntry {
         var insertedRecurringEntry = recurringEntry.copy()
         val existingEntries = get(recurringEntry.pageId, "")
@@ -64,27 +41,6 @@ class RemoteRecurringEntryServiceFirebaseImpl
         }
         return insertedRecurringEntry
     }
-
-    override suspend fun updateRecurringEntries(recurringEntries: List<RecurringEntry>): List<RecurringEntry> {
-        if (recurringEntries.isNullOrEmpty()) {
-            throw NoRecurringEntryException()
-        }
-        val firstRecurringEntry = recurringEntries.first()
-        val updatedEntries = mutableListOf<RecurringEntry>()
-        FirebaseHelper.runTransaction { transaction ->
-            recurringEntries.forEach { recurringEntry ->
-                updatedEntries.add(
-                    updateInDb(
-                        firstRecurringEntry.pageId,
-                        recurringEntry,
-                        transaction
-                    )
-                )
-            }
-        }
-        return updatedEntries
-    }
-
 
     override suspend fun updateRecurringEntry(recurringEntry: RecurringEntry): RecurringEntry {
         var updatedRecurringEntry = recurringEntry.copy()
@@ -100,18 +56,6 @@ class RemoteRecurringEntryServiceFirebaseImpl
             deleteFromDb(recurringEntry.pageId, recurringEntry, transaction)
         }
     }
-
-    override suspend fun deleteRecurringEntries(recurringEntries: List<RecurringEntry>) {
-        if (recurringEntries.isNullOrEmpty()) {
-            throw NoRecurringEntryException()
-        }
-        FirebaseHelper.runTransaction { transaction ->
-            recurringEntries.forEach { recurringRecurringEntry ->
-                deleteFromDb(recurringRecurringEntry.pageId, recurringRecurringEntry, transaction)
-            }
-        }
-    }
-
 
     private fun insertInDb(
         pageId: String,

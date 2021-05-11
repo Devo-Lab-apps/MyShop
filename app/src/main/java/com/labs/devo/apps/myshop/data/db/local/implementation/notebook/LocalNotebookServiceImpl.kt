@@ -34,12 +34,6 @@ constructor(
         }
     }
 
-    override suspend fun updateNotebooks(notebooks: List<Notebook>) {
-        return AsyncHelper.runAsync {
-            dao.updateNotebooks(notebooks)
-        }
-    }
-
     override suspend fun updateNotebook(notebook: Notebook) {
         return AsyncHelper.runAsync {
             dao.updateNotebook(notebook)
@@ -49,12 +43,6 @@ constructor(
     override suspend fun deleteNotebook(notebook: Notebook) {
         return AsyncHelper.runAsync {
             dao.deleteNotebook(notebook)
-        }
-    }
-
-    override suspend fun deleteNotebooks(notebooks: List<Notebook>) {
-        return AsyncHelper.runAsync {
-            dao.deleteNotebooks(notebooks)
         }
     }
 
