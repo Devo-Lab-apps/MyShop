@@ -42,12 +42,6 @@ class LocalPageServiceImpl
         }
     }
 
-    override suspend fun updatePages(pages: List<Page>) {
-        return AsyncHelper.runAsync {
-            dao.updatePages(pages)
-        }
-    }
-
     override suspend fun updatePage(page: Page) {
         return AsyncHelper.runAsync {
             dao.updatePage(page)
@@ -57,12 +51,6 @@ class LocalPageServiceImpl
     override suspend fun deletePage(page: Page) {
         return AsyncHelper.runAsync {
             dao.deletePage(page)
-        }
-    }
-
-    override suspend fun deletePages(pages: List<Page>) {
-        return AsyncHelper.runAsync {
-            dao.deletePages(pages)
         }
     }
 

@@ -67,13 +67,6 @@ class LocalEntryServiceImpl
         }
     }
 
-    override suspend fun updateEntries(entries: List<Entry>) {
-        return AsyncHelper.runAsync {
-            val e = entries
-            dao.updateEntries(e)
-        }
-    }
-
     override suspend fun updateEntry(entry: Entry) {
         return AsyncHelper.runAsync {
             val e = entry
@@ -85,13 +78,6 @@ class LocalEntryServiceImpl
         return AsyncHelper.runAsync {
             val e = entry
             dao.deleteEntry(e)
-        }
-    }
-
-    override suspend fun deleteEntries(entries: List<Entry>) {
-        return AsyncHelper.runAsync {
-            val e = entries
-            dao.deleteEntries(e)
         }
     }
 

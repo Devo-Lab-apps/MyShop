@@ -18,17 +18,11 @@ interface EntryRepository {
 
     suspend fun getEntry(entryId: String): DataState<Entry>
 
-    suspend fun insertEntries(entries: List<Entry>): DataState<List<Entry>>
-
     suspend fun insertEntry(entry: Entry): DataState<Entry>
-
-    suspend fun updateEntries(entries: List<Entry>): DataState<List<Entry>>
 
     suspend fun updateEntry(entry: Entry): DataState<Entry>
 
     suspend fun deleteEntry(entry: Entry): DataState<Entry>
-
-    suspend fun deleteEntries(entries: List<Entry>): DataState<List<Entry>>
 
     suspend fun deleteEntries()
 

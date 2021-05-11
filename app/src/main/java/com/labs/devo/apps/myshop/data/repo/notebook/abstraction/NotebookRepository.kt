@@ -10,17 +10,11 @@ interface NotebookRepository {
 
     suspend fun getNotebook(notebookId: String): Notebook
 
-    suspend fun insertNotebooks(notebooks: List<Notebook>): DataState<List<Notebook>>
-
     suspend fun insertNotebook(notebook: Notebook): DataState<Notebook>
-
-    suspend fun updateNotebooks(notebooks: List<Notebook>): DataState<List<Notebook>>
 
     suspend fun updateNotebook(notebook: Notebook): DataState<Notebook>
 
     suspend fun deleteNotebook(notebook: Notebook): DataState<Notebook>
-
-    suspend fun deleteNotebooks(notebooks: List<Notebook>): DataState<List<Notebook>>
 
     suspend fun deleteNotebooks()
 

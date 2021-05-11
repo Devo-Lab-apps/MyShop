@@ -18,13 +18,9 @@ interface LocalPageService {
 
     suspend fun insertPage(page: Page)
 
-    suspend fun updatePages(pages: List<Page>)
-
     suspend fun updatePage(page: Page)
 
     suspend fun deletePage(page: Page)
-
-    suspend fun deletePages(pages: List<Page>)
 
     suspend fun deletePages(notebookId: String)
 

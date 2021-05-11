@@ -14,13 +14,9 @@ interface LocalRecurringEntryService {
 
     suspend fun insertRecurringEntry(entry: RecurringEntry)
 
-    suspend fun updateRecurringEntries(entries: List<RecurringEntry>)
-
     suspend fun updateRecurringEntry(entry: RecurringEntry)
 
     suspend fun deleteRecurringEntry(entry: RecurringEntry)
-
-    suspend fun deleteRecurringEntries(entries: List<RecurringEntry>)
 
     suspend fun deleteRecurringEntries()
 

@@ -55,19 +55,6 @@ class NotebookRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun insertNotebooks(notebooks: List<Notebook>): DataState<List<Notebook>> {
-        return try {
-            checkPermissions(Permissions.CREATE_NOTEBOOK)
-            val insertedNotebooks = remoteNotebookService.insertNotebooks(notebooks)
-            localNotebookService.insertNotebooks(insertedNotebooks)
-            DataState.data(insertedNotebooks)
-        } catch (ex: Exception) {
-            DataState.message(
-                ex.message ?: "An unknown error occurred. Please retry later."
-            )
-        }
-    }
-
     override suspend fun insertNotebook(notebook: Notebook): DataState<Notebook> {
 
         return try {
@@ -80,21 +67,6 @@ class NotebookRepositoryImpl @Inject constructor(
                 ex.message ?: "An unknown error occurred. Please retry later."
             )
         }
-    }
-
-    override suspend fun updateNotebooks(notebooks: List<Notebook>): DataState<List<Notebook>> {
-
-        return try {
-            checkPermissions(Permissions.CREATE_NOTEBOOK)
-            val updatedNotebooks = remoteNotebookService.updateNotebooks(notebooks)
-            localNotebookService.updateNotebooks(updatedNotebooks)
-            DataState.data(updatedNotebooks)
-        } catch (ex: Exception) {
-            DataState.message(
-                ex.message ?: "An unknown error occurred. Please retry later."
-            )
-        }
-
     }
 
     override suspend fun updateNotebook(notebook: Notebook): DataState<Notebook> {
@@ -117,19 +89,6 @@ class NotebookRepositoryImpl @Inject constructor(
             remoteNotebookService.deleteNotebook(notebook)
             localNotebookService.deleteNotebook(notebook)
             DataState.data(notebook)
-        } catch (ex: Exception) {
-            DataState.message(
-                ex.message ?: "An unknown error occurred. Please retry later."
-            )
-        }
-    }
-
-    override suspend fun deleteNotebooks(notebooks: List<Notebook>): DataState<List<Notebook>> {
-        return try {
-            checkPermissions(Permissions.DELETE_NOTEBOOK)
-            remoteNotebookService.deleteNotebooks(notebooks)
-            localNotebookService.deleteNotebooks(notebooks)
-            DataState.data(notebooks)
         } catch (ex: Exception) {
             DataState.message(
                 ex.message ?: "An unknown error occurred. Please retry later."
