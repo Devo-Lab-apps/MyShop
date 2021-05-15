@@ -5,12 +5,12 @@ import com.labs.devo.apps.myshop.data.models.item.Item
 
 interface LocalItemService {
 
-    fun getLocalItems(
+    fun getItems(
         searchQuery: String,
         orderBy: String
     ): PagingSource<Int, Item>
 
-    suspend fun createLocalItem(item: Item)
+    suspend fun createItem(item: Item)
 
     suspend fun updateItem(item: Item)
 
