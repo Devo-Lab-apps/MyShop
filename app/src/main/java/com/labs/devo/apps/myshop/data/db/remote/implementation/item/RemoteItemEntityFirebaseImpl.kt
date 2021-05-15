@@ -10,12 +10,11 @@ import com.labs.devo.apps.myshop.util.exceptions.UserNotInitializedException
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
-class RemoteEntityFirebaseImpl
+const val itemGetLimit = 10
+class RemoteItemEntityFirebaseImpl
 @Inject constructor(val mapper: RemoteItemMapper) : RemoteItemService {
 
-    private val itemGetLimit: Long = 10
-
-    override suspend fun getItems(searchQuery: String, startAfter: String): List<Item> {
+    override suspend fun getItems(searchQuery: String, startAfter: String?): List<Item> {
         val user = UserManager.user ?: throw UserNotInitializedException()
         return get(user.accountId, searchQuery, startAfter)
     }
@@ -23,10 +22,11 @@ class RemoteEntityFirebaseImpl
     private suspend fun get(
         accountId: String,
         searchQuery: String,
-        startAfter: String
+        startAfter: String?
     ): List<Item> {
+        val start = startAfter?.toLong() ?: 0L
         val querySnapshot = FirebaseHelper.getItemCollection(accountId)
-            .orderBy(Item::itemId.name).startAfter(startAfter).limit(itemGetLimit)
+            .orderBy(Item::modifiedAt.name).startAfter(start).limit(itemGetLimit.toLong())
             .get().await()
 
         return querySnapshot.map { qs ->

@@ -10,14 +10,14 @@ import javax.inject.Inject
 class LocalItemServiceImpl
 @Inject constructor(private val itemDao: ItemDao) : LocalItemService {
 
-    override fun getLocalItems(
+    override fun getItems(
         searchQuery: String,
         orderBy: String
     ): PagingSource<Int, Item> {
         return itemDao.getItems()
     }
 
-    override suspend fun createLocalItem(item: Item) {
+    override suspend fun createItem(item: Item) {
         AsyncHelper.runAsync {
             itemDao.insertItem(item)
         }
