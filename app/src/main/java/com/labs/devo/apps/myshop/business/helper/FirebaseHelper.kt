@@ -6,6 +6,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Transaction
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.account
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.entry
+import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.item
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.notebook
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.page
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.recurringEntry
@@ -20,7 +21,7 @@ object FirebaseConstants {
     const val page = "page"
     const val entry = "entry"
     const val recurringEntry = "recurring_entry"
-    const val microEntry = "micro_entry"
+    const val item = "item"
     const val foreignNotebookName = "Foreign"
     const val foreignNotebookKey = "foreign"
 }
@@ -103,6 +104,21 @@ object FirebaseHelper {
 
     fun getRecurringEntryReference(accountId: String): DocumentReference {
         return getRecurringEntryCollection(accountId).document()
+    }
+
+    fun getItemCollection(accountId: String): CollectionReference {
+        return getAccountCollection().document(accountId).collection(item)
+    }
+
+    fun getItemReference(
+        accountId: String,
+        itemId: String
+    ): DocumentReference {
+        return getItemCollection(accountId).document(itemId)
+    }
+
+    fun getItemReference(accountId: String): DocumentReference {
+        return getItemCollection(accountId).document()
     }
 
     suspend fun runWriteBatch(f: () -> Unit) {
