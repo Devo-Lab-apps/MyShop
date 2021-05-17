@@ -7,7 +7,11 @@ import android.content.Intent
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
-import com.labs.devo.apps.myshop.util.MyBroadCastReceiver
+import com.labs.devo.apps.myshop.RECURRING_ENTRY_CHANNEL
+import com.labs.devo.apps.myshop.const.AppConstants.TAG
+import com.labs.devo.apps.myshop.data.models.notebook.RecurringEntry
+import com.labs.devo.apps.myshop.util.NotificationBroadCastReceiver
+import com.labs.devo.apps.myshop.util.printLogD
 
 
 object MyNotificationManager {
@@ -19,14 +23,14 @@ object MyNotificationManager {
 
     // private const val RESULT_ID = "id"
 
-    fun sendSingleNotification(
+    private fun sendSingleNotification(
         context: Context,
         notificationMetadataBuilder: NotificationMetadataBuilder,
         notificationBuilder: NotificationBuilder
     ) {
         val manager = context.getSystemService(AppCompatActivity.ALARM_SERVICE) as AlarmManager
 
-        val alarmIntent = Intent(context, MyBroadCastReceiver::class.java)
+        val alarmIntent = Intent(context, NotificationBroadCastReceiver::class.java)
         alarmIntent.putExtra(NOTIFICATION_DATA, gson.toJson(notificationBuilder))
         alarmIntent.putExtra(
             ALARM_METADATA,
@@ -36,7 +40,7 @@ object MyNotificationManager {
             context,
             notificationMetadataBuilder.uniqueNotificationName.hashCode(),
             alarmIntent,
-            0
+            PendingIntent.FLAG_UPDATE_CURRENT
         )
         val initialDelay = notificationMetadataBuilder.getEffectiveInitialDelay()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -50,14 +54,14 @@ object MyNotificationManager {
         }
     }
 
-    fun sendRecurringNotification(
+    private fun sendRecurringNotification(
         context: Context,
         notificationMetadataBuilder: NotificationMetadataBuilder,
         notificationBuilder: NotificationBuilder
     ) {
         val manager = context.getSystemService(AppCompatActivity.ALARM_SERVICE) as AlarmManager
 
-        val alarmIntent = Intent(context, MyBroadCastReceiver::class.java)
+        val alarmIntent = Intent(context, NotificationBroadCastReceiver::class.java)
         alarmIntent.putExtra(NOTIFICATION_DATA, gson.toJson(notificationBuilder))
         alarmIntent.putExtra(
             ALARM_METADATA,
@@ -67,7 +71,7 @@ object MyNotificationManager {
             context,
             notificationMetadataBuilder.uniqueNotificationName.hashCode(),
             alarmIntent,
-            0
+            PendingIntent.FLAG_UPDATE_CURRENT
         )
         val initialDelay = notificationMetadataBuilder.getEffectiveInitialDelay()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -82,10 +86,69 @@ object MyNotificationManager {
         }
     }
 
-    fun checkIfAlarmExists(context: Context, notificationUniqueName: String): Boolean {
-        val alarmIntent = Intent(context, MyBroadCastReceiver::class.java)
+    private fun checkIfAlarmExists(context: Context, notificationUniqueName: String): Boolean {
+        val alarmIntent = Intent(context, NotificationBroadCastReceiver::class.java)
         val pendingIntent =
-            PendingIntent.getBroadcast(context, notificationUniqueName.hashCode(), alarmIntent, 0)
+            PendingIntent.getBroadcast(
+                context,
+                notificationUniqueName.hashCode(),
+                alarmIntent,
+                PendingIntent.FLAG_NO_CREATE
+            )
         return pendingIntent != null
     }
+
+    fun cancelIfAlarmExists(context: Context, notificationUniqueName: String) {
+        val manager = context.getSystemService(AppCompatActivity.ALARM_SERVICE) as AlarmManager
+        val alarmIntent = Intent(context, NotificationBroadCastReceiver::class.java)
+        val pendingIntent =
+            PendingIntent.getBroadcast(
+                context,
+                notificationUniqueName.hashCode(),
+                alarmIntent,
+                PendingIntent.FLAG_NO_CREATE
+            )
+        if (pendingIntent != null) {
+            printLogD(TAG, "Cancelling alarm with id: $notificationUniqueName")
+            manager.cancel(pendingIntent)
+            pendingIntent.cancel()
+        } else {
+            printLogD(TAG, "Can't cancel, alarm doesn't exist with id: $notificationUniqueName")
+        }
+    }
+
+
+    fun registerWork(
+        context: Context,
+        recurringEntry: RecurringEntry,
+        registerOverride: Boolean = false
+    ) {
+        if (registerOverride || !checkIfAlarmExists(
+                context,
+                recurringEntry.recurringEntryId
+            )
+        ) {
+            printLogD(TAG, "Registering: ${recurringEntry.recurringEntryId}")
+            val re = gson.toJson(recurringEntry)
+            sendSingleNotification(
+                context,
+                NotificationMetadataBuilder(
+                    recurringEntry.recurringEntryId,
+                    RECURRING_ENTRY_CHANNEL,
+                    recurringEntry.recurringEntryId,
+                    true,
+                    TimeDuration(recurringEntry.recurringTime, recurringEntry.frequency),
+                    re
+                ),
+                NotificationBuilder(
+                    recurringEntry.name,
+                    "Add ${recurringEntry.amount}?"
+                ),
+            )
+        } else {
+            printLogD(TAG, "Already registered: ${recurringEntry.recurringEntryId}")
+        }
+    }
+
+
 }

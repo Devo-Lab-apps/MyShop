@@ -10,25 +10,28 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
-import androidx.paging.map
+import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.labs.devo.apps.myshop.R
+import com.labs.devo.apps.myshop.business.helper.MyNotificationManager.registerWork
 import com.labs.devo.apps.myshop.const.AppConstants
+import com.labs.devo.apps.myshop.data.db.local.database.dao.AlarmDao
+import com.labs.devo.apps.myshop.data.db.local.database.dao.AlarmKey
 import com.labs.devo.apps.myshop.data.models.notebook.RecurringEntry
 import com.labs.devo.apps.myshop.databinding.ActivityMainBinding
+import com.labs.devo.apps.myshop.util.NotificationBroadCastReceiver
 import com.labs.devo.apps.myshop.util.PreferencesManager
 import com.labs.devo.apps.myshop.util.printLogD
 import com.labs.devo.apps.myshop.view.activity.auth.AuthenticationActivity
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity
-import com.labs.devo.apps.myshop.view.activity.notebook.entry.registerWork
 import com.labs.devo.apps.myshop.view.adapter.notebook.RecurringEntryListAdapter
+import com.labs.devo.apps.myshop.view.util.AsyncHelper
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.first
 import java.util.*
 import javax.inject.Inject
 
@@ -48,10 +51,15 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private lateinit var binding: ActivityMainBinding
 
     @Inject
+    lateinit var alarmDao: AlarmDao
+
+    @Inject
     lateinit var auth: FirebaseAuth
 
     @Inject
     lateinit var preferencesManager: PreferencesManager
+
+    lateinit var recurringAdapter: RecurringEntryListAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -97,23 +105,27 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
         }
         lifecycleScope.launchWhenStarted {
-            val recurringEntriesImported =
-                preferencesManager.recurringEntriesImportedStatusData.first()
-            if (!recurringEntriesImported) {
-                val recurringAdapter = RecurringEntryListAdapter(object :
-                    RecurringEntryListAdapter.OnRecurringEntryClick {
-                    override fun onClick(recurringEntry: RecurringEntry) {}
-                })
-                binding.homeRecyclerView.apply {
-                    setHasFixedSize(true)
-                    layoutManager = LinearLayoutManager(this@HomeActivity)
-                    adapter = recurringAdapter
-                }
-                viewModel.entries.collectLatest { data ->
-                    recurringAdapter.submitData(data)
-                    data.map {
-                        printLogD(TAG, it)
-                        registerWork(this@HomeActivity, it)
+            viewModel.entries.collectLatest { data ->
+                recurringAdapter.submitData(data)
+            }
+        }
+
+        lifecycleScope.launchWhenStarted {
+            recurringAdapter.addLoadStateListener { state ->
+                when (state.refresh) {
+                    is LoadState.NotLoading -> {
+                        recurringAdapter.snapshot().items.forEach { re ->
+                            registerWork(applicationContext, re)
+                            AsyncHelper.runAsyncInBackground {
+                                alarmDao.insertOrReplace(
+                                    AlarmKey(
+                                        re.recurringEntryId,
+                                        NotificationBroadCastReceiver::class.qualifiedName
+                                            ?: "com.labs.devo.apps.myshop.util.NotificationBroadCastReceiver"
+                                    )
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -139,6 +151,15 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             R.string.open_drawer_description,
             R.string.close_drawer_description,
         )
+        recurringAdapter = RecurringEntryListAdapter(object :
+            RecurringEntryListAdapter.OnRecurringEntryClick {
+            override fun onClick(recurringEntry: RecurringEntry) {}
+        })
+        binding.homeRecyclerView.apply {
+            setHasFixedSize(true)
+            layoutManager = LinearLayoutManager(this@HomeActivity)
+            adapter = recurringAdapter
+        }
 
         binding.homeDrawerLayout.addDrawerListener(actionDrawable)
         actionDrawable.syncState()
@@ -149,7 +170,9 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         when (item.itemId) {
             R.id.notebooks_nav -> openNotebookActivity()
             R.id.logout_user -> logoutUser()
-//            R.id.cancel_notification -> NotificationWorker.cancelAllWork(this)
+            R.id.cancel_notification -> {
+
+            }//printLogD(TAG, recurringAdapter.snapshot().items)
         }
         return true
     }

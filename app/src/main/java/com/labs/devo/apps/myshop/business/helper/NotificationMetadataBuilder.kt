@@ -1,6 +1,8 @@
 package com.labs.devo.apps.myshop.business.helper
 
+import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.const.AppConstants.ONE_DAY_MILLIS
+import com.labs.devo.apps.myshop.util.printLogD
 import java.util.*
 
 data class NotificationMetadataBuilder(
@@ -8,13 +10,15 @@ data class NotificationMetadataBuilder(
     val channelId: String,
     val notificationId: String,
     val isRepeating: Boolean,
-    private val initialDelay: TimeDuration
+    val initialDelay: TimeDuration,
+    val metadata: String
 ) {
     fun getEffectiveInitialDelay(): Pair<Long, Long> {
         val time = initialDelay.timeAtHours.split(":")
         val calendar = Calendar.getInstance()
         calendar.set(Calendar.HOUR_OF_DAY, time[0].toInt())
         calendar.set(Calendar.MINUTE, time[1].toInt())
+        calendar.set(Calendar.SECOND, 0)
         if (calendar.before(Calendar.getInstance())) {
             val nextIteration = getNextIteration()
             calendar.add(nextIteration.first, nextIteration.second)
