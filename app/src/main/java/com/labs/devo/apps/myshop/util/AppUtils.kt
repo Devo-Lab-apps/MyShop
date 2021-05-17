@@ -8,7 +8,6 @@ fun checkIsImageBiggerInSize(uri: Uri, size: Int, exception: Exception) {
     try {
         uri.path?.let {
             val file = File(it)
-            printLogD(TAG, file.length())
             if (size < file.length()) throw exception
         } ?: throw exception
     } catch (ex: Exception) {

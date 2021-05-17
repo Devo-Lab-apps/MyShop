@@ -7,14 +7,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
-import androidx.paging.map
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.labs.devo.apps.myshop.R
-import com.labs.devo.apps.myshop.RECURRING_ENTRY_CHANNEL
-import com.labs.devo.apps.myshop.business.helper.MyNotificationManager
-import com.labs.devo.apps.myshop.business.helper.NotificationBuilder
-import com.labs.devo.apps.myshop.business.helper.NotificationMetadataBuilder
-import com.labs.devo.apps.myshop.business.helper.TimeDuration
 import com.labs.devo.apps.myshop.data.mediator.GenericLoadStateAdapter
 import com.labs.devo.apps.myshop.data.models.notebook.RecurringEntry
 import com.labs.devo.apps.myshop.databinding.FragmentRecurringEntryBinding
@@ -106,9 +100,6 @@ class RecurringEntryFragment : Fragment(R.layout.fragment_recurring_entry),
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             viewModel.recurringEntries.collectLatest { pagingData ->
                 entryAdapter.submitData(pagingData)
-                pagingData.map { recurringEntry ->
-                    registerWork(requireContext(), recurringEntry)
-                }
             }
         }
     }
@@ -138,27 +129,4 @@ class RecurringEntryFragment : Fragment(R.layout.fragment_recurring_entry),
 
     }
 
-}
-
-fun registerWork(context: Context, recurringEntry: RecurringEntry) {
-    if (!MyNotificationManager.checkIfAlarmExists(
-            context,
-            recurringEntry.recurringEntryId
-        )
-    ) {
-        MyNotificationManager.sendRecurringNotification(
-            context,
-            NotificationMetadataBuilder(
-                recurringEntry.recurringEntryId,
-                RECURRING_ENTRY_CHANNEL,
-                recurringEntry.recurringEntryId,
-                true,
-                TimeDuration(recurringEntry.recurringTime, recurringEntry.frequency)
-            ),
-            NotificationBuilder(
-                recurringEntry.name,
-                "Add ${recurringEntry.amount}?"
-            ),
-        )
-    }
 }

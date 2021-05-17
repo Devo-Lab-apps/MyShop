@@ -12,7 +12,6 @@ import com.labs.devo.apps.myshop.data.models.notebook.Notebook
 import com.labs.devo.apps.myshop.util.exceptions.NotebookLimitExceededException
 import com.labs.devo.apps.myshop.util.exceptions.NotebookNotFoundException
 import com.labs.devo.apps.myshop.util.exceptions.UserNotInitializedException
-import com.labs.devo.apps.myshop.util.printLogD
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 

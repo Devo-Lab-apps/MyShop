@@ -35,7 +35,7 @@ class RecurringEntryRepositoryImpl
             remoteRecurringEntryService
         ),
         pagingSourceFactory = {
-            localRecurringEntryService.getRecurringEntries(pageId ?: "")
+            localRecurringEntryService.getRecurringEntries(pageId ?: "%%")
         }
     ).flow
 //    : DataState<List<RecurringEntry>> {

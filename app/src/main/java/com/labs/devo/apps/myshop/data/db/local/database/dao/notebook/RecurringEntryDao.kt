@@ -8,9 +8,9 @@ import com.labs.devo.apps.myshop.data.models.notebook.RecurringEntry
 @Dao
 interface RecurringEntryDao {
 
-    @Query("SELECT * FROM RecurringEntry WHERE pageId = :pageId ORDER BY name ASC")
+    @Query("SELECT * FROM RecurringEntry WHERE pageId LIKE :pageId ORDER BY name ASC")
     fun getRecurringEntries(
-        pageId: String = ""
+        pageId: String = "%%"
     ): PagingSource<Int, RecurringEntry>
 
     @Query("SELECT * FROM RecurringEntry WHERE recurringEntryId = :recurringEntryId")

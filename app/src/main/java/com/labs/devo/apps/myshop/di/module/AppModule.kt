@@ -10,6 +10,7 @@ import com.labs.devo.apps.myshop.business.auth.implementation.FirebaseUserAuth
 import com.labs.devo.apps.myshop.const.AppConstants.APP_DATABASE
 import com.labs.devo.apps.myshop.const.AppConstants.ITEM_DATABASE
 import com.labs.devo.apps.myshop.const.AppConstants.NOTEBOOK_DATABASE
+import com.labs.devo.apps.myshop.data.db.local.database.dao.AlarmDao
 import com.labs.devo.apps.myshop.data.db.local.database.dao.RateDao
 import com.labs.devo.apps.myshop.data.db.local.database.dao.RemoteKeyDao
 import com.labs.devo.apps.myshop.data.db.local.database.dao.item.ItemDao
@@ -108,6 +109,10 @@ class AppModule {
     @Singleton
     fun provideRecurringEntryDao(database: NotebookDatabase): RecurringEntryDao =
         database.recurringEntryDao()
+
+    @Provides
+    @Singleton
+    fun provideAlarmDao(database: AppDatabase): AlarmDao = database.alarmDao()
 
     @Provides
     @Singleton

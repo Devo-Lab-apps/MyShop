@@ -30,7 +30,7 @@
             android:name=".view.activity.home.HomeActivity"
             android:theme="@style/Theme.MaterialComponents.Light.NoActionBar" />
         <receiver
-            android:name=".util.MyBroadCastReceiver"
+            android:name=".util.NotificationBroadCastReceiver"
             android:directBootAware="true"
             android:enabled="true"
             android:exported="true">
