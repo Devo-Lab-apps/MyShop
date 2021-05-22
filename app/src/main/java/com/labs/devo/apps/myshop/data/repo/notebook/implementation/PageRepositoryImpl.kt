@@ -1,6 +1,5 @@
 package com.labs.devo.apps.myshop.data.repo.notebook.implementation
 
-import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
@@ -16,7 +15,8 @@ import com.labs.devo.apps.myshop.util.exceptions.PageNotFoundException
 import com.labs.devo.apps.myshop.view.util.DataState
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
-
+const val PAGES_PAGE_SIZE = 20
+const val PAGE_MAX_SIZE = 100
 class PageRepositoryImpl @Inject constructor(
     private val localPageService: LocalPageService,
     private val notebookDatabase: NotebookDatabase,
@@ -30,7 +30,7 @@ class PageRepositoryImpl @Inject constructor(
         orderBy: String,
         forceRefresh: Boolean
     ): Flow<PagingData<Page>> = Pager(
-        config = PagingConfig(pageSize = 20, maxSize = 100),
+        config = PagingConfig(PAGES_PAGE_SIZE, PAGE_MAX_SIZE),
         remoteMediator = PageRemoteMediator(
             notebookId,
             searchQuery,
@@ -52,11 +52,11 @@ class PageRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun insertPage(page: Page): DataState<Page> {
+    override suspend fun createPage(page: Page): DataState<Page> {
         return try {
             checkPermissions(Permissions.CREATE_PAGE)
-            val newPage = remotePageService.insertPage(page)
-            localPageService.insertPage(newPage)
+            val newPage = remotePageService.createPage(page)
+            localPageService.createPage(newPage)
             DataState.data(newPage)
         } catch (ex: java.lang.Exception) {
             DataState.message(
@@ -103,7 +103,7 @@ class PageRepositoryImpl @Inject constructor(
             if (remotePages.isNullOrEmpty()) {
                 throw java.lang.Exception("No pages for the selected notebook")
             }
-            localPageService.insertPages(remotePages)
+            localPageService.createPages(remotePages)
             DataState.data(remotePages)
         } catch (ex: java.lang.Exception) {
             DataState.message(

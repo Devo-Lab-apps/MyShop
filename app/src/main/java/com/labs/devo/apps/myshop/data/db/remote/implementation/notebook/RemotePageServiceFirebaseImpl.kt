@@ -39,7 +39,7 @@ class RemotePageServiceFirebaseImpl @Inject constructor(
         return get(pageIds, searchQuery, startAfter)
     }
 
-    override suspend fun insertPage(page: Page): Page {
+    override suspend fun createPage(page: Page): Page {
         if (!page.consumerUserId.isValidEmail()) {
             throw java.lang.Exception("Invalid receiver's email.")
         }
@@ -50,7 +50,7 @@ class RemotePageServiceFirebaseImpl @Inject constructor(
             if (notebookEntity.pages.size >= 50) {
                 throw PageLimitExceededException()
             }
-            createdPage = insertInDb(page, transaction)
+            createdPage = createInDb(page, transaction)
             addPagesInNotebookEntity(notebookEntity, listOf(createdPage.pageId), transaction)
         }
         return createdPage
@@ -84,11 +84,11 @@ class RemotePageServiceFirebaseImpl @Inject constructor(
         }
     }
 
-    private fun insertInDb(page: Page, transaction: Transaction): Page {
+    private fun createInDb(page: Page, transaction: Transaction): Page {
         val pageId = FirebaseHelper.getPageReference().id
         val foreignSnapshot = foreignSnapshot(page, transaction, pageId)
         if (foreignSnapshot.exists()) {
-            insertInForeign(foreignSnapshot, transaction, pageId)
+            createInForeign(foreignSnapshot, transaction, pageId)
         }
         val data = remotePageMapper.mapToEntity(
             page.copy(
@@ -100,7 +100,7 @@ class RemotePageServiceFirebaseImpl @Inject constructor(
         return remotePageMapper.mapFromEntity(data)
     }
 
-    private fun insertInForeign(
+    private fun createInForeign(
         foreignSnapshot: DocumentSnapshot,
         transaction: Transaction,
         pageId: String

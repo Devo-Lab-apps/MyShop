@@ -11,14 +11,14 @@ interface RateDao {
     suspend fun getLimit(operationName: String): RateLimit
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertRateLimit(rateLimit: RateLimit): Long
+    suspend fun createRateLimit(rateLimit: RateLimit): Long
 
     @Update
     suspend fun update(rateLimit: RateLimit)
 
     @Transaction
     suspend fun upsertRateLimit(rateLimit: RateLimit) {
-        val id: Long = insertRateLimit(rateLimit)
+        val id: Long = createRateLimit(rateLimit)
         if (id == -1L) {
             update(rateLimit)
         }

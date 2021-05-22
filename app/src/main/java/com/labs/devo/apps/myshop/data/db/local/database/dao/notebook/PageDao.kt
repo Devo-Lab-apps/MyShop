@@ -33,10 +33,10 @@ interface PageDao {
     fun getPage(pageId: String): Page?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertPage(page: Page)
+    suspend fun createPage(page: Page)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertPages(pages: List<Page>)
+    suspend fun createPages(pages: List<Page>)
 
     @Update
     suspend fun updatePage(page: Page)

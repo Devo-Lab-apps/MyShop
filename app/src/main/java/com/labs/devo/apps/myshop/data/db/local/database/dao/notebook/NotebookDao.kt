@@ -13,10 +13,10 @@ interface NotebookDao {
     fun getNotebook(notebookId: String): Notebook
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertNotebook(notebook: Notebook)
+    suspend fun createNotebook(notebook: Notebook)
 
     @Insert
-    suspend fun insertNotebooks(notebooks: List<Notebook>)
+    suspend fun createNotebooks(notebooks: List<Notebook>)
 
     @Update
     suspend fun updateNotebook(notebook: Notebook)

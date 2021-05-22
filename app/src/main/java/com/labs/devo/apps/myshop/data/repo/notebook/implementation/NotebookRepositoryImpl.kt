@@ -26,7 +26,7 @@ class NotebookRepositoryImpl @Inject constructor(
             var notebooks = localNotebookService.getNotebooks()
             if (notebooks.isNullOrEmpty()) {
                 val remoteNotebooks = remoteNotebookService.getNotebooks()
-                localNotebookService.insertNotebooks(remoteNotebooks)
+                localNotebookService.createNotebooks(remoteNotebooks)
                 notebooks = remoteNotebooks
             }
             emit(DataState.data(notebooks))
@@ -55,12 +55,12 @@ class NotebookRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun insertNotebook(notebook: Notebook): DataState<Notebook> {
+    override suspend fun createNotebook(notebook: Notebook): DataState<Notebook> {
 
         return try {
             checkPermissions(Permissions.CREATE_NOTEBOOK)
-            val insertNotebook = remoteNotebookService.insertNotebook(notebook)
-            localNotebookService.insertNotebook(insertNotebook)
+            val insertNotebook = remoteNotebookService.createNotebook(notebook)
+            localNotebookService.createNotebook(insertNotebook)
             DataState.data(insertNotebook)
         } catch (ex: Exception) {
             DataState.message(
@@ -104,7 +104,7 @@ class NotebookRepositoryImpl @Inject constructor(
         return try {
             localNotebookService.deleteNotebooks()
             val notebooks = remoteNotebookService.getNotebooks()
-            localNotebookService.insertNotebooks(notebooks)
+            localNotebookService.createNotebooks(notebooks)
             DataState.data(notebooks)
         } catch (ex: java.lang.Exception) {
             DataState.message(

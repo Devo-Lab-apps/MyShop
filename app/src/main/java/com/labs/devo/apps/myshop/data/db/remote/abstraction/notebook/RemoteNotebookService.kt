@@ -8,7 +8,7 @@ interface RemoteNotebookService {
 
     suspend fun getNotebooks(): List<Notebook>
 
-    suspend fun insertNotebook(notebook: Notebook): Notebook
+    suspend fun createNotebook(notebook: Notebook): Notebook
 
     suspend fun updateNotebook(notebook: Notebook): Notebook
 

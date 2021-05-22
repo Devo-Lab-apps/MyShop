@@ -29,7 +29,7 @@ class RemoteRecurringEntryServiceFirebaseImpl
         return get(pageId, startAfter)
     }
 
-    override suspend fun insertRecurringEntry(recurringEntry: RecurringEntry): RecurringEntry {
+    override suspend fun createRecurringEntry(recurringEntry: RecurringEntry): RecurringEntry {
         var insertedRecurringEntry = recurringEntry.copy()
         val existingEntries = get(recurringEntry.pageId, "")
         if (existingEntries.size > 1) {
@@ -37,7 +37,7 @@ class RemoteRecurringEntryServiceFirebaseImpl
         }
         FirebaseHelper.runTransaction { transaction ->
             insertedRecurringEntry =
-                insertInDb(recurringEntry.pageId, recurringEntry, transaction)
+                createInDb(recurringEntry.pageId, recurringEntry, transaction)
         }
         return insertedRecurringEntry
     }
@@ -57,7 +57,7 @@ class RemoteRecurringEntryServiceFirebaseImpl
         }
     }
 
-    private fun insertInDb(
+    private fun createInDb(
         pageId: String,
         recurringEntry: RecurringEntry,
         transaction: Transaction

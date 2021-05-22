@@ -13,12 +13,12 @@ interface UserAuth {
     /**
      * Method to login user.
      */
-    suspend fun loginUser(credentials: LoginUserCredentials): DataState<AuthenticationResult>
+    suspend fun login(credentials: LoginUserCredentials): DataState<AuthenticationResult>
 
     /**
      * Method to create new user.
      */
-    suspend fun signUpUser(credentials: SignUpUserCredentials): DataState<AuthenticationResult>
+    suspend fun signup(credentials: SignUpUserCredentials): DataState<AuthenticationResult>
 
 
     /**

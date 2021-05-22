@@ -9,7 +9,7 @@ interface RemoteRecurringEntryService {
         startAfter: String
     ): List<RecurringEntry>
 
-    suspend fun insertRecurringEntry(recurringEntry: RecurringEntry): RecurringEntry
+    suspend fun createRecurringEntry(recurringEntry: RecurringEntry): RecurringEntry
 
     suspend fun updateRecurringEntry(recurringEntry: RecurringEntry): RecurringEntry
 

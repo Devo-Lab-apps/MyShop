@@ -10,9 +10,9 @@ interface LocalRecurringEntryService {
 
     suspend fun getRecurringEntry(recurringEntryId: String): RecurringEntry?
 
-    suspend fun insertRecurringEntries(entries: List<RecurringEntry>)
+    suspend fun createRecurringEntries(entries: List<RecurringEntry>)
 
-    suspend fun insertRecurringEntry(entry: RecurringEntry)
+    suspend fun createRecurringEntry(entry: RecurringEntry)
 
     suspend fun updateRecurringEntry(entry: RecurringEntry)
 

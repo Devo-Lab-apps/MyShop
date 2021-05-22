@@ -14,7 +14,7 @@ interface RecurringEntryRepository {
 
     suspend fun getRecurringEntry(recurringEntryId: String): DataState<RecurringEntry>
 
-    suspend fun insertRecurringEntry(recurringEntry: RecurringEntry): DataState<RecurringEntry>
+    suspend fun createRecurringEntry(recurringEntry: RecurringEntry): DataState<RecurringEntry>
 
     suspend fun updateRecurringEntry(recurringEntry: RecurringEntry): DataState<RecurringEntry>
 

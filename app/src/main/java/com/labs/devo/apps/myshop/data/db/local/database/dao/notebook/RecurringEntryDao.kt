@@ -19,10 +19,10 @@ interface RecurringEntryDao {
         ): RecurringEntry?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertRecurringEntry(entry: RecurringEntry)
+    suspend fun createRecurringEntry(entry: RecurringEntry)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertRecurringEntries(entries: List<RecurringEntry>)
+    suspend fun createRecurringEntries(entries: List<RecurringEntry>)
 
     @Update
     suspend fun updateRecurringEntry(entry: RecurringEntry)

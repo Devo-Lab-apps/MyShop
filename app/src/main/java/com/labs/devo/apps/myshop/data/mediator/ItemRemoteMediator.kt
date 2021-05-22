@@ -65,8 +65,8 @@ class ItemRemoteMediator(
                     itemDao.deleteItems()
                 }
 
-                remoteKeyDao.insertOrReplace(RemoteKey(remoteKey, endReached.toString()))
-                itemDao.insertItems(remoteItems)
+                remoteKeyDao.createOrReplace(RemoteKey(remoteKey, endReached.toString()))
+                itemDao.createItems(remoteItems)
             }
             //TODO put appropriate condition
             return MediatorResult.Success(endOfPaginationReached = endReached == null)
@@ -85,7 +85,7 @@ class ItemRemoteMediator(
         lastModifiedItem?.let {
             if (System.currentTimeMillis() - it.modifiedAt > AppConstants.ONE_DAY_MILLIS) {
                 AsyncHelper.runAsync {
-                    remoteKeyDao.insertOrReplace(RemoteKey(remoteKey, it.modifiedAt.toString()))
+                    remoteKeyDao.createOrReplace(RemoteKey(remoteKey, it.modifiedAt.toString()))
                 }
             }
         }

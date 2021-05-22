@@ -25,9 +25,9 @@ interface LocalEntryService {
 
     suspend fun getEntry(entryId: String): Entry?
 
-    suspend fun insertEntries(entries: List<Entry>)
+    suspend fun createEntries(entries: List<Entry>)
 
-    suspend fun insertEntry(entry: Entry)
+    suspend fun createEntry(entry: Entry)
 
     suspend fun updateEntry(entry: Entry)
 

@@ -21,16 +21,16 @@ class LocalRecurringEntryServiceImpl
         }
     }
 
-    override suspend fun insertRecurringEntries(entries: List<RecurringEntry>) {
+    override suspend fun createRecurringEntries(entries: List<RecurringEntry>) {
         return AsyncHelper.runAsync {
-            dao.insertRecurringEntries(entries)
+            dao.createRecurringEntries(entries)
         }
     }
 
-    override suspend fun insertRecurringEntry(entry: RecurringEntry) {
+    override suspend fun createRecurringEntry(entry: RecurringEntry) {
         return AsyncHelper.runAsync {
             val e = entry
-            dao.insertRecurringEntry(e)
+            dao.createRecurringEntry(e)
         }
     }
 

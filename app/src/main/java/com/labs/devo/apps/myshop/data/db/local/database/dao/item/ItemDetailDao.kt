@@ -16,7 +16,7 @@ interface ItemDetailDao {
     fun getItemDetail(itemDetailId: String): ItemDetail?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertItemDetail(itemDetail: ItemDetail)
+    suspend fun createItemDetail(itemDetail: ItemDetail)
 
     @Update
     suspend fun updateItemDetail(itemDetail: ItemDetail)

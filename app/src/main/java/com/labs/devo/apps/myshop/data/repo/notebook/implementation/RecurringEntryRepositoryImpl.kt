@@ -16,6 +16,9 @@ import com.labs.devo.apps.myshop.view.util.DataState
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
+const val RECURRING_ENTRY_PAGE_SIZE = 20
+const val RECURRING_ENTRY_MAX_SIZE = 100
+
 class RecurringEntryRepositoryImpl
 @Inject constructor(
     private val localRecurringEntryService: LocalRecurringEntryService,
@@ -27,7 +30,7 @@ class RecurringEntryRepositoryImpl
         pageId: String?,
         forceRefresh: Boolean
     ): Flow<PagingData<RecurringEntry>> = Pager(
-        config = PagingConfig(pageSize = 20, maxSize = 100),
+        config = PagingConfig(RECURRING_ENTRY_PAGE_SIZE, RECURRING_ENTRY_MAX_SIZE),
         remoteMediator = RecurringEntryRemoteMediator(
             pageId,
             forceRefresh,
@@ -71,12 +74,12 @@ class RecurringEntryRepositoryImpl
         }
     }
 
-    override suspend fun insertRecurringEntry(recurringEntry: RecurringEntry): DataState<RecurringEntry> {
+    override suspend fun createRecurringEntry(recurringEntry: RecurringEntry): DataState<RecurringEntry> {
         return try {
             PermissionsHelper.checkPermissions(Permissions.CREATE_RECURRING_ENTRY)
             val insertRecurringEntry =
-                remoteRecurringEntryService.insertRecurringEntry(recurringEntry)
-            localRecurringEntryService.insertRecurringEntry(insertRecurringEntry)
+                remoteRecurringEntryService.createRecurringEntry(recurringEntry)
+            localRecurringEntryService.createRecurringEntry(insertRecurringEntry)
             DataState.data(insertRecurringEntry)
         } catch (ex: Exception) {
             DataState.message(
@@ -121,7 +124,7 @@ class RecurringEntryRepositoryImpl
         return try {
             localRecurringEntryService.deleteRecurringEntries(pageId)
             val recurringEntries = remoteRecurringEntryService.getRecurringEntries(pageId, "")
-            localRecurringEntryService.insertRecurringEntries(recurringEntries)
+            localRecurringEntryService.createRecurringEntries(recurringEntries)
             DataState.data(recurringEntries)
         } catch (ex: java.lang.Exception) {
             DataState.message(

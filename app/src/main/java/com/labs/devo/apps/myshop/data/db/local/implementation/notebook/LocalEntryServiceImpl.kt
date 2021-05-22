@@ -22,12 +22,12 @@ class LocalEntryServiceImpl
         orderBy: String,
         isRepeating: Boolean
     ): PagingSource<Int, Entry> {
-        var o = orderBy
+        var finalOrderBy = orderBy
         if (orderBy.isEmpty()) {
-            o = Entry::entryTitle.name
+            finalOrderBy = Entry::entryTitle.name
         }
         val s = "%$searchQuery%"
-        return dao.getEntries(pageId, s, o, isRepeating)
+        return dao.getEntries(pageId, s, finalOrderBy, isRepeating)
     }
 
     override fun getEntriesLikeEntryId(
@@ -53,17 +53,17 @@ class LocalEntryServiceImpl
         }
     }
 
-    override suspend fun insertEntries(entries: List<Entry>) {
+    override suspend fun createEntries(entries: List<Entry>) {
         return AsyncHelper.runAsync {
             val e = entries
-            dao.insertEntries(e)
+            dao.createEntries(e)
         }
     }
 
-    override suspend fun insertEntry(entry: Entry) {
+    override suspend fun createEntry(entry: Entry) {
         return AsyncHelper.runAsync {
             val e = entry
-            dao.insertEntry(e)
+            dao.createEntry(e)
         }
     }
 

@@ -117,7 +117,7 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         recurringAdapter.snapshot().items.forEach { re ->
                             registerWork(applicationContext, re)
                             AsyncHelper.runAsyncInBackground {
-                                alarmDao.insertOrReplace(
+                                alarmDao.createOrReplace(
                                     AlarmKey(
                                         re.recurringEntryId,
                                         NotificationBroadCastReceiver::class.qualifiedName

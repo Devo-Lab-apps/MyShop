@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.paging.PagingSource
 import androidx.room.*
 import com.labs.devo.apps.myshop.data.models.notebook.Entry
-import kotlinx.coroutines.flow.Flow
 
 
 @Dao
@@ -88,10 +87,10 @@ interface EntryDao {
         ): Entry?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertEntry(entry: Entry)
+    suspend fun createEntry(entry: Entry)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertEntries(entries: List<Entry>)
+    suspend fun createEntries(entries: List<Entry>)
 
     @Update
     suspend fun updateEntry(entry: Entry)
