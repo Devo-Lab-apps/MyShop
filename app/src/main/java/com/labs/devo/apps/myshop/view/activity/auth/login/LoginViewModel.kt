@@ -30,7 +30,7 @@ class LoginViewModel @ViewModelInject constructor(private val userAuth: UserAuth
     }
 
     private fun login(credentials: LoginUserCredentials) = viewModelScope.launch {
-        val data = userAuth.loginUser(credentials)
+        val data = userAuth.login(credentials)
         data.data?.let { res ->
             val authResult = res.getContentIfNotHandled()
             if (authResult is AuthenticationResult.LoggedIn) {

@@ -27,11 +27,16 @@ class RemoteEntryServiceFirebaseImpl
         return get(pageId, query, startAfter)
     }
 
+    override suspend fun getEntry(pageId: String, entryId: String): Entry {
+        checkIfPageExists(pageId)
+        return get(pageId, entryId)
+    }
 
-    override suspend fun insertEntry(entry: Entry): Entry {
+
+    override suspend fun createEntry(entry: Entry): Entry {
         var insertedEntry = entry.copy()
         FirebaseHelper.runTransaction { transaction ->
-            insertedEntry = insertInDb(entry.pageId, entry, transaction)
+            insertedEntry = createInDb(entry.pageId, entry, transaction)
         }
         return insertedEntry
     }
@@ -51,7 +56,7 @@ class RemoteEntryServiceFirebaseImpl
     }
 
 
-    private fun insertInDb(pageId: String, entry: Entry, transaction: Transaction): Entry {
+    private fun createInDb(pageId: String, entry: Entry, transaction: Transaction): Entry {
         val id = FirebaseHelper.getEntryReference(pageId).id
         val ref = FirebaseHelper.getEntryReference(pageId, id)
         val data = mapper.mapToEntity(entry)
@@ -84,6 +89,13 @@ class RemoteEntryServiceFirebaseImpl
             val obj = ds.toObject(RemoteEntityEntry::class.java)!!
             mapper.mapFromEntity(obj)
         } ?: listOf()
+    }
+
+    private suspend fun get(pageId: String, entryId: String): Entry {
+        val ds = FirebaseHelper.getEntryReference(pageId, entryId).get().await()
+        if (!ds.exists()) throw EntryNotFoundException()
+        val obj = ds.toObject(RemoteEntityEntry::class.java)!!
+        return mapper.mapFromEntity(obj)
     }
 
     private suspend fun checkIfPageExists(pageId: String) {

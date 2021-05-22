@@ -30,7 +30,7 @@ constructor(
 
 
     fun addPage(page: Page) = viewModelScope.launch {
-        val res = pageRepository.insertPage(page)
+        val res = pageRepository.createPage(page)
         res.data?.let {
             channel.send(AddEditPageEvent.PageInserted(PAGE_ADDED))
         }

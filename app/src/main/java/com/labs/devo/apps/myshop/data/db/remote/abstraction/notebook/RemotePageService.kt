@@ -6,7 +6,7 @@ interface RemotePageService {
 
     suspend fun getPages(notebookId: String, searchQuery: String, startAfter: String?): List<Page>?
 
-    suspend fun insertPage(page: Page): Page
+    suspend fun createPage(page: Page): Page
 
     suspend fun updatePage(page: Page): Page
 

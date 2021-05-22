@@ -19,7 +19,7 @@ class LocalItemServiceImpl
 
     override suspend fun createItem(item: Item) {
         AsyncHelper.runAsync {
-            itemDao.insertItem(item)
+            itemDao.createItem(item)
         }
     }
 

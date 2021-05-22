@@ -32,7 +32,7 @@ abstract class AppDatabase : RoomDatabase() {
             applicationScope.launch {
                 val rateDao = database.get().rateDao()
                 for (operation in allowedOperationMap) {
-                    rateDao.insertRateLimit(RateLimit(operation.key, 0))
+                    rateDao.createRateLimit(RateLimit(operation.key, 0))
                 }
             }
         }

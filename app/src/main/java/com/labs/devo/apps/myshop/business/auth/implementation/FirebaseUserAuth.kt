@@ -7,6 +7,7 @@ import com.labs.devo.apps.myshop.business.auth.abstraction.UserAuth
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants
 import com.labs.devo.apps.myshop.business.helper.FirebaseHelper
 import com.labs.devo.apps.myshop.const.AppConstants
+import com.labs.devo.apps.myshop.const.ErrorCode
 import com.labs.devo.apps.myshop.data.db.remote.models.notebook.ImportStatus
 import com.labs.devo.apps.myshop.data.db.remote.models.notebook.NotebookMetadataConstants
 import com.labs.devo.apps.myshop.data.db.remote.models.notebook.RemoteEntityNotebook
@@ -16,6 +17,8 @@ import com.labs.devo.apps.myshop.data.models.auth.AuthenticationResult
 import com.labs.devo.apps.myshop.data.models.auth.LoginUserCredentials
 import com.labs.devo.apps.myshop.data.models.auth.SignUpUserCredentials
 import com.labs.devo.apps.myshop.util.AppData
+import com.labs.devo.apps.myshop.util.exceptions.ExceptionCatcher
+import com.labs.devo.apps.myshop.util.exceptions.ExceptionCatcher.handleExceptionAndReturnErrorMessage
 import com.labs.devo.apps.myshop.util.printLogD
 import com.labs.devo.apps.myshop.view.util.DataState
 import kotlinx.coroutines.tasks.await
@@ -28,43 +31,33 @@ import javax.inject.Inject
 class FirebaseUserAuth @Inject constructor(val auth: FirebaseAuth) :
     UserAuth {
 
-    /**
-     * Enum to decide the authentication event i.e. sign up or login.
-     */
-    enum class AuthEvent {
-        LOGIN,
-        SIGNUP
-    }
-
     private val TAG = AppConstants.APP_PREFIX + javaClass.simpleName
 
-    override suspend fun loginUser(credentials: LoginUserCredentials): DataState<AuthenticationResult> {
+    override suspend fun login(credentials: LoginUserCredentials): DataState<AuthenticationResult> {
         return try {
             auth.signInWithEmailAndPassword(credentials.email, credentials.password).await()
             val isEmailVerified = auth.currentUser?.isEmailVerified
             return if (isEmailVerified == true) {
                 getUserFromDb(credentials.email)
             } else {
-                throw java.lang.Exception("Please verify your email before login.")
+                throw ExceptionCatcher.GenericException(ErrorCode.ERROR_EMAIL_NOT_VERIFIED)
             }
-        } catch (e: Exception) {
+        } catch (ex: java.lang.Exception) {
             auth.signOut()
-            DataState.message(e.message ?: "An error occurred. Please try again later")
+            DataState.message(handleExceptionAndReturnErrorMessage(ex))
         }
     }
 
 
-    override suspend fun signUpUser(credentials: SignUpUserCredentials): DataState<AuthenticationResult> {
+    override suspend fun signup(credentials: SignUpUserCredentials): DataState<AuthenticationResult> {
         return try {
             val authResult =
                 auth.createUserWithEmailAndPassword(credentials.email, credentials.password).await()
-            val res = createAccountAndUserInDb(credentials.email, authResult)
-            //sign out and return result
+            createAccountAndUserInDb(credentials.email, authResult)
+        } catch (ex: java.lang.Exception) {
+            DataState.message(handleExceptionAndReturnErrorMessage(ex))
+        } finally {
             auth.signOut()
-            res
-        } catch (e: Exception) {
-            auth.signOut()
-            DataState.message(e.message ?: "An error occurred. Please try again later")
         }
     }
 
@@ -74,21 +67,12 @@ class FirebaseUserAuth @Inject constructor(val auth: FirebaseAuth) :
             val doc = FirebaseHelper.getUsersDocReference(credentials.email).get().await()
             val user = doc.toObject(User::class.java)!!
             clearLoginDevice(user)
+            DataState.data(AuthenticationResult.LoggedOutOfDevices)
+        } catch (ex: java.lang.Exception) {
+            DataState.message(handleExceptionAndReturnErrorMessage(ex))
+        } finally {
             //for re-login
             auth.signOut()
-            DataState.data(
-                data = AuthenticationResult.LoggedOutOfDevices,
-                message = "Logged out of all devices. Please login again."
-            )
-        } catch (ex: java.lang.Exception) {
-            auth.signOut()
-            if (ex is FirebaseFirestoreException || ex is NullPointerException) {
-                throw Exception(
-                    "An error occurred while creating user. Please try again later.",
-                    ex
-                )
-            }
-            throw ex
         }
     }
 
@@ -104,7 +88,7 @@ class FirebaseUserAuth @Inject constructor(val auth: FirebaseAuth) :
             val doc = FirebaseHelper.getUsersDocReference(email).get().await()
             user = doc.toObject(User::class.java)!!
             //if first time login, same device login or logged out of all devices.
-            if (user.loggedInDeviceId == "" || user.loggedInDeviceId == AppData.deviceId) {
+            if (user.loggedInDeviceId == AppConstants.EMPTY_STRING || user.loggedInDeviceId == AppData.deviceId) {
                 updateLoginTimeAndLoginDevice(user)
                 //if logging in from another device
             } else if (AppData.deviceId != user.loggedInDeviceId) {
@@ -121,42 +105,37 @@ class FirebaseUserAuth @Inject constructor(val auth: FirebaseAuth) :
         } catch (ex: Exception) {
             //TODO decide whether to create account and user in db.
             //TODO create a customer care
-            throw java.lang.Exception("Can't find user record. Please contact with our customer care.")
+            throw ExceptionCatcher.GenericException(ErrorCode.ERROR_AUTHENTICATED_USER_NOT_FOUND)
         }
     }
 
 
     /**
-     * Method to created user in DB under "user" and "account" collection.
+     * Method to created user in DB under user and account collection.
      */
     private suspend fun createAccountAndUserInDb(
         email: String,
         authResult: AuthResult?
     ): DataState<AuthenticationResult> {
-        var user: User? = null
         return try {
+            var user: User? = null
             authResult?.let { res ->
                 res.user?.let { u ->
                     val account = createAccountInDb(email)
                     user = createUserInDb(email, account.accountId, u.uid)
                     createForeignNotebook(u.uid, account.accountId)
-                    u.sendEmailVerification()
+                    u.sendEmailVerification().await()
                 }
-            }
+            } ?: throw ExceptionCatcher.GenericException(
+                ErrorCode.ERROR_UNKNOWN_STATE,
+                "AuthResult is null for the signed up user."
+            )
             DataState.data(
                 data = AuthenticationResult.SignedUp(user!!),
                 message = "Successfully created. Please verify your email before login."
             )
         } catch (ex: Exception) {
-            user = null //to delete the user in finally make it null here.
-            printLogD(TAG, "Can't store data in db. So deleting user")
             auth.currentUser?.delete()?.await()
-            if (ex is FirebaseFirestoreException || ex is NullPointerException) {
-                throw Exception(
-                    "An error occurred while creating user. Please try again later.",
-                    ex
-                )
-            }
             throw ex
         }
     }
@@ -168,8 +147,9 @@ class FirebaseUserAuth @Inject constructor(val auth: FirebaseAuth) :
             creatorUserId = uid,
             accountId = accountId,
             metadata = mapOf(
-                NotebookMetadataConstants.isForeign to "true",
-                NotebookMetadataConstants.importStatus to "${ImportStatus.IMPORTING.ordinal}",
+                NotebookMetadataConstants.isForeign to true.toString(),
+                //a cloud function will import pages in the backend
+                NotebookMetadataConstants.importStatus to ImportStatus.IMPORTING.ordinal.toString(),
             )
         )
         FirebaseHelper.getNotebookCollection(accountId)
@@ -182,7 +162,7 @@ class FirebaseUserAuth @Inject constructor(val auth: FirebaseAuth) :
     private suspend fun createUserInDb(email: String, accountId: String, uid: String): User {
         val user = User(
             uid,
-            "", //not set on sign up
+            AppConstants.EMPTY_STRING, //TODO change this when doing alias setup, currently not set on sign up
             email,
             accountId,
             signedUpInAt = System.currentTimeMillis(),
@@ -213,16 +193,18 @@ class FirebaseUserAuth @Inject constructor(val auth: FirebaseAuth) :
      */
     private suspend fun updateLoginTimeAndLoginDevice(user: User) {
         val loggedInDeviceId = AppData.deviceId
-        user.loggedInAt = System.currentTimeMillis()
-        user.loggedInDeviceId = loggedInDeviceId
-        FirebaseHelper.getUsersDocReference(user.email).set(user).await()
+        val data = mapOf<String, Any>(
+            user::loggedInAt.name to System.currentTimeMillis(),
+            user::loggedInDeviceId.name to loggedInDeviceId
+        )
+        FirebaseHelper.getUsersDocReference(user.email).update(data).await()
     }
 
     /**
      * Clean login device for the user.
      */
     private suspend fun clearLoginDevice(user: User) {
-        user.loggedInDeviceId = ""
+        user.loggedInDeviceId = AppConstants.EMPTY_STRING
         FirebaseHelper.getUsersDocReference(user.email).set(user).await()
     }
 

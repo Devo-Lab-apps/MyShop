@@ -10,7 +10,7 @@ interface NotebookRepository {
 
     suspend fun getNotebook(notebookId: String): Notebook
 
-    suspend fun insertNotebook(notebook: Notebook): DataState<Notebook>
+    suspend fun createNotebook(notebook: Notebook): DataState<Notebook>
 
     suspend fun updateNotebook(notebook: Notebook): DataState<Notebook>
 

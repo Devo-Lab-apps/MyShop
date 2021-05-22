@@ -32,7 +32,7 @@ class RemoteNotebookServiceFirebaseImpl @Inject constructor(
         })
     }
 
-    override suspend fun insertNotebook(notebook: Notebook): Notebook {
+    override suspend fun createNotebook(notebook: Notebook): Notebook {
         val existingNotebooks = getNotebooks()
 
         if (existingNotebooks.size >= 3) {
@@ -40,7 +40,7 @@ class RemoteNotebookServiceFirebaseImpl @Inject constructor(
         }
         var insertedNotebook = notebook
         FirebaseHelper.runWriteBatch {
-            insertedNotebook = insertInDb(notebook)
+            insertedNotebook = createInDb(notebook)
         }
         return insertedNotebook
     }
@@ -85,7 +85,7 @@ class RemoteNotebookServiceFirebaseImpl @Inject constructor(
     }
 
 
-    private fun insertInDb(notebook: Notebook): Notebook {
+    private fun createInDb(notebook: Notebook): Notebook {
         checkIfForeign(notebook)
         val user = UserManager.user ?: throw UserNotInitializedException()
         val notebookId = FirebaseHelper.getNotebookReference(user.accountId).id

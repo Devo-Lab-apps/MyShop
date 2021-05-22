@@ -17,6 +17,9 @@ import com.labs.devo.apps.myshop.view.util.DataState
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
+
+const val ENTRY_PAGE_SIZE = 20
+const val ENTRY_MAX_SIZE = 100
 class EntryRepositoryImpl
 @Inject constructor(
     private val localEntryService: LocalEntryService,
@@ -32,7 +35,7 @@ class EntryRepositoryImpl
         forceRefresh: Boolean,
         isRepeating: Boolean
     ): Flow<PagingData<Entry>> = Pager(
-        config = PagingConfig(pageSize = 20, maxSize = 100),
+        config = PagingConfig(ENTRY_PAGE_SIZE, ENTRY_MAX_SIZE),
         remoteMediator = EntryRemoteMediator(
             pageId,
             searchQuery,
@@ -50,13 +53,12 @@ class EntryRepositoryImpl
         }
     ).flow
 
-    override suspend fun getEntry(entryId: String): DataState<Entry> {
+    override suspend fun getEntry(pageId: String, entryId: String): DataState<Entry> {
         return try {
             checkPermissions(Permissions.GET_ENTRY)
             var entry = localEntryService.getEntry(entryId)
             if (entry == null) {
-                //TODO set this f
-                entry = remoteEntryService.getEntries(entryId, "", "")[0]
+                entry = remoteEntryService.getEntry(pageId, entryId)
             }
             DataState.data(entry)
         } catch (ex: Exception) {
@@ -90,11 +92,11 @@ class EntryRepositoryImpl
 //        }
 //    }
 
-    override suspend fun insertEntry(entry: Entry): DataState<Entry> {
+    override suspend fun createEntry(entry: Entry): DataState<Entry> {
         return try {
             checkPermissions(Permissions.CREATE_ENTRY)
-            val insertedEntry = remoteEntryService.insertEntry(entry)
-            localEntryService.insertEntry(insertedEntry)
+            val insertedEntry = remoteEntryService.createEntry(entry)
+            localEntryService.createEntry(insertedEntry)
             DataState.data(insertedEntry)
         } catch (ex: Exception) {
             DataState.message(
@@ -138,7 +140,7 @@ class EntryRepositoryImpl
         return try {
             localEntryService.deleteEntries(pageId)
             val entries = remoteEntryService.getEntries(pageId, "", "")
-            localEntryService.insertEntries(entries)
+            localEntryService.createEntries(entries)
             DataState.data(entries)
         } catch (ex: java.lang.Exception) {
             DataState.message(

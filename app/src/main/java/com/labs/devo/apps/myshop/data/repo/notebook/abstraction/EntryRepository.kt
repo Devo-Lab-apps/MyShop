@@ -16,9 +16,9 @@ interface EntryRepository {
         isRepeating: Boolean
     ): Flow<PagingData<Entry>>
 
-    suspend fun getEntry(entryId: String): DataState<Entry>
+    suspend fun getEntry(pageId: String, entryId: String): DataState<Entry>
 
-    suspend fun insertEntry(entry: Entry): DataState<Entry>
+    suspend fun createEntry(entry: Entry): DataState<Entry>
 
     suspend fun updateEntry(entry: Entry): DataState<Entry>
 

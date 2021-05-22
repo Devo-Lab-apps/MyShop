@@ -16,7 +16,7 @@ interface PageRepository {
 
     suspend fun getPage(pageId: String): Page
 
-    suspend fun insertPage(page: Page): DataState<Page>
+    suspend fun createPage(page: Page): DataState<Page>
 
     suspend fun updatePage(page: Page): DataState<Page>
 

@@ -74,8 +74,8 @@ class RecurringEntryRemoteMediator(
                         recurringEntryDao.deleteAll()
                 }
 
-                remoteKeyDao.insertOrReplace(RemoteKey(remoteKey, endReached))
-                recurringEntryDao.insertRecurringEntries(remoteRecurringEntries)
+                remoteKeyDao.createOrReplace(RemoteKey(remoteKey, endReached))
+                recurringEntryDao.createRecurringEntries(remoteRecurringEntries)
             }
             if (pageId == null && endReached == null) {
                 preferencesManager.updateRecurringEntriesSynced()

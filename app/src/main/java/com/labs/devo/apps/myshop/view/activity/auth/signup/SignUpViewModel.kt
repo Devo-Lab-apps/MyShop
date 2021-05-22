@@ -36,7 +36,7 @@ class SignUpViewModel
     }
 
     private fun signUp(credentials: SignUpUserCredentials) = viewModelScope.launch {
-        val data = userAuth.signUpUser(credentials)
+        val data = userAuth.signup(credentials)
         data.data?.let { res ->
             val authResult = res.getContentIfNotHandled()
             channel.send(

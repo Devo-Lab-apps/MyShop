@@ -22,15 +22,15 @@ constructor(
         return AsyncHelper.runAsync { dao.getNotebook(notebookId) }
     }
 
-    override suspend fun insertNotebooks(notebooks: List<Notebook>) {
+    override suspend fun createNotebooks(notebooks: List<Notebook>) {
         return AsyncHelper.runAsync {
-            dao.insertNotebooks(notebooks)
+            dao.createNotebooks(notebooks)
         }
     }
 
-    override suspend fun insertNotebook(notebook: Notebook) {
+    override suspend fun createNotebook(notebook: Notebook) {
         return AsyncHelper.runAsync {
-            dao.insertNotebook(notebook)
+            dao.createNotebook(notebook)
         }
     }
 

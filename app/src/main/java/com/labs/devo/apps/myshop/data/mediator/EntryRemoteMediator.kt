@@ -72,8 +72,8 @@ class EntryRemoteMediator(
                     entryDao.deleteEntries(pageId)
                 }
 
-                remoteKeyDao.insertOrReplace(RemoteKey(remoteKey, endReached))
-                entryDao.insertEntries(remoteEntries)
+                remoteKeyDao.createOrReplace(RemoteKey(remoteKey, endReached))
+                entryDao.createEntries(remoteEntries)
             }
             //TODO put appropriate condition
             return MediatorResult.Success(endOfPaginationReached = endReached == null)

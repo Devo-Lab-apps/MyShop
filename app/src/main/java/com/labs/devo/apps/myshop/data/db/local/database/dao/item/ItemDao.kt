@@ -15,10 +15,10 @@ interface ItemDao {
     fun getItem(itemId: String): Item?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertItem(item: Item)
+    suspend fun createItem(item: Item)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertItems(items: List<Item>)
+    suspend fun createItems(items: List<Item>)
 
     @Update
     suspend fun updateItem(item: Item)

@@ -73,8 +73,8 @@ class PageRemoteMediator(
                     pageDao.deletePages(notebookId)
                 }
 
-                remoteKeyDao.insertOrReplace(RemoteKey(remoteKey, endReached))
-                pageDao.insertPages(remotePages ?: listOf())
+                remoteKeyDao.createOrReplace(RemoteKey(remoteKey, endReached))
+                pageDao.createPages(remotePages ?: listOf())
             }
             //TODO put appropriate condition
             return MediatorResult.Success(endOfPaginationReached = endReached == null)

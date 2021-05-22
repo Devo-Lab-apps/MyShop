@@ -6,7 +6,9 @@ interface RemoteEntryService {
 
     suspend fun getEntries(pageId: String, query: String, startAfter: String?): List<Entry>
 
-    suspend fun insertEntry(entry: Entry): Entry
+    suspend fun getEntry(pageId: String, entryId: String): Entry
+
+    suspend fun createEntry(entry: Entry): Entry
 
     suspend fun updateEntry(entry: Entry): Entry
 

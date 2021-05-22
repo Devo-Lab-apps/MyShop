@@ -3,7 +3,6 @@ package com.labs.devo.apps.myshop.view.activity.notebook.entry
 import androidx.hilt.Assisted
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import com.labs.devo.apps.myshop.business.helper.FirebaseHelper
 import com.labs.devo.apps.myshop.business.helper.UserManager
@@ -40,13 +39,13 @@ class AddEditEntryViewModel @ViewModelInject constructor(
     fun addEntry(entry: Entry) = viewModelScope.launch {
         if (entry.isRepeating) {
             val data = recurringEntry(entry)
-            val res = recurringEntryRepository.insertRecurringEntry(data)
+            val res = recurringEntryRepository.createRecurringEntry(data)
             res.data?.let {
                 channel.send(AddEditEntryEvent.EntryInserted(ENTRY_INSERTED_MSG))
             }
                 ?: channel.send(AddEditEntryEvent.ShowInvalidInputMessage(res.message?.getContentIfNotHandled()))
         } else {
-            val res = entryRepository.insertEntry(entry)
+            val res = entryRepository.createEntry(entry)
             res.data?.let {
                 channel.send(AddEditEntryEvent.EntryInserted(ENTRY_INSERTED_MSG))
             }

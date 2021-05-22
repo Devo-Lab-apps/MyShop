@@ -28,7 +28,7 @@ constructor(
     val operation = state.get<String>(OPERATION)
 
     fun addNotebook(notebook: Notebook) = viewModelScope.launch {
-        val res = notebookRepository.insertNotebook(notebook)
+        val res = notebookRepository.createNotebook(notebook)
         res.data?.let {
             channel.send(AddEditNotebookEvent.NotebookInserted(NOTEBOOK_INSERTED))
         }

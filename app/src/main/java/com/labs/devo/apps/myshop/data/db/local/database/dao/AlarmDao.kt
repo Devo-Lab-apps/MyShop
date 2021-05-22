@@ -13,7 +13,7 @@ data class AlarmKey(
 @Dao
 interface AlarmDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertOrReplace(alarmKey: AlarmKey)
+    suspend fun createOrReplace(alarmKey: AlarmKey)
 
     @Query("SELECT * FROM alarm_key WHERE serviceName = :query")
     suspend fun remoteKeyByQuery(query: String): AlarmKey?

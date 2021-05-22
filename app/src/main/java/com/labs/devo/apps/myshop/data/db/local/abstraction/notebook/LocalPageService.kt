@@ -14,9 +14,9 @@ interface LocalPageService {
 
     suspend fun getPage(pageId: String): Page?
 
-    suspend fun insertPages(pages: List<Page>)
+    suspend fun createPages(pages: List<Page>)
 
-    suspend fun insertPage(page: Page)
+    suspend fun createPage(page: Page)
 
     suspend fun updatePage(page: Page)
 

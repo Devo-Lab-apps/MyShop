@@ -30,15 +30,15 @@ class LocalPageServiceImpl
         }
     }
 
-    override suspend fun insertPages(pages: List<Page>) {
+    override suspend fun createPages(pages: List<Page>) {
         return AsyncHelper.runAsync {
-            dao.insertPages(pages)
+            dao.createPages(pages)
         }
     }
 
-    override suspend fun insertPage(page: Page) {
+    override suspend fun createPage(page: Page) {
         return AsyncHelper.runAsync {
-            dao.insertPage(page)
+            dao.createPage(page)
         }
     }
 

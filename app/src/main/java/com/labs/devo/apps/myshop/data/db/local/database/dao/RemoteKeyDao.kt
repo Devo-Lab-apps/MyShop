@@ -9,7 +9,7 @@ import com.labs.devo.apps.myshop.data.db.local.database.RemoteKey
 @Dao
 interface RemoteKeyDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertOrReplace(remoteKey: RemoteKey)
+    suspend fun createOrReplace(remoteKey: RemoteKey)
 
     @Query("SELECT * FROM remote_keys WHERE label = :query")
     suspend fun remoteKeyByQuery(query: String): RemoteKey?

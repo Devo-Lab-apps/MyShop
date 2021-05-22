@@ -8,9 +8,9 @@ interface LocalNotebookService {
 
     suspend fun getNotebook(notebookId: String): Notebook?
 
-    suspend fun insertNotebooks(notebooks: List<Notebook>)
+    suspend fun createNotebooks(notebooks: List<Notebook>)
 
-    suspend fun insertNotebook(notebook: Notebook)
+    suspend fun createNotebook(notebook: Notebook)
 
     suspend fun updateNotebook(notebook: Notebook)
 
