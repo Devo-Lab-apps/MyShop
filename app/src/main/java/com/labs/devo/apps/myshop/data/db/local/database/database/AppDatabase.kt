@@ -5,9 +5,11 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.labs.devo.apps.myshop.business.helper.allowedOperationMap
+import com.labs.devo.apps.myshop.data.db.local.database.RemoteKey
 import com.labs.devo.apps.myshop.data.db.local.database.dao.AlarmDao
 import com.labs.devo.apps.myshop.data.db.local.database.dao.AlarmKey
 import com.labs.devo.apps.myshop.data.db.local.database.dao.RateDao
+import com.labs.devo.apps.myshop.data.db.local.database.dao.RemoteKeyDao
 import com.labs.devo.apps.myshop.data.db.local.database.util.AppDatabaseConverter
 import com.labs.devo.apps.myshop.data.models.util.RateLimit
 import kotlinx.coroutines.CoroutineScope
@@ -15,13 +17,15 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
 
-@Database(entities = [RateLimit::class, AlarmKey::class], exportSchema = false, version = 1)
+@Database(entities = [RateLimit::class, AlarmKey::class, RemoteKey::class], exportSchema = false, version = 1)
 @TypeConverters(AppDatabaseConverter::class)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun rateDao(): RateDao
 
     abstract fun alarmDao(): AlarmDao
+
+    abstract fun remoteKeyDao(): RemoteKeyDao
 
     class Callback @Inject constructor(
         val database: Provider<AppDatabase>,

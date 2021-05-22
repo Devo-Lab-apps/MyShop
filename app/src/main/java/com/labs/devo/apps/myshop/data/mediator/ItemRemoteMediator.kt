@@ -3,9 +3,9 @@ package com.labs.devo.apps.myshop.data.mediator
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
-import androidx.room.withTransaction
 import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.data.db.local.database.RemoteKey
+import com.labs.devo.apps.myshop.data.db.local.database.database.AppDatabase
 import com.labs.devo.apps.myshop.data.db.local.database.database.ItemDatabase
 import com.labs.devo.apps.myshop.data.db.local.database.database.NotebookDatabase
 import com.labs.devo.apps.myshop.data.db.remote.abstraction.item.RemoteItemService
@@ -20,12 +20,13 @@ class ItemRemoteMediator(
     private val forceRefresh: Boolean,
     private val itemDatabase: ItemDatabase,
     notebookDatabase: NotebookDatabase,
+    appDatabase: AppDatabase,
     private val networkService: RemoteItemService
 ) : RemoteMediator<Int, Item>() {
 
     private val itemDao = itemDatabase.itemDao()
 
-    private val remoteKeyDao = notebookDatabase.remoteKeyDao()
+    private val remoteKeyDao = appDatabase.remoteKeyDao()
 
     private val TAG = AppConstants.APP_PREFIX + javaClass.simpleName
 
@@ -59,15 +60,15 @@ class ItemRemoteMediator(
             val endReached = if (remoteItems.size == itemGetLimit) remoteItems[9].modifiedAt
             else null
 
-            itemDatabase.withTransaction {
-                if (loadType == LoadType.REFRESH) {
-                    remoteKeyDao.deleteByQuery(itemsLoadKey)
-                    itemDao.deleteItems()
-                }
 
-                remoteKeyDao.createOrReplace(RemoteKey(remoteKey, endReached.toString()))
-                itemDao.createItems(remoteItems)
+            if (loadType == LoadType.REFRESH) {
+                remoteKeyDao.deleteByQuery(itemsLoadKey)
+                itemDao.deleteItems()
             }
+
+            remoteKeyDao.createOrReplace(RemoteKey(remoteKey, endReached.toString()))
+            itemDao.createItems(remoteItems)
+
             //TODO put appropriate condition
             return MediatorResult.Success(endOfPaginationReached = endReached == null)
         } catch (ex: Exception) {

@@ -8,6 +8,7 @@ import androidx.room.withTransaction
 import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.const.AppConstants.ONE_DAY_MILLIS
 import com.labs.devo.apps.myshop.data.db.local.database.RemoteKey
+import com.labs.devo.apps.myshop.data.db.local.database.database.AppDatabase
 import com.labs.devo.apps.myshop.data.db.local.database.database.NotebookDatabase
 import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemotePageService
 import com.labs.devo.apps.myshop.data.models.notebook.Page
@@ -21,12 +22,13 @@ class PageRemoteMediator(
     private val searchQuery: String,
     private val forceRefresh: Boolean,
     private val database: NotebookDatabase,
+    private val appDatabase: AppDatabase,
     private val networkService: RemotePageService
 ) : RemoteMediator<Int, Page>() {
 
     private val pageDao = database.pageDao()
 
-    private val remoteKeyDao = database.remoteKeyDao()
+    private val remoteKeyDao = appDatabase.remoteKeyDao()
 
     private val TAG = AppConstants.APP_PREFIX + javaClass.simpleName
 
@@ -43,7 +45,7 @@ class PageRemoteMediator(
                 LoadType.REFRESH -> null
                 LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
                 LoadType.APPEND -> {
-                    val rk = database.withTransaction {
+                    val rk = appDatabase.withTransaction {
                         remoteKeyDao.remoteKeyByQuery(remoteKey)
                     }
                     if (rk != null) {
@@ -67,15 +69,15 @@ class PageRemoteMediator(
                 else null
             }
 
-            database.withTransaction {
-                if (loadType == LoadType.REFRESH) {
-                    remoteKeyDao.deleteByQuery("$pagesLoadKey$notebookId")
-                    pageDao.deletePages(notebookId)
-                }
 
-                remoteKeyDao.createOrReplace(RemoteKey(remoteKey, endReached))
-                pageDao.createPages(remotePages ?: listOf())
+            if (loadType == LoadType.REFRESH) {
+                remoteKeyDao.deleteByQuery("$pagesLoadKey$notebookId")
+                pageDao.deletePages(notebookId)
             }
+
+            remoteKeyDao.createOrReplace(RemoteKey(remoteKey, endReached))
+            pageDao.createPages(remotePages ?: listOf())
+
             //TODO put appropriate condition
             return MediatorResult.Success(endOfPaginationReached = endReached == null)
         } catch (ex: Exception) {

@@ -8,6 +8,7 @@ import androidx.room.withTransaction
 import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.const.AppConstants.ONE_DAY_MILLIS
 import com.labs.devo.apps.myshop.data.db.local.database.RemoteKey
+import com.labs.devo.apps.myshop.data.db.local.database.database.AppDatabase
 import com.labs.devo.apps.myshop.data.db.local.database.database.NotebookDatabase
 import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemoteEntryService
 import com.labs.devo.apps.myshop.data.models.notebook.Entry
@@ -21,15 +22,16 @@ class EntryRemoteMediator(
     private val pageId: String,
     private val searchQuery: String,
     private val forceRefresh: Boolean,
-    private val database: NotebookDatabase,
+    private val notebookDatabase: NotebookDatabase,
+    private val appDatabase: AppDatabase,
     private val networkService: RemoteEntryService
 ) : RemoteMediator<Int, Entry>() {
 
     private val TAG = AppConstants.APP_PREFIX + javaClass.simpleName
 
-    private val entryDao = database.entryDao()
+    private val entryDao = notebookDatabase.entryDao()
 
-    private val remoteKeyDao = database.remoteKeyDao()
+    private val remoteKeyDao = appDatabase.remoteKeyDao()
 
 
     override suspend fun load(
@@ -45,7 +47,7 @@ class EntryRemoteMediator(
                 LoadType.REFRESH -> null
                 LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
                 LoadType.APPEND -> {
-                    val rk = database.withTransaction {
+                    val rk = appDatabase.withTransaction {
                         remoteKeyDao.remoteKeyByQuery(remoteKey)
                     }
                     if (rk != null) {
@@ -66,15 +68,14 @@ class EntryRemoteMediator(
                 if (remoteEntries.size >= 10) remoteEntries[9].entryId
                 else null
 
-            database.withTransaction {
-                if (loadType == LoadType.REFRESH) {
-                    remoteKeyDao.deleteByQuery(remoteKey)
-                    entryDao.deleteEntries(pageId)
-                }
-
-                remoteKeyDao.createOrReplace(RemoteKey(remoteKey, endReached))
-                entryDao.createEntries(remoteEntries)
+            if (loadType == LoadType.REFRESH) {
+                remoteKeyDao.deleteByQuery(remoteKey)
+                entryDao.deleteEntries(pageId)
             }
+
+            remoteKeyDao.createOrReplace(RemoteKey(remoteKey, endReached))
+            entryDao.createEntries(remoteEntries)
+
             //TODO put appropriate condition
             return MediatorResult.Success(endOfPaginationReached = endReached == null)
         } catch (ex: Exception) {

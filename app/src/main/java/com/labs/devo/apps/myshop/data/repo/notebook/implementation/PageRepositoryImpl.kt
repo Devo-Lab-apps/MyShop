@@ -6,6 +6,7 @@ import androidx.paging.PagingData
 import com.labs.devo.apps.myshop.business.helper.PermissionsHelper.checkPermissions
 import com.labs.devo.apps.myshop.const.Permissions
 import com.labs.devo.apps.myshop.data.db.local.abstraction.notebook.LocalPageService
+import com.labs.devo.apps.myshop.data.db.local.database.database.AppDatabase
 import com.labs.devo.apps.myshop.data.db.local.database.database.NotebookDatabase
 import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemotePageService
 import com.labs.devo.apps.myshop.data.mediator.PageRemoteMediator
@@ -20,6 +21,7 @@ const val PAGE_MAX_SIZE = 100
 class PageRepositoryImpl @Inject constructor(
     private val localPageService: LocalPageService,
     private val notebookDatabase: NotebookDatabase,
+    private val appDatabase: AppDatabase,
     private val remotePageService: RemotePageService
 ) : PageRepository {
 
@@ -36,6 +38,7 @@ class PageRepositoryImpl @Inject constructor(
             searchQuery,
             forceRefresh,
             notebookDatabase,
+            appDatabase,
             remotePageService
         ),
         pagingSourceFactory = { localPageService.getPages(notebookId, searchQuery, orderBy) }
