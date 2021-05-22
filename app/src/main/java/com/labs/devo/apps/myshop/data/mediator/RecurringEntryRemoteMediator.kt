@@ -7,6 +7,7 @@ import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
 import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.data.db.local.database.RemoteKey
+import com.labs.devo.apps.myshop.data.db.local.database.database.AppDatabase
 import com.labs.devo.apps.myshop.data.db.local.database.database.NotebookDatabase
 import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemoteRecurringEntryService
 import com.labs.devo.apps.myshop.data.models.notebook.RecurringEntry
@@ -21,6 +22,7 @@ class RecurringEntryRemoteMediator(
     private val pageId: String?,
     private val forceRefresh: Boolean,
     private val database: NotebookDatabase,
+    private val appDatabase: AppDatabase,
     private val networkService: RemoteRecurringEntryService
 ) : RemoteMediator<Int, RecurringEntry>() {
 
@@ -31,7 +33,7 @@ class RecurringEntryRemoteMediator(
 
     private val recurringEntryDao = database.recurringEntryDao()
 
-    private val remoteKeyDao = database.remoteKeyDao()
+    private val remoteKeyDao = appDatabase.remoteKeyDao()
 
 
     override suspend fun load(
@@ -44,7 +46,7 @@ class RecurringEntryRemoteMediator(
                 LoadType.REFRESH -> null
                 LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
                 LoadType.APPEND -> {
-                    val rk = database.withTransaction {
+                    val rk = appDatabase.withTransaction {
                         remoteKeyDao.remoteKeyByQuery(remoteKey)
                     }
                     if (rk != null) {
@@ -65,18 +67,17 @@ class RecurringEntryRemoteMediator(
                 if (remoteRecurringEntries.size >= 10) remoteRecurringEntries[9].recurringEntryId
                 else null
 
-            database.withTransaction {
-                if (loadType == LoadType.REFRESH) {
-                    remoteKeyDao.deleteByQuery(remoteKey)
-                    if (pageId != null)
-                        recurringEntryDao.deleteRecurringEntries(pageId)
-                    else
-                        recurringEntryDao.deleteAll()
-                }
-
-                remoteKeyDao.createOrReplace(RemoteKey(remoteKey, endReached))
-                recurringEntryDao.createRecurringEntries(remoteRecurringEntries)
+            if (loadType == LoadType.REFRESH) {
+                remoteKeyDao.deleteByQuery(remoteKey)
+                if (pageId != null)
+                    recurringEntryDao.deleteRecurringEntries(pageId)
+                else
+                    recurringEntryDao.deleteAll()
             }
+
+            remoteKeyDao.createOrReplace(RemoteKey(remoteKey, endReached))
+            recurringEntryDao.createRecurringEntries(remoteRecurringEntries)
+
             if (pageId == null && endReached == null) {
                 preferencesManager.updateRecurringEntriesSynced()
             }

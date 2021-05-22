@@ -8,6 +8,7 @@ import androidx.paging.PagingData
 import com.labs.devo.apps.myshop.business.helper.PermissionsHelper.checkPermissions
 import com.labs.devo.apps.myshop.const.Permissions
 import com.labs.devo.apps.myshop.data.db.local.abstraction.notebook.LocalEntryService
+import com.labs.devo.apps.myshop.data.db.local.database.database.AppDatabase
 import com.labs.devo.apps.myshop.data.db.local.database.database.NotebookDatabase
 import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemoteEntryService
 import com.labs.devo.apps.myshop.data.mediator.EntryRemoteMediator
@@ -24,6 +25,7 @@ class EntryRepositoryImpl
 @Inject constructor(
     private val localEntryService: LocalEntryService,
     private val notebookDatabase: NotebookDatabase,
+    private val appDatabase: AppDatabase,
     private val remoteEntryService: RemoteEntryService
 ) : EntryRepository {
 
@@ -41,6 +43,7 @@ class EntryRepositoryImpl
             searchQuery,
             forceRefresh,
             notebookDatabase,
+            appDatabase,
             remoteEntryService
         ),
         pagingSourceFactory = {

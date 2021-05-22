@@ -6,6 +6,7 @@ import androidx.paging.PagingData
 import com.labs.devo.apps.myshop.business.helper.PermissionsHelper
 import com.labs.devo.apps.myshop.const.Permissions
 import com.labs.devo.apps.myshop.data.db.local.abstraction.item.LocalItemService
+import com.labs.devo.apps.myshop.data.db.local.database.database.AppDatabase
 import com.labs.devo.apps.myshop.data.db.local.database.database.ItemDatabase
 import com.labs.devo.apps.myshop.data.db.local.database.database.NotebookDatabase
 import com.labs.devo.apps.myshop.data.db.remote.abstraction.item.RemoteItemService
@@ -19,6 +20,7 @@ import javax.inject.Inject
 class ItemRepositoryImpl
 @Inject constructor(
     val notebookDatabase: NotebookDatabase,
+    val appDatabase: AppDatabase,
     private val itemDatabase: ItemDatabase,
     val localItemService: LocalItemService,
     private val remoteItemService: RemoteItemService
@@ -38,6 +40,7 @@ class ItemRepositoryImpl
             forceRefresh,
             itemDatabase,
             notebookDatabase,
+            appDatabase,
             remoteItemService
         ),
         pagingSourceFactory = {

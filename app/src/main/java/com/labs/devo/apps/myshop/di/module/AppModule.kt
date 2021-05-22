@@ -116,7 +116,7 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun provideRemoteKeyDao(database: NotebookDatabase): RemoteKeyDao = database.remoteKeyDao()
+    fun provideRemoteKeyDao(database: AppDatabase): RemoteKeyDao = database.remoteKeyDao()
 
     @Provides
     @Singleton

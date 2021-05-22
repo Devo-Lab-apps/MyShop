@@ -6,6 +6,7 @@ import androidx.paging.PagingData
 import com.labs.devo.apps.myshop.business.helper.PermissionsHelper
 import com.labs.devo.apps.myshop.const.Permissions
 import com.labs.devo.apps.myshop.data.db.local.abstraction.notebook.LocalRecurringEntryService
+import com.labs.devo.apps.myshop.data.db.local.database.database.AppDatabase
 import com.labs.devo.apps.myshop.data.db.local.database.database.NotebookDatabase
 import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemoteRecurringEntryService
 import com.labs.devo.apps.myshop.data.mediator.RecurringEntryRemoteMediator
@@ -23,7 +24,8 @@ class RecurringEntryRepositoryImpl
 @Inject constructor(
     private val localRecurringEntryService: LocalRecurringEntryService,
     private val remoteRecurringEntryService: RemoteRecurringEntryService,
-    private val notebookDatabase: NotebookDatabase
+    private val notebookDatabase: NotebookDatabase,
+    private val appDatabase: AppDatabase
 ) : RecurringEntryRepository {
 
     override suspend fun getRecurringEntries(
@@ -35,6 +37,7 @@ class RecurringEntryRepositoryImpl
             pageId,
             forceRefresh,
             notebookDatabase,
+            appDatabase,
             remoteRecurringEntryService
         ),
         pagingSourceFactory = {

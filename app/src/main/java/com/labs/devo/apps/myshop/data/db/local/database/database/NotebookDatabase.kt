@@ -17,7 +17,7 @@ import com.labs.devo.apps.myshop.data.models.notebook.RecurringEntry
 
 
 @Database(
-    entities = [Page::class, Notebook::class, Entry::class, RemoteKey::class, RecurringEntry::class],
+    entities = [Page::class, Notebook::class, Entry::class, RecurringEntry::class],
     version = 1,
     exportSchema = false
 )
@@ -29,8 +29,6 @@ abstract class NotebookDatabase : RoomDatabase() {
     abstract fun notebookDao(): NotebookDao
 
     abstract fun entryDao(): EntryDao
-
-    abstract fun remoteKeyDao(): RemoteKeyDao
 
     abstract fun recurringEntryDao(): RecurringEntryDao
 
