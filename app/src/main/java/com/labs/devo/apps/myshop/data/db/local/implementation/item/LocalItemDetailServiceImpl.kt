@@ -17,6 +17,12 @@ class LocalItemDetailServiceImpl
         return itemDetailDao.getItemDetails()
     }
 
+    override suspend fun getItemDetail(itemId: String): ItemDetail? {
+        return AsyncHelper.runAsync {
+            itemDetailDao.getItemDetail(itemId)
+        }
+    }
+
     override suspend fun createItemDetail(itemDetail: ItemDetail) {
         AsyncHelper.runAsync {
             itemDetailDao.createItemDetail(itemDetail)

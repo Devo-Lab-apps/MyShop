@@ -10,6 +10,11 @@ interface LocalItemDetailService {
         orderBy: String
     ): PagingSource<Int, ItemDetail>
 
+    /**
+     * Get Item with the itemId and not the itemDetailId.
+     */
+    suspend fun getItemDetail(itemId: String): ItemDetail?
+
     suspend fun createItemDetail(itemDetail: ItemDetail)
 
     suspend fun updateItemDetail(itemDetail: ItemDetail)
