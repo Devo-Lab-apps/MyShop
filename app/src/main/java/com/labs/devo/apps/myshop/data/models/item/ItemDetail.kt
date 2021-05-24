@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "itemDetail")
 data class ItemDetail(
     @PrimaryKey
+    val itemDetailId: String = "",
     val itemId: String = "",
     val itemName: String = "",
     val quantity: Double = 0.0,
@@ -16,7 +17,7 @@ data class ItemDetail(
     val subCategory: String? = null,
     val boughtFrom: String? = null,
     val imageUrl: String? = null,
-    val metadata: Map<String, String>? = null,
+    val metadata: Map<String, String>? = mapOf(),
     val tags: List<String> = listOf(),
     //add 30 days from current time
     val expiresAt: Long = System.currentTimeMillis() + 30 * DAY_IN_MILLIS,
