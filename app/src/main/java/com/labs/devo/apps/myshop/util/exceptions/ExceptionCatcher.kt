@@ -34,7 +34,7 @@ object ExceptionCatcher {
     fun handleExceptionAndReturnErrorMessage(e: Exception): String {
         return when (e) {
             is FirebaseFirestoreException -> decodeFirebaseFirestoreException(e.code.name)
-            is FirebaseAuthException -> decodeFirebaseFirestoreException(e.errorCode)
+            is FirebaseAuthException -> decodeFirebaseAuthException(e.errorCode)
             is GenericException -> decodeGenericException(e)
             else -> e.message ?: UNKNOWN_ERROR_OCCURRED_RETRY
         }
@@ -45,8 +45,12 @@ object ExceptionCatcher {
             ErrorCode.ERROR_EMAIL_NOT_VERIFIED -> "Please verify your email before login."
             ErrorCode.ERROR_AUTHENTICATED_USER_NOT_FOUND -> "Something went wrong on our side. Please contact the customer care."
             ErrorCode.ERROR_UNKNOWN_STATE -> {
-                if (ex.reason != null) cLog(ex.reason)
-                UNKNOWN_ERROR_OCCURRED_RETRY
+                if (ex.reason != null) {
+                    cLog(ex.reason)
+                    ex.reason
+                } else {
+                    UNKNOWN_ERROR_OCCURRED_RETRY
+                }
             }
             else -> UNKNOWN_ERROR_OCCURRED_RETRY
         }
