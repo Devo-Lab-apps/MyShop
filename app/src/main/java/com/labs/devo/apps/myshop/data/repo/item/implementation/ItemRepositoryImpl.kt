@@ -22,7 +22,7 @@ class ItemRepositoryImpl
     val notebookDatabase: NotebookDatabase,
     val appDatabase: AppDatabase,
     private val itemDatabase: ItemDatabase,
-    val localItemService: LocalItemService,
+    private val localItemService: LocalItemService,
     private val remoteItemService: RemoteItemService
 ) : ItemRepository {
 

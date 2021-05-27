@@ -1,16 +1,15 @@
 package com.labs.devo.apps.myshop.business.helper
 
-import com.google.firebase.firestore.CollectionReference
-import com.google.firebase.firestore.DocumentReference
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Transaction
+import com.google.firebase.firestore.*
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.account
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.entry
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.item
+import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.itemDetail
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.notebook
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.page
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.recurringEntry
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants.user
+import com.labs.devo.apps.myshop.data.models.item.ItemDetail
 import kotlinx.coroutines.tasks.await
 
 
@@ -22,6 +21,7 @@ object FirebaseConstants {
     const val entry = "entry"
     const val recurringEntry = "recurring_entry"
     const val item = "item"
+    const val itemDetail = "item_detail"
     const val foreignNotebookName = "Foreign"
     const val foreignNotebookKey = "foreign"
 }
@@ -115,6 +115,27 @@ object FirebaseHelper {
         itemId: String
     ): DocumentReference {
         return getItemCollection(accountId).document(itemId)
+    }
+
+    fun getItemDetailReference(accountId: String): DocumentReference {
+        return getItemDetailCollection(accountId).document()
+    }
+
+    fun getItemDetailCollection(accountId: String): CollectionReference {
+        return getAccountCollection().document(accountId).collection(itemDetail)
+    }
+
+    fun getItemDetailReference(
+        accountId: String,
+        itemDetailId: String
+    ): DocumentReference {
+        return getItemDetailCollection(accountId).document(itemDetailId)
+    }
+    fun getItemDetailReferenceByItemId(
+        accountId: String,
+        itemId: String
+    ): Query {
+        return getItemDetailCollection(accountId).whereEqualTo(ItemDetail::itemId.name, itemId)
     }
 
     fun getItemReference(accountId: String): DocumentReference {

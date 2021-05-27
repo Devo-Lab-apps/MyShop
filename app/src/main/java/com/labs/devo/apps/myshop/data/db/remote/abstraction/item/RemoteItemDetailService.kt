@@ -6,6 +6,8 @@ interface RemoteItemDetailService {
 
     suspend fun getItemDetails(searchQuery: String, startAfter: String?): List<ItemDetail>
 
+    suspend fun getItemDetail(itemId: String): ItemDetail
+
     suspend fun createItemDetail(itemDetail: ItemDetail): ItemDetail
 
     suspend fun updateItemDetail(itemDetail: ItemDetail): ItemDetail

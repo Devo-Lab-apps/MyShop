@@ -27,6 +27,15 @@ class RemoteItemDetailEntityFirebaseImpl
         return get(user.accountId, searchQuery, startAfter)
     }
 
+    override suspend fun getItemDetail(itemId: String): ItemDetail {
+        val user = UserManager.user ?: throw UserNotInitializedException()
+        val ds = FirebaseHelper.getItemDetailReferenceByItemId(user.accountId, itemId).get().await()
+        if (ds.size() == 1)
+            return mapper.mapFromEntity(ds.documents[0].toObject(RemoteEntityItemDetail::class.java)!!)
+        else
+            throw ItemDetailNotFoundException(ErrorCode.ERROR_ITEM_DETAIL_NOT_FOUND)
+    }
+
     private suspend fun get(
         accountId: String,
         searchQuery: String,
@@ -34,7 +43,7 @@ class RemoteItemDetailEntityFirebaseImpl
     ): List<ItemDetail> {
         //TODO search query not used
         val start = startAfter?.toLong() ?: 0L
-        val querySnapshot = FirebaseHelper.getItemCollection(accountId)
+        val querySnapshot = FirebaseHelper.getItemDetailCollection(accountId)
             .orderBy(Item::modifiedAt.name).startAfter(start).limit(itemDetailGetLimit.toLong())
             .get().await()
 
@@ -65,8 +74,8 @@ class RemoteItemDetailEntityFirebaseImpl
 
     private suspend fun updateInDb(itemDetail: ItemDetail): ItemDetail {
         val user = UserManager.user ?: throw UserNotInitializedException()
-        val id = itemDetail.itemId
-        val ref = FirebaseHelper.getItemReference(user.accountId, id)
+        val id = itemDetail.itemDetailId
+        val ref = FirebaseHelper.getItemDetailReference(user.accountId, id)
         FirebaseHelper.runTransaction { transaction ->
             val existing = transaction.get(ref)
             if (existing.exists()) {
@@ -86,7 +95,7 @@ class RemoteItemDetailEntityFirebaseImpl
 
     private fun deleteFromDb(itemDetailId: String, transaction: Transaction) {
         val user = UserManager.user ?: throw UserNotInitializedException()
-        val ref = FirebaseHelper.getItemReference(user.accountId, itemDetailId)
+        val ref = FirebaseHelper.getItemDetailReference(user.accountId, itemDetailId)
         val existing = transaction.get(ref)
         if (existing.exists()) {
             transaction.delete(ref)
