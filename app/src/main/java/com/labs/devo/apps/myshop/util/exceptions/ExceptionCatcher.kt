@@ -56,6 +56,6 @@ object ExceptionCatcher {
         }
     }
 
-    data class GenericException(val errorCode: ErrorCode, val reason: String? = null) : Exception()
+    open class GenericException(val errorCode: ErrorCode, val reason: String? = null) : Exception()
 
 }
