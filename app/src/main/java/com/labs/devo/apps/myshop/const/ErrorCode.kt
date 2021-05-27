@@ -20,5 +20,10 @@ enum class ErrorCode {
     //Miscellaneous errors
     ERROR_NO_INTERNET,
     ERROR_AUTHENTICATED_USER_NOT_FOUND, // when user is logged in and tries to get user but he is unable to
-    ERROR_UNKNOWN_STATE
+    ERROR_UNKNOWN_STATE,
+
+
+
+    //Item detail
+    ERROR_ITEM_DETAIL_NOT_FOUND
 }
