@@ -15,14 +15,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.labs.devo.apps.myshop.R
-import com.labs.devo.apps.myshop.business.helper.MyNotificationManager.registerWork
+import com.labs.devo.apps.myshop.business.helper.MyNotificationManager.registerRecurringEntryWork
 import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.data.db.local.database.dao.AlarmDao
 import com.labs.devo.apps.myshop.data.db.local.database.dao.AlarmKey
 import com.labs.devo.apps.myshop.data.models.notebook.RecurringEntry
 import com.labs.devo.apps.myshop.databinding.ActivityMainBinding
-import com.labs.devo.apps.myshop.util.NotificationBroadCastReceiver
 import com.labs.devo.apps.myshop.util.PreferencesManager
+import com.labs.devo.apps.myshop.util.RecurringEntryNotificationBroadCastReceiver
 import com.labs.devo.apps.myshop.util.printLogD
 import com.labs.devo.apps.myshop.view.activity.auth.AuthenticationActivity
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity
@@ -69,6 +69,8 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         if (auth.currentUser != null && auth.currentUser!!.email != null) {
             viewModel.attachSnapshotToUser(auth.currentUser!!.email!!)
+        } else {
+            logoutUser()
         }
 
         observeEvents()
@@ -115,12 +117,12 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 when (state.refresh) {
                     is LoadState.NotLoading -> {
                         recurringAdapter.snapshot().items.forEach { re ->
-                            registerWork(applicationContext, re)
+                            registerRecurringEntryWork(applicationContext, re)
                             AsyncHelper.runAsyncInBackground {
                                 alarmDao.createOrReplace(
                                     AlarmKey(
                                         re.recurringEntryId,
-                                        NotificationBroadCastReceiver::class.qualifiedName
+                                        RecurringEntryNotificationBroadCastReceiver::class.qualifiedName
                                             ?: "com.labs.devo.apps.myshop.util.NotificationBroadCastReceiver"
                                     )
                                 )
@@ -136,7 +138,6 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         withContext(Dispatchers.Main) {
             Toast.makeText(this@HomeActivity, s, Toast.LENGTH_LONG).show()
         }
-
     }
 
     /**

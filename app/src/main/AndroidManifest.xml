@@ -30,13 +30,19 @@
             android:name=".view.activity.home.HomeActivity"
             android:theme="@style/Theme.MaterialComponents.Light.NoActionBar" />
         <receiver
-            android:name=".util.NotificationBroadCastReceiver"
-            android:directBootAware="true"
+            android:name=".util.RecurringEntryNotificationBroadCastReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+                <action android:name="com.labs.devo.apps.myshop.RECURRING_ENTRY_NOTIFICATION"/>
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".util.RecurringEntryNotificationActionReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.labs.devo.apps.myshop.RECURRING_ENTRY_ACTION"/>
             </intent-filter>
         </receiver>
     </application>

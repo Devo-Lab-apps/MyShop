@@ -6,12 +6,16 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationCompat
 import com.google.gson.Gson
+import com.labs.devo.apps.myshop.R
 import com.labs.devo.apps.myshop.RECURRING_ENTRY_CHANNEL
 import com.labs.devo.apps.myshop.const.AppConstants.TAG
 import com.labs.devo.apps.myshop.data.models.notebook.RecurringEntry
-import com.labs.devo.apps.myshop.util.NotificationBroadCastReceiver
+import com.labs.devo.apps.myshop.util.RecurringEntryNotificationActionReceiver
+import com.labs.devo.apps.myshop.util.RecurringEntryNotificationBroadCastReceiver
 import com.labs.devo.apps.myshop.util.printLogD
+import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.RECURRING_ENTRY
 
 
 object MyNotificationManager {
@@ -19,7 +23,7 @@ object MyNotificationManager {
     const val NOTIFICATION_DATA = "notification_data"
     const val ALARM_METADATA = "alarm_metadata"
     private const val CHANNEL_ID = "channel_id"
-    private const val NOTIFICATION_ID = "notification_id"
+    const val NOTIFICATION_ID = "notification_id"
 
     // private const val RESULT_ID = "id"
 
@@ -30,7 +34,8 @@ object MyNotificationManager {
     ) {
         val manager = context.getSystemService(AppCompatActivity.ALARM_SERVICE) as AlarmManager
 
-        val alarmIntent = Intent(context, NotificationBroadCastReceiver::class.java)
+        val alarmIntent = Intent(context, RecurringEntryNotificationBroadCastReceiver::class.java)
+        alarmIntent.action = "com.labs.devo.apps.myshop.RECURRING_ENTRY_NOTIFICATION"
         alarmIntent.putExtra(NOTIFICATION_DATA, gson.toJson(notificationBuilder))
         alarmIntent.putExtra(
             ALARM_METADATA,
@@ -61,7 +66,8 @@ object MyNotificationManager {
     ) {
         val manager = context.getSystemService(AppCompatActivity.ALARM_SERVICE) as AlarmManager
 
-        val alarmIntent = Intent(context, NotificationBroadCastReceiver::class.java)
+        val alarmIntent = Intent(context, RecurringEntryNotificationBroadCastReceiver::class.java)
+        alarmIntent.action = "com.labs.devo.apps.myshop.RECURRING_ENTRY_NOTIFICATION"
         alarmIntent.putExtra(NOTIFICATION_DATA, gson.toJson(notificationBuilder))
         alarmIntent.putExtra(
             ALARM_METADATA,
@@ -87,7 +93,8 @@ object MyNotificationManager {
     }
 
     private fun checkIfAlarmExists(context: Context, notificationUniqueName: String): Boolean {
-        val alarmIntent = Intent(context, NotificationBroadCastReceiver::class.java)
+        val alarmIntent = Intent(context, RecurringEntryNotificationBroadCastReceiver::class.java)
+        alarmIntent.action = "com.labs.devo.apps.myshop.RECURRING_ENTRY_NOTIFICATION"
         val pendingIntent =
             PendingIntent.getBroadcast(
                 context,
@@ -100,7 +107,7 @@ object MyNotificationManager {
 
     fun cancelIfAlarmExists(context: Context, notificationUniqueName: String) {
         val manager = context.getSystemService(AppCompatActivity.ALARM_SERVICE) as AlarmManager
-        val alarmIntent = Intent(context, NotificationBroadCastReceiver::class.java)
+        val alarmIntent = Intent(context, RecurringEntryNotificationBroadCastReceiver::class.java)
         val pendingIntent =
             PendingIntent.getBroadcast(
                 context,
@@ -118,7 +125,7 @@ object MyNotificationManager {
     }
 
 
-    fun registerWork(
+    fun registerRecurringEntryWork(
         context: Context,
         recurringEntry: RecurringEntry,
         registerOverride: Boolean = false
