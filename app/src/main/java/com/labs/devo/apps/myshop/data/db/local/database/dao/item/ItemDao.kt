@@ -3,13 +3,25 @@ package com.labs.devo.apps.myshop.data.db.local.database.dao.item
 import androidx.paging.PagingSource
 import androidx.room.*
 import com.labs.devo.apps.myshop.data.models.item.Item
-import com.labs.devo.apps.myshop.data.models.notebook.Notebook
 
 @Dao
 interface ItemDao {
 
-    @Query("SELECT * FROM item")
-    fun getItems(): PagingSource<Int, Item>
+    fun getItems(searchQuery: String, orderBy: String): PagingSource<Int, Item> =
+        when (orderBy) {
+            Item::itemName.name -> {
+                getItemInNameOrder(searchQuery)
+            }
+            else -> {
+                getItemInDateOrder(searchQuery)
+            }
+        }
+
+    @Query("SELECT * FROM item where itemName LIKE :searchQuery order by itemName ASC")
+    fun getItemInDateOrder(searchQuery: String): PagingSource<Int, Item>
+
+    @Query("SELECT * FROM item where itemName LIKE :searchQuery order by modifiedAt ASC")
+    fun getItemInNameOrder(searchQuery: String): PagingSource<Int, Item>
 
     @Query("SELECT * FROM item WHERE itemId = :itemId")
     fun getItem(itemId: String): Item?

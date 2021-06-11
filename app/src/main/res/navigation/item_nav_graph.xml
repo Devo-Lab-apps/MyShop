@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/item_nav_graph"
+    app:startDestination="@id/itemFragment">
+
+    <fragment
+        android:id="@+id/itemFragment"
+        android:name="com.labs.devo.apps.myshop.view.activity.items.item.ItemFragment"
+        android:label="ItemFragment"
+        tools:layout="@layout/fragment_item"
+        >
+        <action
+            android:id="@+id/action_itemFragment_to_addEditItemFragment"
+            app:destination="@id/addEditItemFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/addEditItemFragment"
+        android:name="com.labs.devo.apps.myshop.view.activity.items.item.AddEditItemFragment"
+        android:label="AddEditItemFragment"
+        tools:layout="@layout/fragment_add_edit_item">
+        <argument
+            android:name="item"
+            app:argType="com.labs.devo.apps.myshop.data.models.item.Item"
+            app:nullable="true" />
+        <argument
+            android:name="operation"
+            app:argType="string"
+            android:defaultValue="add_item" />
+    </fragment>
+</navigation>

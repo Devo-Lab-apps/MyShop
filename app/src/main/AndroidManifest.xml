@@ -14,6 +14,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MyShop">
+        <activity android:name=".view.activity.items.item.ItemActivity"
+            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar" />
         <activity
             android:name=".view.activity.notebook.NotebookActivity"
             android:theme="@style/Theme.MaterialComponents.Light.NoActionBar" />
@@ -29,12 +31,13 @@
         <activity
             android:name=".view.activity.home.HomeActivity"
             android:theme="@style/Theme.MaterialComponents.Light.NoActionBar" />
+
         <receiver
             android:name=".util.RecurringEntryNotificationBroadCastReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.labs.devo.apps.myshop.RECURRING_ENTRY_NOTIFICATION"/>
+                <action android:name="com.labs.devo.apps.myshop.RECURRING_ENTRY_NOTIFICATION" />
             </intent-filter>
         </receiver>
         <receiver
@@ -42,7 +45,7 @@
             android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.labs.devo.apps.myshop.RECURRING_ENTRY_ACTION"/>
+                <action android:name="com.labs.devo.apps.myshop.RECURRING_ENTRY_ACTION" />
             </intent-filter>
         </receiver>
     </application>

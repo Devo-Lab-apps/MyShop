@@ -13,4 +13,5 @@
     <string name="update_page">Update Page</string>
     <string name="recurring">Is Recurring</string>
     <string name="update_micro_entry">Update repeating Entry</string>
+    <string name="update_item">Update Item</string>
 </resources>

@@ -1,15 +1,18 @@
 package com.labs.devo.apps.myshop.di.module
 
+import com.labs.devo.apps.myshop.data.db.local.abstraction.item.LocalItemDetailService
 import com.labs.devo.apps.myshop.data.db.local.abstraction.item.LocalItemService
 import com.labs.devo.apps.myshop.data.db.local.abstraction.notebook.LocalEntryService
 import com.labs.devo.apps.myshop.data.db.local.abstraction.notebook.LocalNotebookService
 import com.labs.devo.apps.myshop.data.db.local.abstraction.notebook.LocalPageService
 import com.labs.devo.apps.myshop.data.db.local.abstraction.notebook.LocalRecurringEntryService
 import com.labs.devo.apps.myshop.data.db.local.database.dao.item.ItemDao
+import com.labs.devo.apps.myshop.data.db.local.database.dao.item.ItemDetailDao
 import com.labs.devo.apps.myshop.data.db.local.database.dao.notebook.EntryDao
 import com.labs.devo.apps.myshop.data.db.local.database.dao.notebook.NotebookDao
 import com.labs.devo.apps.myshop.data.db.local.database.dao.notebook.PageDao
 import com.labs.devo.apps.myshop.data.db.local.database.dao.notebook.RecurringEntryDao
+import com.labs.devo.apps.myshop.data.db.local.implementation.item.LocalItemDetailServiceImpl
 import com.labs.devo.apps.myshop.data.db.local.implementation.item.LocalItemServiceImpl
 import com.labs.devo.apps.myshop.data.db.local.implementation.notebook.LocalEntryServiceImpl
 import com.labs.devo.apps.myshop.data.db.local.implementation.notebook.LocalNotebookServiceImpl
@@ -17,6 +20,7 @@ import com.labs.devo.apps.myshop.data.db.local.implementation.notebook.LocalPage
 import com.labs.devo.apps.myshop.data.db.local.implementation.notebook.LocalRecurringEntryServiceImpl
 import com.labs.devo.apps.myshop.data.db.remote.abstraction.account.AccountService
 import com.labs.devo.apps.myshop.data.db.remote.abstraction.account.UserService
+import com.labs.devo.apps.myshop.data.db.remote.abstraction.item.RemoteItemDetailService
 import com.labs.devo.apps.myshop.data.db.remote.abstraction.item.RemoteItemService
 import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemoteEntryService
 import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemoteNotebookService
@@ -24,11 +28,13 @@ import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemotePageS
 import com.labs.devo.apps.myshop.data.db.remote.abstraction.notebook.RemoteRecurringEntryService
 import com.labs.devo.apps.myshop.data.db.remote.implementation.account.AccountServiceFirestoreImpl
 import com.labs.devo.apps.myshop.data.db.remote.implementation.account.UserServiceFirestoreImpl
+import com.labs.devo.apps.myshop.data.db.remote.implementation.item.RemoteItemDetailEntityFirebaseImpl
 import com.labs.devo.apps.myshop.data.db.remote.implementation.item.RemoteItemEntityFirebaseImpl
 import com.labs.devo.apps.myshop.data.db.remote.implementation.notebook.RemoteEntryServiceFirebaseImpl
 import com.labs.devo.apps.myshop.data.db.remote.implementation.notebook.RemoteNotebookServiceFirebaseImpl
 import com.labs.devo.apps.myshop.data.db.remote.implementation.notebook.RemotePageServiceFirebaseImpl
 import com.labs.devo.apps.myshop.data.db.remote.implementation.notebook.RemoteRecurringEntryServiceFirebaseImpl
+import com.labs.devo.apps.myshop.data.db.remote.mapper.item.RemoteItemDetailMapper
 import com.labs.devo.apps.myshop.data.db.remote.mapper.item.RemoteItemMapper
 import com.labs.devo.apps.myshop.data.db.remote.mapper.notebook.RemoteEntryMapper
 import com.labs.devo.apps.myshop.data.db.remote.mapper.notebook.RemoteNotebookMapper
@@ -122,5 +128,20 @@ object ServiceModule {
         itemDao: ItemDao,
     ): LocalItemService =
         LocalItemServiceImpl(itemDao)
+
+    @Provides
+    @Singleton
+    fun provideRemoteItemDetailService(
+        remoteItemDetailMapper: RemoteItemDetailMapper
+    ): RemoteItemDetailService =
+        RemoteItemDetailEntityFirebaseImpl(remoteItemDetailMapper)
+
+    @Provides
+    @Singleton
+    fun provideLocalItemDetailService(
+        itemDetailDao: ItemDetailDao,
+    ): LocalItemDetailService =
+        LocalItemDetailServiceImpl(itemDetailDao)
+
 
 }

@@ -4,6 +4,7 @@ import androidx.paging.PagingSource
 import com.labs.devo.apps.myshop.data.db.local.abstraction.item.LocalItemService
 import com.labs.devo.apps.myshop.data.db.local.database.dao.item.ItemDao
 import com.labs.devo.apps.myshop.data.models.item.Item
+import com.labs.devo.apps.myshop.data.models.notebook.Entry
 import com.labs.devo.apps.myshop.view.util.AsyncHelper
 import javax.inject.Inject
 
@@ -14,7 +15,12 @@ class LocalItemServiceImpl
         searchQuery: String,
         orderBy: String
     ): PagingSource<Int, Item> {
-        return itemDao.getItems()
+        var finalOrderBy = orderBy
+        if (orderBy.isEmpty()) {
+            finalOrderBy = Entry::entryTitle.name
+        }
+        val s = "%$searchQuery%"
+        return itemDao.getItems(s, finalOrderBy)
     }
 
     override suspend fun createItem(item: Item) {

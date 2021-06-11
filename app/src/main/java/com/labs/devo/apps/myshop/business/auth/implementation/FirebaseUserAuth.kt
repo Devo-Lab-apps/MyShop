@@ -2,7 +2,6 @@ package com.labs.devo.apps.myshop.business.auth.implementation
 
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestoreException
 import com.labs.devo.apps.myshop.business.auth.abstraction.UserAuth
 import com.labs.devo.apps.myshop.business.helper.FirebaseConstants
 import com.labs.devo.apps.myshop.business.helper.FirebaseHelper
@@ -19,7 +18,6 @@ import com.labs.devo.apps.myshop.data.models.auth.SignUpUserCredentials
 import com.labs.devo.apps.myshop.util.AppData
 import com.labs.devo.apps.myshop.util.exceptions.ExceptionCatcher
 import com.labs.devo.apps.myshop.util.exceptions.ExceptionCatcher.handleExceptionAndReturnErrorMessage
-import com.labs.devo.apps.myshop.util.printLogD
 import com.labs.devo.apps.myshop.view.util.DataState
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -126,13 +124,13 @@ class FirebaseUserAuth @Inject constructor(val auth: FirebaseAuth) :
                     createForeignNotebook(u.uid, account.accountId)
                     u.sendEmailVerification().await()
                 }
+                DataState.data(
+                    data = AuthenticationResult.SignedUp(user!!),
+                    message = "Successfully created. Please verify your email before login."
+                )
             } ?: throw ExceptionCatcher.GenericException(
                 ErrorCode.ERROR_UNKNOWN_STATE,
                 "AuthResult is null for the signed up user."
-            )
-            DataState.data(
-                data = AuthenticationResult.SignedUp(user!!),
-                message = "Successfully created. Please verify your email before login."
             )
         } catch (ex: Exception) {
             auth.currentUser?.delete()?.await()

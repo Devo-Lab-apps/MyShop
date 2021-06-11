@@ -1,8 +1,11 @@
 package com.labs.devo.apps.myshop.data.models.item
 
+import android.os.Parcelable
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 @Entity(tableName = "item")
 data class Item(
     @PrimaryKey
@@ -11,4 +14,4 @@ data class Item(
     val quantity: Double = 0.0,
     val createdAt: Long = System.currentTimeMillis(),
     val modifiedAt: Long = System.currentTimeMillis()
-)
+) : Parcelable

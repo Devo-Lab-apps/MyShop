@@ -25,6 +25,7 @@ import com.labs.devo.apps.myshop.util.PreferencesManager
 import com.labs.devo.apps.myshop.util.RecurringEntryNotificationBroadCastReceiver
 import com.labs.devo.apps.myshop.util.printLogD
 import com.labs.devo.apps.myshop.view.activity.auth.AuthenticationActivity
+import com.labs.devo.apps.myshop.view.activity.items.item.ItemActivity
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity
 import com.labs.devo.apps.myshop.view.adapter.notebook.RecurringEntryListAdapter
 import com.labs.devo.apps.myshop.view.util.AsyncHelper
@@ -171,11 +172,13 @@ class HomeActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         when (item.itemId) {
             R.id.notebooks_nav -> openNotebookActivity()
             R.id.logout_user -> logoutUser()
-            R.id.cancel_notification -> {
-
-            }//printLogD(TAG, recurringAdapter.snapshot().items)
+            R.id.items -> startItemActivity()
         }
         return true
+    }
+
+    private fun startItemActivity() {
+        startActivity(Intent(this, ItemActivity::class.java))
     }
 
     /**

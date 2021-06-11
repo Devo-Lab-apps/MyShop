@@ -42,7 +42,11 @@ class RemoteItemDetailEntityFirebaseImpl
         startAfter: String?
     ): List<ItemDetail> {
         //TODO search query not used
-        val start = startAfter?.toLong() ?: 0L
+        val start = try {
+            startAfter?.toLong() ?: 0L
+        } catch (ex: Exception) {
+            0L
+        }
         val querySnapshot = FirebaseHelper.getItemDetailCollection(accountId)
             .orderBy(Item::modifiedAt.name).startAfter(start).limit(itemDetailGetLimit.toLong())
             .get().await()
