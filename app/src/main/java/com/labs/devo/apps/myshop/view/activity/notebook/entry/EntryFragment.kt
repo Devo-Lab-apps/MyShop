@@ -64,7 +64,7 @@ class EntryFragment : Fragment(R.layout.fragment_entry), EntryListAdapter.OnEntr
         setHasOptionsMenu(true)
 
         //initial loading
-        dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
+//        dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
         entryListAdapter = EntryListAdapter(this)
 
         binding.apply {

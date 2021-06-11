@@ -20,6 +20,7 @@ import com.labs.devo.apps.myshop.databinding.FragmentNotebookBinding
 import com.labs.devo.apps.myshop.util.PreferencesManager
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity
 import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.ADD_NOTEBOOK_OPERATION
+import com.labs.devo.apps.myshop.view.activity.notebook.NotebookActivity.NotebookConstants.EDIT_NOTEBOOK_OPERATION
 import com.labs.devo.apps.myshop.view.adapter.notebook.NotebookListAdapter
 import com.labs.devo.apps.myshop.view.util.DataState
 import com.labs.devo.apps.myshop.view.util.DataStateListener
@@ -133,7 +134,7 @@ class NotebookFragment : DialogFragment(R.layout.fragment_notebook),
                 }
                 val action =
                     NotebookFragmentDirections.actionNotebookFragmentToAddEditNotebookFragment(
-                        ADD_NOTEBOOK_OPERATION, notebook
+                        EDIT_NOTEBOOK_OPERATION, notebook
                     )
                 findNavController().navigate(action)
             }

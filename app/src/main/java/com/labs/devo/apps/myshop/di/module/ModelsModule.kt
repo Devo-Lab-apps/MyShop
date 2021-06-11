@@ -1,5 +1,6 @@
 package com.labs.devo.apps.myshop.di.module
 
+import com.labs.devo.apps.myshop.data.db.remote.mapper.item.RemoteItemDetailMapper
 import com.labs.devo.apps.myshop.data.db.remote.mapper.item.RemoteItemMapper
 import com.labs.devo.apps.myshop.data.db.remote.mapper.notebook.RemoteEntryMapper
 import com.labs.devo.apps.myshop.data.db.remote.mapper.notebook.RemoteNotebookMapper
@@ -37,5 +38,10 @@ object ModelsModule {
     @Singleton
     fun provideRemoteItemMapper(): RemoteItemMapper =
         RemoteItemMapper()
+
+    @Provides
+    @Singleton
+    fun provideRemoteItemDetailMapper(): RemoteItemDetailMapper =
+        RemoteItemDetailMapper()
 
 }
