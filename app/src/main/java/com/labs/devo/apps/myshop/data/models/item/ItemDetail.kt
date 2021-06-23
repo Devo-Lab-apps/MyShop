@@ -1,9 +1,12 @@
 package com.labs.devo.apps.myshop.data.models.item
 
+import android.os.Parcelable
 import android.text.format.DateUtils.DAY_IN_MILLIS
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 @Entity(tableName = "itemDetail")
 data class ItemDetail(
     @PrimaryKey
@@ -24,4 +27,4 @@ data class ItemDetail(
     val boughtAt: Long = System.currentTimeMillis(),
     val createdAt: Long = System.currentTimeMillis(),
     val modifiedAt: Long = System.currentTimeMillis()
-)
+) : Parcelable

@@ -144,7 +144,7 @@ class AddEditPageFragment : Fragment(R.layout.add_edit_page_fragment) {
                 getPageForAdd(user, pageName, consumerId)
             }
             validateAddPageInputs(page)
-            checkAndUploadImage(user.email, consumerId)
+            checkAndUploadImage(user.accountId, consumerId)
             val isDownloadUrlInitialized = this@AddEditPageFragment::downloadUrl.isInitialized
             val userDownloadUrl = if (isDownloadUrlInitialized) downloadUrl else null
             val pageWithImage = page.copy(userImageUrl = userDownloadUrl)
@@ -163,7 +163,7 @@ class AddEditPageFragment : Fragment(R.layout.add_edit_page_fragment) {
             )
             val page: Page = doOnMainSync(Dispatchers.Main) { getPageForUpdate(pageName, p) }
             validateEditPageInputs(p, page)
-            checkAndUploadImage(user.email, p.consumerUserId)
+            checkAndUploadImage(user.accountId, p.consumerUserId)
             val userDownloadUrl = if (this@AddEditPageFragment::downloadUrl.isInitialized) {
                 downloadUrl
             } else if (!page.userImageUrl.isNullOrEmpty()) {

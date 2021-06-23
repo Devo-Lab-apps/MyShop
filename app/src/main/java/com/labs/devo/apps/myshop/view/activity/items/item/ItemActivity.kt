@@ -15,6 +15,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class ItemActivity : AppCompatActivity(), DataStateListener {
     object ItemConstants {
 
+        const val ITEM_DETAIL: String = "item_detail"
         const val ITEM: String = "item"
         const val EDIT_ITEM_OPERATION: String = "edit_item"
         const val ADD_ITEM_OPERATION: String = "add_item"

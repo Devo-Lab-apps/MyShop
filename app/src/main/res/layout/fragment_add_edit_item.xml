@@ -3,146 +3,212 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:padding="24dp"
         tools:context=".view.activity.notebook.item.AddEditItemFragment">
 
-        <TextView
-            android:id="@+id/add_item_tv"
-            android:layout_width="wrap_content"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Enter item title"
-            android:textColor="@color/black"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            >
 
-        <EditText
-            android:id="@+id/item_title"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:background="@drawable/text_input_bg"
-            android:ems="10"
-            android:fontFamily="@font/open_sans_semibold"
-            android:hint="Verka Milk"
-            android:padding="16dp"
-            android:textSize="16sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/add_item_tv" />
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/item_image"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:src="@drawable/user_image"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/item_quantity_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="Quantity"
-            android:textColor="@color/black"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/item_title" />
+            <TextView
+                android:id="@+id/add_item_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Enter item title"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/item_image" />
 
-        <EditText
-            android:id="@+id/item_quantity"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:background="@drawable/text_input_bg"
-            android:ems="10"
-            android:fontFamily="@font/open_sans_semibold"
-            android:hint="0.0"
-            android:inputType="numberDecimal"
-            android:padding="16dp"
-            android:textSize="16sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/item_quantity_tv" />
+            <EditText
+                android:id="@+id/item_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/text_input_bg"
+                android:ems="10"
+                android:fontFamily="@font/open_sans_semibold"
+                android:hint="Milk"
+                android:padding="16dp"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/add_item_tv" />
 
-<!--        <CheckBox-->
-<!--            android:id="@+id/isRecurring"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:checked="false"-->
-<!--            android:layout_margin="4dp"-->
-<!--            android:text="@string/recurring"-->
-<!--            app:layout_constraintEnd_toEndOf="parent"-->
-<!--            app:layout_constraintTop_toBottomOf="@+id/item_amount"-->
-<!--            app:useMaterialThemeColors="true" />-->
+            <TextView
+                android:id="@+id/item_quantity_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="Quantity"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/item_name" />
 
-<!--        <androidx.constraintlayout.widget.ConstraintLayout-->
-<!--            android:id="@+id/recurringForm"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_marginTop="16dp"-->
-<!--            android:visibility="gone"-->
+            <EditText
+                android:id="@+id/item_quantity"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/text_input_bg"
+                android:ems="10"
+                android:fontFamily="@font/open_sans_semibold"
+                android:hint="0.0"
+                android:inputType="numberDecimal"
+                android:padding="16dp"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/item_quantity_tv" />
 
-<!--            app:layout_constraintTop_toBottomOf="@+id/isRecurring"-->
-<!--            tools:layout_editor_absoluteX="24dp">-->
+            <CheckBox
+                android:id="@+id/item_extra_details"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:checked="false"
+                android:text="Add More Details"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/item_quantity"
+                app:useMaterialThemeColors="true" />
 
-<!--            &lt;!&ndash;    //isRepeatingItem&ndash;&gt;-->
-<!--            &lt;!&ndash;    //metadata&ndash;&gt;-->
-<!--            &lt;!&ndash;    // -timeOfRepeat,&ndash;&gt;-->
-<!--            &lt;!&ndash;    // -frequencyOfRepetition,&ndash;&gt;-->
-<!--            &lt;!&ndash;    // -notificationId,&ndash;&gt;-->
-<!--            &lt;!&ndash;    // -isPaid&ndash;&gt;-->
-<!--            &lt;!&ndash;    // -repeatEndsAt&ndash;&gt;-->
-<!--            &lt;!&ndash;    // -automaticallyCreateItemEveryday&ndash;&gt;-->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/item_extra_details_form"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:visibility="gone"
+                app:layout_constraintTop_toBottomOf="@+id/item_extra_details"
+                tools:layout_editor_absoluteX="24dp">
 
-<!--            <Spinner-->
-<!--                android:id="@+id/repeating_item_frequency"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="40dp"-->
-<!--                android:hint="Frequency"-->
-<!--                android:inputType="none"-->
-<!--                app:layout_constraintEnd_toEndOf="parent"-->
-<!--                app:layout_constraintStart_toStartOf="parent"-->
-<!--                app:layout_constraintTop_toTopOf="parent" />-->
+                <EditText
+                    android:id="@+id/item_description"
+                    android:layout_width="match_parent"
+                    android:layout_height="100dp"
+                    android:background="@drawable/text_input_bg"
+                    android:gravity="start|top"
+                    android:hint="Description"
+                    android:padding="12dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-<!--            <Button-->
-<!--                android:id="@+id/recurringTime"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:layout_marginTop="8dp"-->
-<!--                android:text="Time of repeat"-->
-<!--                app:layout_constraintEnd_toEndOf="parent"-->
-<!--                app:layout_constraintStart_toStartOf="parent"-->
-<!--                app:layout_constraintTop_toBottomOf="@+id/repeating_item_frequency" />-->
+                <TextView
+                    android:id="@+id/item_category_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="Item Category"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/item_bought_from" />
 
-<!--            &lt;!&ndash;            <com.google.android.material.textfield.TextInputLayout&ndash;&gt;-->
-<!--            &lt;!&ndash;                android:id="@+id/repeating_item_frequency"&ndash;&gt;-->
-<!--            &lt;!&ndash;                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"&ndash;&gt;-->
-<!--            &lt;!&ndash;                android:layout_width="match_parent"&ndash;&gt;-->
-<!--            &lt;!&ndash;                android:layout_height="wrap_content"&ndash;&gt;-->
-<!--            &lt;!&ndash;                android:hint="Frequency"&ndash;&gt;-->
-<!--            &lt;!&ndash;                app:layout_constraintEnd_toEndOf="parent"&ndash;&gt;-->
-<!--            &lt;!&ndash;                app:layout_constraintStart_toStartOf="parent"&ndash;&gt;-->
-<!--            &lt;!&ndash;                app:layout_constraintTop_toTopOf="parent">&ndash;&gt;-->
+                <Spinner
+                    android:id="@+id/item_category"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="12dp"
+                    android:hint="Item Category"
+                    android:inputType="none"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/item_category_tv" />
+
+                <TextView
+                    android:id="@+id/item_subcategory_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="Item Subcategory"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/item_category" />
+
+                <Spinner
+                    android:id="@+id/item_subcategory"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="12dp"
+                    android:hint="Item Subcategory"
+                    android:inputType="none"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/item_subcategory_tv" />
 
 
-<!--            &lt;!&ndash;            </com.google.android.material.textfield.TextInputLayout>&ndash;&gt;-->
+                <!--            <com.google.android.material.textfield.TextInputLayout-->
+                <!--                android:id="@+id/repeating_item_frequency"-->
+                <!--                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"-->
+                <!--                android:layout_width="match_parent"-->
+                <!--                android:layout_height="wrap_content"-->
+                <!--                android:hint="Frequency"-->
+                <!--                app:layout_constraintEnd_toEndOf="parent"-->
+                <!--                app:layout_constraintStart_toStartOf="parent"-->
+                <!--                app:layout_constraintTop_toTopOf="parent">-->
 
 
-<!--        </androidx.constraintlayout.widget.ConstraintLayout>-->
+                <!--            </com.google.android.material.textfield.TextInputLayout>-->
 
-        <Button
-            android:id="@+id/add_edit_item_btn"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:background="@drawable/primary_btn_bg"
-            android:fontFamily="@font/open_sans_semibold"
-            android:text="Add Item"
-            android:layout_marginTop="12dp"
-            android:textAllCaps="false"
-            android:textColor="@android:color/background_light"
-            android:textSize="16sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/item_quantity" />
+                <TextView
+                    android:id="@+id/item_bought_from_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:text="Bought From"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/item_description" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+                <EditText
+                    android:id="@+id/item_bought_from"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:background="@drawable/text_input_bg"
+                    android:ems="10"
+                    android:fontFamily="@font/open_sans_semibold"
+                    android:padding="16dp"
+                    android:textSize="16sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/item_bought_from_tv" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <Button
+                android:id="@+id/add_edit_item_btn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/primary_btn_bg"
+                android:fontFamily="@font/open_sans_semibold"
+                android:text="Add Item"
+                android:textAllCaps="false"
+                android:textColor="@android:color/background_light"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/item_extra_details_form" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
 </layout>

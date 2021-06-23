@@ -25,9 +25,12 @@ class AddEditItemViewModel @ViewModelInject constructor(
 
     val item = state.get<Item>(ItemActivity.ItemConstants.ITEM)
 
+    val itemDetail = state.get<ItemDetail>(ItemActivity.ItemConstants.ITEM_DETAIL)
+
     val operation = state.get<String>(NotebookActivity.NotebookConstants.OPERATION)!!
 
     fun createItem(itemDetail: ItemDetail) = viewModelScope.launch {
+        //TODO add validation here.
         val item = convertToItem(itemDetail)
         val itemRes = itemRepository.createItem(item)
         itemRes.data?.let { event ->
@@ -40,16 +43,18 @@ class AddEditItemViewModel @ViewModelInject constructor(
                 event.getContentIfNotHandled()?.let {
                     itemRepository.deleteItem(resItem)
                 }
-                channel.send(showError(itemDetailRes.message?.getContentIfNotHandled()))
+                showError(itemDetailRes.message?.getContentIfNotHandled())
             }
         } ?: run {
-            channel.send(showError(itemRes.message?.getContentIfNotHandled()))
+            showError(itemRes.message?.getContentIfNotHandled())
         }
     }
 
-    private fun showError(str: String?): AddEditItemEvent.ShowInvalidInputMessage {
-        return AddEditItemEvent.ShowInvalidInputMessage(
-            str ?: UNKNOWN_ERROR_OCCURRED_RETRY
+    private suspend fun showError(str: String?) {
+        channel.send(
+            AddEditItemEvent.ShowInvalidInputMessage(
+                str ?: UNKNOWN_ERROR_OCCURRED_RETRY
+            )
         )
     }
 
@@ -57,7 +62,8 @@ class AddEditItemViewModel @ViewModelInject constructor(
         return Item(
             itemDetail.itemId,
             itemDetail.itemName,
-            itemDetail.quantity
+            itemDetail.quantity,
+            itemDetail.imageUrl
         )
     }
 
@@ -67,20 +73,13 @@ class AddEditItemViewModel @ViewModelInject constructor(
         val item = convertToItem(itemDetail)
         val itemRes = itemRepository.updateItem(item)
         itemRes.data?.let {
-            var isChanged = false
-            if (prevItemDetail.itemName != item.itemName) isChanged = true
-            if (prevItemDetail.quantity != item.quantity) isChanged = true
-            if (isChanged) {
-                val itemDetailRes = itemDetailRepository.updateItemDetail(itemDetail)
-                itemDetailRes.data?.let {
-                    channel.send(AddEditItemEvent.ItemUpdated(ITEM_UPDATED))
-                } ?: kotlin.run {
-                    val prevItem = convertToItem(prevItemDetail)
-                    itemRepository.updateItem(prevItem)
-                    showError(itemDetailRes.message?.getContentIfNotHandled())
-                }
-            } else {
+            val itemDetailRes = itemDetailRepository.updateItemDetail(itemDetail)
+            itemDetailRes.data?.let {
                 channel.send(AddEditItemEvent.ItemUpdated(ITEM_UPDATED))
+            } ?: run {
+                val prevItem = convertToItem(prevItemDetail)
+                itemRepository.updateItem(prevItem)
+                showError(itemDetailRes.message?.getContentIfNotHandled())
             }
         } ?: showError(itemRes.message?.getContentIfNotHandled())
     }
@@ -103,6 +102,7 @@ class AddEditItemViewModel @ViewModelInject constructor(
         data class ItemUpdated(val msg: String) : AddEditItemEvent()
 
         data class ItemDeleted(val msg: String) : AddEditItemEvent()
+
     }
 
     object AddItemModelConstants {

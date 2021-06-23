@@ -48,4 +48,8 @@ object FirebaseStorageHelper {
         return "/user/$userId/pages/$consumerId/profile-img/"
     }
 
+    fun getItemImageUrl(userId: String, itemId: String): String {
+        return "/user/$userId/items/$itemId/item-image/"
+    }
+
 }

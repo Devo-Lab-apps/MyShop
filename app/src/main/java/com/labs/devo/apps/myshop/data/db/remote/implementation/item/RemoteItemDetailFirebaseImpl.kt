@@ -63,8 +63,8 @@ class RemoteItemDetailEntityFirebaseImpl
 
     private suspend fun createInDb(itemDetail: ItemDetail): ItemDetail {
         val user = UserManager.user ?: throw UserNotInitializedException()
-        val id = FirebaseHelper.getItemReference(user.accountId).id
-        val ref = FirebaseHelper.getItemReference(user.accountId, id)
+        val id = FirebaseHelper.getItemDetailReference(user.accountId).id
+        val ref = FirebaseHelper.getItemDetailReference(user.accountId, id)
         val data = itemDetail.copy(itemDetailId = id)
         FirebaseHelper.runTransaction { transaction ->
             transaction.set(ref, data)

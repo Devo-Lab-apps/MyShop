@@ -17,7 +17,7 @@ class LocalItemServiceImpl
     ): PagingSource<Int, Item> {
         var finalOrderBy = orderBy
         if (orderBy.isEmpty()) {
-            finalOrderBy = Entry::entryTitle.name
+            finalOrderBy = Item::itemName.name
         }
         val s = "%$searchQuery%"
         return itemDao.getItems(s, finalOrderBy)

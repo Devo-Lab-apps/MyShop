@@ -14,6 +14,9 @@
         <action
             android:id="@+id/action_itemFragment_to_addEditItemFragment"
             app:destination="@id/addEditItemFragment" />
+        <action
+            android:id="@+id/action_itemFragment_to_itemDetailFragment"
+            app:destination="@id/itemDetailFragment" />
     </fragment>
     <fragment
         android:id="@+id/addEditItemFragment"
@@ -28,5 +31,21 @@
             android:name="operation"
             app:argType="string"
             android:defaultValue="add_item" />
+        <argument
+            android:name="itemDetail"
+            app:argType="com.labs.devo.apps.myshop.data.models.item.ItemDetail"
+            app:nullable="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/itemDetailFragment"
+        android:name="com.labs.devo.apps.myshop.view.activity.items.item.ItemDetailFragment"
+        android:label="ItemDetailFragment"
+        tools:layout="@layout/item_detail_fragment">
+        <action
+            android:id="@+id/action_itemDetailFragment_to_addEditItemFragment"
+            app:destination="@id/addEditItemFragment" />
+        <argument
+            android:name="item"
+            app:argType="com.labs.devo.apps.myshop.data.models.item.Item" />
     </fragment>
 </navigation>
