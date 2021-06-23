@@ -66,7 +66,7 @@ class ItemRemoteMediator(
                 itemDao.deleteItems()
             }
 
-            remoteKeyDao.createOrReplace(RemoteKey(remoteKey, endReached.toString()))
+            remoteKeyDao.createOrReplace(RemoteKey(remoteKey, endReached?.toString()))
             itemDao.createItems(remoteItems)
 
             //TODO put appropriate condition

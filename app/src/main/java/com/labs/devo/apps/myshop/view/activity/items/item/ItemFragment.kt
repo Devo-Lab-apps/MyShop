@@ -17,9 +17,9 @@ import com.labs.devo.apps.myshop.R
 import com.labs.devo.apps.myshop.const.ErrorMessages.UNKNOWN_ERROR_OCCURRED
 import com.labs.devo.apps.myshop.data.mediator.GenericLoadStateAdapter
 import com.labs.devo.apps.myshop.data.models.item.Item
-import com.labs.devo.apps.myshop.data.models.notebook.Entry
 import com.labs.devo.apps.myshop.databinding.FragmentItemBinding
 import com.labs.devo.apps.myshop.util.extensions.onQueryTextChanged
+import com.labs.devo.apps.myshop.view.activity.items.item.ItemActivity.ItemConstants.ADD_ITEM_OPERATION
 import com.labs.devo.apps.myshop.view.adapter.item.ItemListAdapter
 import com.labs.devo.apps.myshop.view.util.DataState
 import com.labs.devo.apps.myshop.view.util.DataStateListener
@@ -66,7 +66,7 @@ class ItemFragment : Fragment(R.layout.fragment_item), ItemListAdapter.OnItemCli
             }
 
             addItemBtn.setOnClickListener {
-                viewModel.addItem()
+                viewModel.createItem()
             }
             itemToolbar.setNavigationOnClickListener {
                 requireActivity().onBackPressed()
@@ -76,37 +76,38 @@ class ItemFragment : Fragment(R.layout.fragment_item), ItemListAdapter.OnItemCli
 
 
     private fun observeEvents() {
-        lifecycleScope.launchWhenStarted {
-            viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-                viewModel.items.collectLatest { data ->
-                    binding.itemRecyclerView.scrollToPosition(0)
-                    itemListAdapter.submitData(data)
-                }
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            viewModel.items.collectLatest { data ->
+                binding.itemRecyclerView.scrollToPosition(0)
+                itemListAdapter.submitData(data)
             }
+        }
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             viewModel.channelFlow.collectLatest {
                 collectEvents(it)
             }
-            viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-                itemListAdapter.loadStateFlow.collectLatest { state ->
-                    when (state.refresh) {
-                        is LoadState.Error -> {
-                            val error = (state.refresh as LoadState.Error).error
-                            dataStateHandler.onDataStateChange(
-                                DataState.message<Nothing>(
-                                    error.message ?: getString(R.string.unknown_error_occurred)
-                                )
+        }
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            itemListAdapter.loadStateFlow.collectLatest { state ->
+                when (state.refresh) {
+                    is LoadState.Error -> {
+                        val error = (state.refresh as LoadState.Error).error
+                        dataStateHandler.onDataStateChange(
+                            DataState.message<Nothing>(
+                                error.message ?: getString(R.string.unknown_error_occurred)
                             )
-                        }
-                        is LoadState.Loading -> {
-                            dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
-                        }
-                        else -> {
-                            dataStateHandler.onDataStateChange(DataState.loading<Nothing>(false))
-                        }
+                        )
+                    }
+                    is LoadState.Loading -> {
+                        dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
+                    }
+                    else -> {
+                        dataStateHandler.onDataStateChange(DataState.loading<Nothing>(false))
                     }
                 }
             }
         }
+
     }
 
     private fun collectEvents(e: ItemViewModel.ItemEvent) {
@@ -119,7 +120,11 @@ class ItemFragment : Fragment(R.layout.fragment_item), ItemListAdapter.OnItemCli
                 )
             }
             ItemViewModel.ItemEvent.CreateItemEvent -> {
-                val action = ItemFragmentDirections.actionItemFragmentToAddEditItemFragment(null)
+                val action = ItemFragmentDirections.actionItemFragmentToAddEditItemFragment(
+                    null,
+                    ADD_ITEM_OPERATION,
+                    null
+                )
                 findNavController().navigate(action)
             }
         }
@@ -145,8 +150,8 @@ class ItemFragment : Fragment(R.layout.fragment_item), ItemListAdapter.OnItemCli
             searchItem.expandActionView()
             searchView.setQuery(query, false)
         }
-        searchView.onQueryTextChanged {
-            viewModel.setSearchQuery(it)
+        searchView.onQueryTextChanged { searchQuery ->
+            viewModel.setSearchQuery(searchQuery)
         }
 
     }
@@ -161,11 +166,11 @@ class ItemFragment : Fragment(R.layout.fragment_item), ItemListAdapter.OnItemCli
                 viewModel.setOrderBy(Item::itemName.name)
                 true
             }
-//            R.id.action_sync_entries -> {
-//                dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
-//                viewModel.syncEntries()
-//                true
-//            }
+            R.id.action_sync_entries -> {
+                dataStateHandler.onDataStateChange(DataState.loading<Nothing>(true))
+                viewModel.syncItems()
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -176,7 +181,8 @@ class ItemFragment : Fragment(R.layout.fragment_item), ItemListAdapter.OnItemCli
     }
 
     override fun onClick(item: Item) {
-        TODO("Not yet implemented")
+        val action = ItemFragmentDirections.actionItemFragmentToItemDetailFragment(item)
+        findNavController().navigate(action)
     }
 
 }

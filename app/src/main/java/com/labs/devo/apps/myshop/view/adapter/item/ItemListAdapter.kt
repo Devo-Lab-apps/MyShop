@@ -5,6 +5,8 @@ import android.view.ViewGroup
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.labs.devo.apps.myshop.R
 import com.labs.devo.apps.myshop.const.AppConstants
 import com.labs.devo.apps.myshop.data.models.item.Item
 import com.labs.devo.apps.myshop.databinding.SingleItemViewBinding
@@ -21,6 +23,10 @@ class ItemListAdapter(val onItemClick: OnItemClick) :
                 itemName.text = item.itemName
                 itemQuantity.text = item.quantity.toString()
                 itemDate.text = item.createdAt.toString()
+                if (item.imageUrl != null) {
+                    Glide.with(binding.root).load(item.imageUrl)
+                        .placeholder(R.drawable.user_image).into(binding.circleImageView)
+                }
                 val pos = bindingAdapterPosition
                 val e = getItem(pos)
                 if (pos != RecyclerView.NO_POSITION && e != null) {

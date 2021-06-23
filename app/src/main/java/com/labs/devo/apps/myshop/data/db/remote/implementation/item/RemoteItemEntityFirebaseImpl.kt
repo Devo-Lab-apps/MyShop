@@ -11,6 +11,7 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 const val itemGetLimit = 10
+
 class RemoteItemEntityFirebaseImpl
 @Inject constructor(val mapper: RemoteItemMapper) : RemoteItemService {
 
@@ -43,7 +44,7 @@ class RemoteItemEntityFirebaseImpl
         val user = UserManager.user ?: throw UserNotInitializedException()
         val id = FirebaseHelper.getItemReference(user.accountId).id
         val ref = FirebaseHelper.getItemReference(user.accountId, id)
-        val data = item.copy(itemId = id)
+        val data = if (item.itemId.isNotBlank()) item else item.copy(itemId = id)
         FirebaseHelper.runTransaction { transaction ->
             transaction.set(ref, data)
         }

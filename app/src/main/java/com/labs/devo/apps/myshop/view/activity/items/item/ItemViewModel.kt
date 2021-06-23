@@ -29,16 +29,20 @@ class ItemViewModel @ViewModelInject constructor(
     private val _orderBy = MutableStateFlow(AppConstants.EMPTY_STRING)
     val orderBy: StateFlow<String> = _orderBy
 
+    private var refreshStatus = false
+
     val items = combine(
         _searchQuery.asFlow(), _orderBy
     ) { searchQuery, orderBy ->
         Pair(searchQuery, orderBy)
     }.flatMapLatest { (searchQuery, orderBy) ->
-        itemRepository.getItems(
+        val data = itemRepository.getItems(
             searchQuery,
             orderBy,
-            false
+            refreshStatus
         )
+        refreshStatus = false
+        data
     }.cachedIn(viewModelScope)
 
     fun setSearchQuery(query: String) {
@@ -49,14 +53,19 @@ class ItemViewModel @ViewModelInject constructor(
         _orderBy.value = colName
     }
 
-    fun addItem() = viewModelScope.launch {
+    fun createItem() = viewModelScope.launch {
         channel.send(ItemEvent.CreateItemEvent)
+    }
+
+    fun syncItems() {
+        //TODO trigger refresh
+        refreshStatus = true
     }
 
     sealed class ItemEvent {
         data class ShowInvalidInputMessage(val msg: String?) : ItemEvent()
 
-        object CreateItemEvent: ItemEvent()
+        object CreateItemEvent : ItemEvent()
 
     }
 
